@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.28307.271
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WaterLog_Backend", "WaterLog_Backend\WaterLog_Backend.csproj", "{C822C808-B51C-48BC-9717-D455E2C57B7A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SqlTestsWaterlog", "SqlTestsWaterlog\SqlTestsWaterlog.csproj", "{13948DC1-2A2B-49DA-8EAC-C4CFF04D7BB8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{C822C808-B51C-48BC-9717-D455E2C57B7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C822C808-B51C-48BC-9717-D455E2C57B7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C822C808-B51C-48BC-9717-D455E2C57B7A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{13948DC1-2A2B-49DA-8EAC-C4CFF04D7BB8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{13948DC1-2A2B-49DA-8EAC-C4CFF04D7BB8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{13948DC1-2A2B-49DA-8EAC-C4CFF04D7BB8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{13948DC1-2A2B-49DA-8EAC-C4CFF04D7BB8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

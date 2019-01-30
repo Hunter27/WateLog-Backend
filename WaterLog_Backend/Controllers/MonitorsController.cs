@@ -15,12 +15,12 @@ namespace WaterLog_Backend.Controllers
     [ApiController]
     public class MonitorsController : ControllerBase
     {
-        private readonly DatabaseContext _db;
-        readonly IConfiguration _config;
-        public MonitorsController(DatabaseContext context, IConfiguration config)
+        private readonly MonitorsContext _db;
+        
+        public MonitorsController(MonitorsContext context)
         {
             _db = context;
-            _config = config;
+            
         }
 
         // GET api/values
@@ -66,4 +66,5 @@ namespace WaterLog_Backend.Controllers
             await _db.SaveChangesAsync();
         }
     }
+    
 }
