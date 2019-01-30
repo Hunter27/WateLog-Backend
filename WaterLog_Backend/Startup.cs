@@ -13,7 +13,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using WaterLog_Backend.Models;
 
-namespace WebApplication1
+namespace WaterLog_Backend
 {
     public class Startup
     {

@@ -13,14 +13,14 @@ namespace WaterLog_Backend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class MonitorsController : ControllerBase
+    public class TestController : ControllerBase
     {
-        private readonly DatabaseContext _db;
+        private readonly MonitorsContext _db;
         readonly IConfiguration _config;
-        public MonitorsController(DatabaseContext context, IConfiguration config)
+        public TestController(MonitorsContext context)
         {
             _db = context;
-            _config = config;
+            
         }
 
         // GET api/values
