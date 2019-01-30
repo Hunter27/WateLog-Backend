@@ -21,7 +21,7 @@ namespace WebApplication1
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
-            _secretConnection = Configuration["Localhost:ConnectionString"];
+            _secretConnection = Configuration["DevDatabase:ConnectionString"];
         }
 
         public IConfiguration Configuration { get; }
