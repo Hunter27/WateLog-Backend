@@ -18,7 +18,7 @@ namespace WaterLog_Backend
             var builder = new ConfigurationBuilder();
             builder.AddUserSecrets<Startup>();
             var config = builder.Build(); 
-            string mySecret = config["Localhost:ConnectionString"];
+            string mySecret = "Server=dev.retrotest.co.za;Database=iot;User Id=group1;Password=fNX^r+UKy3@CtYh5";
             string queryString = "SELECT Type FROM dbo.Monitors;";
             SqlConnection connection = new SqlConnection(mySecret);
 
