@@ -21,7 +21,8 @@ namespace WaterLog_Backend
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
-            _secretConnection = "Server = dev.retrotest.co.za; Database = iot; User Id = group1; Password = fNX ^ r + UKy3@CtYh5";
+
+            _secretConnection = "Server=dev.retrotest.co.za;Database=iot;User Id=group1;Password=fNX^r+UKy3@CtYh5";
         }
 
         public IConfiguration Configuration { get; }
@@ -31,6 +32,8 @@ namespace WaterLog_Backend
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
+            //Add CORS policy to allow localhost to access the data
+            services.AddCors();
             
             var connection = _secretConnection;
             services.AddDbContext<DatabaseContext>
@@ -40,6 +43,10 @@ namespace WaterLog_Backend
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
+            // Shows UseCors with named policy.
+            app.UseCors(builder =>
+            builder.WithOrigins("http://63.34.199.206/","*","*"));
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
