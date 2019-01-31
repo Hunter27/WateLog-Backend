@@ -7,22 +7,14 @@ using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using WaterLog_Backend.Controllers;
-using WaterLog_Backend.Models;
-using MySql.Data.MySqlClient;
-using System.Data.SqlClient;
 
-namespace WaterLog_Backend
+namespace WebApplication1
 {
     public class Program
     {
         public static void Main(string[] args)
         {
-            //CreateWebHostBuilder(args).Build().Run();
-            Results val = new Results();
-            val.getFirstID();
-
-
+            CreateWebHostBuilder(args).Build().Run();
         }
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
