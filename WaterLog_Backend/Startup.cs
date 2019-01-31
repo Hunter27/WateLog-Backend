@@ -13,7 +13,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using WaterLog_Backend.Models;
 
-namespace WebApplication1
+namespace WaterLog_Backend
 {
     public class Startup
     {
@@ -21,6 +21,7 @@ namespace WebApplication1
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+
             _secretConnection = "Server=dev.retrotest.co.za;Database=iot;User Id=group1;Password=fNX^r+UKy3@CtYh5";
         }
 
