@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +12,7 @@ using WaterLog_Backend.Models;
 
 namespace WaterLog_Backend.Controllers
 {
+    
     [Route("api/[controller]")]
     [ApiController]
     public class MonitorsController : ControllerBase

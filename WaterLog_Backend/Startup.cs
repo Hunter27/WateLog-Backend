@@ -44,7 +44,7 @@ namespace WebApplication1
         {
             // Shows UseCors with named policy.
             app.UseCors(builder =>
-            builder.WithOrigins("http://63.34.199.206/"));
+            builder.WithOrigins("http://63.34.199.206/","*","*"));
 
             if (env.IsDevelopment())
             {
