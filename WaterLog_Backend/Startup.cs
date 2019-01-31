@@ -30,13 +30,9 @@ namespace WebApplication1
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
-            
+
             //Add CORS policy to allow localhost to access the data
-            services.AddCors(options =>
-            {
-                options.AddPolicy("AllowSpecificOrigin",
-                    builder => builder.WithOrigins("http://63.34.199.206/"));
-            });;
+            services.AddCors();
             
             var connection = _secretConnection;
             services.AddDbContext<DatabaseContext>
@@ -47,7 +43,8 @@ namespace WebApplication1
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             // Shows UseCors with named policy.
-            app.UseCors("AllowSpecificOrigin");
+            app.UseCors(builder =>
+            builder.WithOrigins("http://63.34.199.206/"));
 
             if (env.IsDevelopment())
             {
