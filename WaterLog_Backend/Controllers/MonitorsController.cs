@@ -29,7 +29,7 @@ namespace WaterLog_Backend.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<MonitorsEntry>>> Get()
         {
-
+            
             return await _db.Monitors.ToListAsync();
         }
 
@@ -46,7 +46,7 @@ namespace WaterLog_Backend.Controllers
         {
             await _db.Monitors.AddAsync(value);
             await _db.SaveChangesAsync();
-
+            
             ;
         }
 
