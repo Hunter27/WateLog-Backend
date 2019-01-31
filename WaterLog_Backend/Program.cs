@@ -18,8 +18,10 @@ namespace WaterLog_Backend
     {
         public static void Main(string[] args)
         {
-            CreateWebHostBuilder(args).Build().Run();
-          
+            //CreateWebHostBuilder(args).Build().Run();
+            Results val = new Results();
+            val.getFirstID();
+
 
         }
 
