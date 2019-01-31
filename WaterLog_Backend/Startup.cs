@@ -20,6 +20,7 @@ namespace WebApplication1
         public string _secretConnection;
         public Startup(IConfiguration configuration)
         {
+
             Configuration = configuration;
             _secretConnection = "Server=dev.retrotest.co.za;Database=iot;User Id=group1;Password=fNX^r+UKy3@CtYh5";
         }
@@ -31,9 +32,16 @@ namespace WebApplication1
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
-            //Add CORS policy to allow localhost to access the data
-            services.AddCors();
-            
+           
+            services.AddCors(options =>
+            {
+                options.AddPolicy("CorsPolicy",
+                    builder => builder.AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowCredentials());
+            });
+
             var connection = _secretConnection;
             services.AddDbContext<DatabaseContext>
                 (options => options.UseSqlServer(connection));
@@ -42,9 +50,9 @@ namespace WebApplication1
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
+
             // Shows UseCors with named policy.
-            app.UseCors(builder =>
-            builder.WithOrigins("http://63.34.199.206/","*","*"));
+            app.UseCors("CorsPolicy");
 
             if (env.IsDevelopment())
             {
