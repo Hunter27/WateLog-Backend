@@ -30,14 +30,13 @@ namespace WaterLog_Backend
                 while (reader.Read())
                 {
 
-                    // Console.WriteLine(String.Format("{0}, {1}",
-                    //   reader[0], reader[1]));
+                    
                     lis.Add(reader[0].ToString());
                 }
             }
             finally
             {
-                // Always call Close when done reading.
+                
                 reader.Close();
             }
 
@@ -50,7 +49,7 @@ namespace WaterLog_Backend
 
             List<int> lis = new List<int>();
             string queryString = "SELECT Id FROM dbo.Monitors;";
-            string connectionString = "Server=NTOKOZOMOTSUMI;Database=waterlog;Uid=test;Pwd=test123";
+            string connectionString = "Server=dev.retrotest.co.za;Database=iot;User Id=group1;Password=fNX^r+UKy3@CtYh5";
             SqlConnection connection = new SqlConnection(connectionString);
 
             SqlCommand command = new SqlCommand(queryString, connection);

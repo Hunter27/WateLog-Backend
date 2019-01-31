@@ -21,7 +21,7 @@ namespace WaterLog_Backend
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
-            _secretConnection = Configuration["Localhost:ConnectionString"];
+            _secretConnection = "Server = dev.retrotest.co.za; Database = iot; User Id = group1; Password = fNX ^ r + UKy3@CtYh5";
         }
 
         public IConfiguration Configuration { get; }
