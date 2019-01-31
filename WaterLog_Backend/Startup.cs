@@ -30,7 +30,13 @@ namespace WebApplication1
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
-
+            
+            //Add CORS policy to allow localhost to access the data
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowSpecificOrigin",
+                    builder => builder.WithOrigins("http://63.34.199.206/"));
+            });;
             
             var connection = _secretConnection;
             services.AddDbContext<DatabaseContext>
@@ -40,6 +46,9 @@ namespace WebApplication1
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
+            // Shows UseCors with named policy.
+            app.UseCors("AllowSpecificOrigin");
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
