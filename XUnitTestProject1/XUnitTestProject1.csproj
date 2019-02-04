@@ -13,6 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\CheckValues\CheckValues.csproj" />
     <ProjectReference Include="..\WaterLog_Backend\WaterLog_Backend.csproj" />
   </ItemGroup>
 

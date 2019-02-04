@@ -31,6 +31,14 @@ namespace WaterLog_Backend.Controllers
             return await _db.Monitors.ToListAsync();
         }
 
+        [HttpGet]
+        public async Task<ActionResult<ICollection<MonitorsEntry>>> Get2()
+        {
+
+            return await _db.Monitors.ToListAsync();
+        }
+
+
         // GET api/values/5
         [HttpGet("{id}")]
         public async Task<ActionResult<MonitorsEntry>> Get(int id)
