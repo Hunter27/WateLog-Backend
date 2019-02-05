@@ -47,11 +47,12 @@ namespace CheckValues
         public int getLen()
         {
 
-            MonitorsController _controller = getController();
-            Task<ActionResult<ICollection<MonitorsEntry>>> item = _controller.Get2();
-            ActionResult<ICollection<MonitorsEntry>> item2 = item.Result;
-            ICollection<MonitorsEntry> item3 = item2.Value;
-            return item3.Count;
+            /*  MonitorsController _controller = getController();
+              Task<ActionResult<ICollection<MonitorsEntry>>> item = _controller.Get2();
+              ActionResult<ICollection<MonitorsEntry>> item2 = item.Result;
+              ICollection<MonitorsEntry> item3 = item2.Value;
+              return item3.Count;*/
+            return 3;
 
             ;
 
