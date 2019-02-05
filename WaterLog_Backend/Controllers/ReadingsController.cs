@@ -56,7 +56,7 @@ namespace WaterLog_Backend.Controllers
             //Perform changes to SegmentEvents Table
 
             Procedures pr = new Procedures(value, this);
-            int val = pr.getCorrespondingSensor();
+            int val = await pr.getCorrespondingSensorAsync();
 
 
             
