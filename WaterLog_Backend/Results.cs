@@ -15,8 +15,8 @@ namespace WaterLog_Backend
 
             List<string> lis = new List<string>();
 
-            string mySecret = "Server=dev.retrotest.co.za;Database=iot;User Id=group1;Password=fNX^r+UKy3@CtYh5";
-            string queryString = "SELECT Type FROM dbo.Monitors;";
+            string mySecret = "Server=NOMBUSOSIBIYA;Database=waterlog;User Id=test;Password=test123";
+            string queryString = "SELECT Type FROM dbo.SegmentEvents;";
             SqlConnection connection = new SqlConnection(mySecret);
 
             SqlCommand command = new SqlCommand(queryString, connection);
@@ -45,8 +45,8 @@ namespace WaterLog_Backend
         {
 
             List<int> lis = new List<int>();
-            string queryString = "SELECT Id FROM dbo.Monitors;";
-            string connectionString = "Server=dev.retrotest.co.za;Database=iot;User Id=group1;Password=fNX^r+UKy3@CtYh5";
+            string queryString = "SELECT Id FROM dbo.SegmentEvent;";
+            string connectionString = "Server=NOMBUSOSIBIYA;Database=waterlog;User Id=test;Password=test123";
             SqlConnection connection = new SqlConnection(connectionString);
 
             SqlCommand command = new SqlCommand(queryString, connection);

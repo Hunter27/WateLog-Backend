@@ -22,7 +22,7 @@ namespace WebApplication1
         {
 
             Configuration = configuration;
-            _secretConnection = "Server=dev.retrotest.co.za;Database=iot;User Id=group1;Password=fNX^r+UKy3@CtYh5";
+            _secretConnection = "Server=NOMBUSOSIBIYA;Database=waterlog;User Id=test;Password=test123";
         }
 
         public IConfiguration Configuration { get; }
@@ -53,7 +53,7 @@ namespace WebApplication1
 
             // Shows UseCors with named policy.
             app.UseCors("CorsPolicy");
-
+            UpdateDatabase(app);
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
