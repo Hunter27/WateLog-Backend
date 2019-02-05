@@ -23,7 +23,7 @@ namespace CheckValues
             string mySecret = config["Localhost:ConnectionString"];
 
             var optionsBuilder = new DbContextOptionsBuilder<DatabaseContext>();
-            optionsBuilder.UseSqlServer(mySecret);
+            optionsBuilder.UseSqlServer("Server=dev.retrotest.co.za;Database=iot;User Id=group1;Password=fNX^r+UKy3@CtYh5");
             DatabaseContext _context = new DatabaseContext(optionsBuilder.Options);
 
             MonitorsController _controller = new MonitorsController(_context, config);
