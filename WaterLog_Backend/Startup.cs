@@ -22,7 +22,7 @@ namespace WebApplication1
         {
 
             Configuration = configuration;
-            _secretConnection = "Server=NTOKOZOMOTSUMI;Database=waterlog;User Id=test;Password=test123";
+            _secretConnection = "Server=localhost;Database=waterlog;User Id=test;Password=test123";
             //_secretConnection = "Server=dev.retrotest.co.za;Database=iot;User Id=group1;Password=fNX^r+UKy3@CtYh5";
         }
 
