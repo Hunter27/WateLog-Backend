@@ -13,71 +13,43 @@ namespace WaterLog_Backend
 {
     public class Procedures
     {
-        ReadingsEntry value;
-        ReadingsController readingsController;
-        public Procedures(ReadingsEntry value, ReadingsController controller)
+        IControllerService _service;
+        public Procedures(IControllerService service)
         {
-            this.value = value;
-            this.readingsController = controller;
+            _service = service;
         }
+
+        public SegmentEventsController getSegmentsEventsController()
+        {
+            return _service.GetSegmentEventsController();
+           
+        }
+
 
         public MonitorsController getMonitorsController()
         {
-            var builder = new ConfigurationBuilder();
-            builder.AddUserSecrets<Startup>();
-            var config = builder.Build();
-            //string mySecret = config["Localhost:ConnectionString"];
-
-            var optionsBuilder = new DbContextOptionsBuilder<DatabaseContext>();
-            optionsBuilder.UseSqlServer("Server=dev.retrotest.co.za;Database=iot;User Id=group1;Password=fNX^r+UKy3@CtYh5");
-            //optionsBuilder.UseSqlServer("Server = localhost; Database = waterlog; User Id = test; Password = test123");
-            //optionsBuilder.UseSqlServer(mySecret);
-            DatabaseContext _context = new DatabaseContext(optionsBuilder.Options);
-
-            MonitorsController _controller = new MonitorsController(_context, config);
-            return _controller;
+            return _service.GetMonitorsController();
+           
 
         }
 
         public SegmentLeaksController getSegmentLeaksController()
         {
-            var builder = new ConfigurationBuilder();
-            builder.AddUserSecrets<Startup>();
-            var config = builder.Build();
-            //string mySecret = config["Localhost:ConnectionString"];
-
-            var optionsBuilder = new DbContextOptionsBuilder<DatabaseContext>();
-            optionsBuilder.UseSqlServer("Server=dev.retrotest.co.za;Database=iot;User Id=group1;Password=fNX^r+UKy3@CtYh5");
-            //optionsBuilder.UseSqlServer("Server = localhost; Database = waterlog; User Id = test; Password = test123");
-            //optionsBuilder.UseSqlServer(mySecret);
-            DatabaseContext _context = new DatabaseContext(optionsBuilder.Options);
-
-            SegmentLeaksController _controller = new SegmentLeaksController(_context, config);
-            return _controller;
+            return _service.GetSegmentLeaksController();
+           
 
         }
 
         public SegmentsController getSegmentsController()
         {
-            var builder = new ConfigurationBuilder();
-            builder.AddUserSecrets<Startup>();
-            var config = builder.Build();
-            //string mySecret = config["Localhost:ConnectionString"];
-
-            var optionsBuilder = new DbContextOptionsBuilder<DatabaseContext>();
-            optionsBuilder.UseSqlServer("Server=dev.retrotest.co.za;Database=iot;User Id=group1;Password=fNX^r+UKy3@CtYh5");
-            //optionsBuilder.UseSqlServer("Server = localhost; Database = waterlog; User Id = test; Password = test123");
-            //optionsBuilder.UseSqlServer(mySecret);
-            DatabaseContext _context = new DatabaseContext(optionsBuilder.Options);
-
-           SegmentsController _controller = new SegmentsController(_context, config);
-            return _controller;
+            return _service.GetSegmentsController();
 
         }
 
 
-        public async Task<int> getCorrespondingSensorAsync()
+        public async Task triggerInsert(ReadingsEntry value)
         {
+            
             SegmentsController segController = getSegmentsController();
             IEnumerable<SegmentsEntry> allSegments = segController.Get().Result.Value;
             int segmentInid = -1;
@@ -96,7 +68,7 @@ namespace WaterLog_Backend
             }
 
 
-            IEnumerable<ReadingsEntry> allReadings = readingsController.Get().Result.Value;
+            IEnumerable<ReadingsEntry> allReadings = getReadingsController().Get().Result.Value;
             allReadings = allReadings.OrderByDescending(read => read.TimesStamp);
             ReadingsEntry r1 = null, r2 = null;
             Boolean found1 = false, found2 = false;
@@ -159,9 +131,11 @@ namespace WaterLog_Backend
                 await updateSegmentsEventAsync(segmentid, "normal", r1.Value, r2.Value);
             }
 
+        }
 
-
-            return 7;
+        private ReadingsController getReadingsController()
+        {
+            return _service.GetReadingsController();
         }
 
         private string calculateSeverity(int segmentid)
@@ -191,7 +165,7 @@ namespace WaterLog_Backend
             entry.LatestTimeStamp = updated;
             entry.ResolvedStatus = resolvedStatus;
             entry.Id = leakId;
-            await controller.Put(leakId,entry);
+            await controller.Patch(entry);
             
         }
 
@@ -208,23 +182,7 @@ namespace WaterLog_Backend
 
         }
 
-        public SegmentEventsController getSegmentsEventsController()
-        {
-            var builder = new ConfigurationBuilder();
-            builder.AddUserSecrets<Startup>();
-            var config = builder.Build();
-            //string mySecret = config["Localhost:ConnectionString"];
-
-            var optionsBuilder = new DbContextOptionsBuilder<DatabaseContext>();
-            //optionsBuilder.UseSqlServer("Server = localhost; Database = waterlog; User Id = test; Password = test123");
-            optionsBuilder.UseSqlServer("Server=dev.retrotest.co.za;Database=iot;User Id=group1;Password=fNX^r+UKy3@CtYh5");
-            //optionsBuilder.UseSqlServer(mySecret);
-            DatabaseContext _context = new DatabaseContext(optionsBuilder.Options);
-
-            SegmentEventsController _controller = new SegmentEventsController(_context, config);
-            return _controller;
-        }
-
+    
         public Boolean isLeakage(double first,double second)
         {
             double margin = 2;
@@ -235,7 +193,87 @@ namespace WaterLog_Backend
             return false;
         }
 
+        public EmailTemplate populateEmail(int sectionid)
+        {
+            SegmentLeaksController controller = getSegmentLeaksController();
+            var leaks = controller.Get().Result.Value;
+            var leak = leaks.Where(sudo => sudo.SegmentId == sectionid).Single();
+
+            EmailTemplate template = new EmailTemplate("Segment" + leak.SegmentId, getSegmentStatus(leak.SegmentId), leak.Severity,getLeakPeriod(leak), calculateTotalCost(leak), calculatePerHourCost(leak), buildUrl(leak.SegmentId));
+            return template;
+        }
+
+        private string getLeakPeriod(SegmentLeaksEntry leak)
+        {
+            return ((leak.LatestTimeStamp - leak.OriginalTimeStamp).TotalDays.ToString());
+        }
+
+        public double calculateTotalCost(SegmentLeaksEntry leak)
+        {
+            SegmentEventsController controller = getSegmentsEventsController();
+            var list = controller.Get().Result.Value;
+            var entry = list.Where(inlist => inlist.SegmentId == leak.SegmentId).Last();
+
+            var timebetween = (leak.LatestTimeStamp - leak.OriginalTimeStamp).TotalHours;
+            var perhour = calculatePerHourCost(leak);
+            return (timebetween * perhour);
+        }
+
+        private string buildUrl(int segmentId)
+        {
+            return "https://localhost:3000/segment/" + segmentId;
+        }
+
+        public double calculatePerHourCost(SegmentLeaksEntry leak)
+        {
+            SegmentEventsController controller = getSegmentsEventsController();
+            var list = controller.Get().Result.Value;
+            var entry = list.Where(inlist => inlist.SegmentId == leak.SegmentId).Last();
+
+            double currentTariff = 127.00;
+
+            double usageperpoll = (entry.FlowIn - entry.FlowOut);
+
+            //Transform ml to l per 1 min
+            usageperpoll *= 0.001;
+
+            double usageperhour = usageperpoll * 60;
+
+            return (usageperhour * currentTariff);
+        }
+
+        public double calculateLitresPerHour(SegmentLeaksEntry leak)
+        {
+            SegmentEventsController controller = getSegmentsEventsController();
+            var list = controller.Get().Result.Value;
+            var entry = list.Where(inlist => inlist.SegmentId == leak.SegmentId).Last();
+            double usageperpoll = (entry.FlowIn - entry.FlowOut);
+
+            //Transform ml to l per 1 min
+            usageperpoll *= 0.001;
+            return (usageperpoll * 60);
+        }
+
+        public double calculateTotaLitres(SegmentLeaksEntry leak)
+        {
+            SegmentEventsController controller = getSegmentsEventsController();
+            var list = controller.Get().Result.Value;
+            var entry = list.Where(inlist => inlist.SegmentId == leak.SegmentId).Last();
+
+            var timebetween = (leak.LatestTimeStamp - leak.OriginalTimeStamp).TotalHours;
+            var perhour = calculateLitresPerHour(leak);
+            return (timebetween * perhour);
+        }
+
+        private string getSegmentStatus(int segmentId)
+        {
+            SegmentEventsController controller = getSegmentsEventsController();
+            var list = controller.Get().Result.Value;
+            var entry = list.Where(inlist => inlist.SegmentId == segmentId).Last();
+
+            return entry.EventType;
 
 
+        }
     }
 }

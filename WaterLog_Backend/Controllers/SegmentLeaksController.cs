@@ -19,10 +19,12 @@ namespace WaterLog_Backend.Controllers
     {
         private readonly DatabaseContext _db;
         readonly IConfiguration _config;
-        public SegmentLeaksController(DatabaseContext context, IConfiguration config)
+        private IControllerService _service;
+        public SegmentLeaksController(DatabaseContext context, IConfiguration config,IControllerService service)
         {
             _db = context;
             _config = config;
+            _service = service;
         }
 
         // GET api/values
@@ -33,20 +35,37 @@ namespace WaterLog_Backend.Controllers
             return await _db.SegmentLeaks.ToListAsync();
         }
 
+
+        [Route("costs/{id}")]
+        public async Task<ActionResult<string>> GetCost(int id)
+        {
+            SegmentLeaksEntry leaks = _db.SegmentLeaks.Find(id);
+            Procedures procedures = new Procedures(_service);
+            return ("{total: " + procedures.calculateTotalCost(leaks) + ", perhour: " +procedures.calculatePerHourCost(leaks) + "}");
+        }
+
+        [Route("litres/{id}")]
+        public async Task<ActionResult<string>> GetLitres(int id)
+        {
+            SegmentLeaksEntry leaks = _db.SegmentLeaks.Find(id);
+            Procedures procedures = new Procedures(_service);
+            return ("{total: " + procedures.calculateTotaLitres(leaks) + ", perhour: " + procedures.calculateLitresPerHour(leaks) + "}");
+        }
+
         // GET api/values/5
         [HttpGet("{id}")]
         public async Task<ActionResult<SegmentLeaksEntry>> Get(int id)
         {
-            return await _db.SegmentLeaks.FindAsync(id);
-        }
-        /*
-                [HttpGet]
-                public async Task<ActionResult<ICollection<MonitorsEntry>>> Get2()
-                {
+            var leaks = await _db.SegmentLeaks.FindAsync(id);
+            
+            if(leaks == null)
+            {
+                return NotFound();
+            }
 
-                    return await _db.Monitors.ToListAsync();
-                }
-                */
+            return leaks;
+        }
+       
         // POST api/values
         [HttpPost]
         public async Task Post([FromBody] SegmentLeaksEntry value)
@@ -73,6 +92,19 @@ namespace WaterLog_Backend.Controllers
             var entry = await _db.SegmentLeaks.FindAsync(id);
             _db.SegmentLeaks.Remove(entry);
             await _db.SaveChangesAsync();
+        }
+
+        [HttpPatch("{id}")]
+        public async Task Patch([FromBody] SegmentLeaksEntry value)
+        {
+            var entry = _db.SegmentLeaks.FirstOrDefault(segL => segL.Id == value.Id);
+
+            if(entry != null)
+            {
+                entry.LatestTimeStamp = value.LatestTimeStamp;
+               await _db.SaveChangesAsync();
+            }
+            
         }
     }
 }
