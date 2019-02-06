@@ -39,6 +39,24 @@ namespace WaterLog_Backend
 
         }
 
+        public SegmentLeaksController getSegmentLeaksController()
+        {
+            var builder = new ConfigurationBuilder();
+            builder.AddUserSecrets<Startup>();
+            var config = builder.Build();
+            //string mySecret = config["Localhost:ConnectionString"];
+
+            var optionsBuilder = new DbContextOptionsBuilder<DatabaseContext>();
+            optionsBuilder.UseSqlServer("Server=dev.retrotest.co.za;Database=iot;User Id=group1;Password=fNX^r+UKy3@CtYh5");
+            //optionsBuilder.UseSqlServer("Server = localhost; Database = waterlog; User Id = test; Password = test123");
+            //optionsBuilder.UseSqlServer(mySecret);
+            DatabaseContext _context = new DatabaseContext(optionsBuilder.Options);
+
+            SegmentLeaksController _controller = new SegmentLeaksController(_context, config);
+            return _controller;
+
+        }
+
         public SegmentsController getSegmentsController()
         {
             var builder = new ConfigurationBuilder();
@@ -77,14 +95,14 @@ namespace WaterLog_Backend
 
             }
 
-     
+
             IEnumerable<ReadingsEntry> allReadings = readingsController.Get().Result.Value;
             allReadings = allReadings.OrderByDescending(read => read.TimesStamp);
             ReadingsEntry r1 = null, r2 = null;
             Boolean found1 = false, found2 = false;
             foreach (ReadingsEntry read in allReadings)
             {
-                if(found1 && found2)
+                if (found1 && found2)
                 {
                     break;
                 }
@@ -93,7 +111,7 @@ namespace WaterLog_Backend
                     r1 = read;
                     found1 = true;
                 }
-                if(read.SenseID == segmentOutid && found2 == false)
+                if (read.SenseID == segmentOutid && found2 == false)
                 {
                     r2 = read;
                     found2 = true;
@@ -102,19 +120,79 @@ namespace WaterLog_Backend
 
             }
 
-            if (isLeakage(r1.Value, r2.Value)){
+            if (isLeakage(r1.Value, r2.Value)) {
                 //Updateleakagestatus
-                await updateSegmentsEventAsync(segmentid,"leak",r1.Value,r2.Value);
+                await updateSegmentsEventAsync(segmentid, "leak", r1.Value, r2.Value);
+                // Update SegmentLeaks
+                SegmentLeaksController segmentLeaks = getSegmentLeaksController();
+
+                //Case - doesn't exist
+                IEnumerable<SegmentLeaksEntry> allLeaks = segmentLeaks.Get().Result.Value;
+                if (allLeaks.Any(leak => leak.SegmentId == segmentid))
+                {
+                    //At least an instance of the leak exists
+                    SegmentLeaksEntry latestEntry = allLeaks.Where(leak => leak.SegmentId == segmentid).Last();
+
+                    //Check in SegmentEntry if latest event related to entry has been resolved.
+                    if(latestEntry != null)
+                    {
+                        SegmentEventsController controller = getSegmentsEventsController();
+                        IEnumerable<SegmentEventsEntry> allEvents = controller.Get().Result.Value;
+                        SegmentEventsEntry entry = allEvents.Where(leak => leak.SegmentId == segmentid).Last();
+                        if(entry.EventType == "leak")
+                        {
+                            //Latest event related to segment is still leaking.
+                            await updateSegmentLeaksAsync(latestEntry.Id,segmentid,calculateSeverity(segmentid),latestEntry.OriginalTimeStamp,entry.TimeStamp,"unresolved");
+                        }
+                        
+                    }
+                }
+                else
+                {
+                    //Normal Add
+                    await createSegmentLeaksAsync(segmentid,calculateSeverity(segmentid),"unresolved");
+                }
             }
             else
             {
                 //Updatewithoutleakagestatus
-                await updateSegmentsEventAsync(segmentid,"normal",r1.Value,r2.Value);
+                await updateSegmentsEventAsync(segmentid, "normal", r1.Value, r2.Value);
             }
 
 
 
             return 7;
+        }
+
+        private string calculateSeverity(int segmentid)
+        {
+            return "normal";
+        }
+
+        public async Task createSegmentLeaksAsync(int segId,string severity,string resolvedStatus)
+        {
+            SegmentLeaksController controller = getSegmentLeaksController();
+            SegmentLeaksEntry entry = new SegmentLeaksEntry();
+            entry.SegmentId = segId;
+            entry.Severity = severity;
+            entry.LatestTimeStamp = DateTime.UtcNow;
+            entry.OriginalTimeStamp = DateTime.UtcNow;
+            entry.ResolvedStatus = resolvedStatus;
+            await controller.Post(entry);
+        }
+
+        public async Task updateSegmentLeaksAsync(int leakId,int segId, string severity, DateTime original,DateTime updated, string resolvedStatus)
+        {
+            SegmentLeaksController controller = getSegmentLeaksController();
+            SegmentLeaksEntry entry = new SegmentLeaksEntry();
+            entry.SegmentId = segId;
+            entry.Severity = severity;
+            entry.OriginalTimeStamp = original;
+            entry.LatestTimeStamp = updated;
+            entry.ResolvedStatus = resolvedStatus;
+            entry.Id = leakId;
+            await controller.Put(leakId,entry);
+            
         }
 
         public async Task updateSegmentsEventAsync(int id, string status,double inv,double outv)
