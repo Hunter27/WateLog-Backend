@@ -49,7 +49,10 @@ namespace EmailNotifications
                 {
                     using (var tr = table.AddRow(classAttributes: "someattributes"))
                     {
-                        tr.AddCell(alert,align:"center");
+                        tr.AddCell(alert,align:"center",fontColor:"red");
+                        TableStructure.Row rr = new TableStructure.Row(sb, id: "some-id");
+                        rr.Dispose();
+
 
                     }
                 }
@@ -61,7 +64,7 @@ namespace EmailNotifications
             {
                 var client = new SmtpClient("smtp.gmail.com", 587)
                 {
-                    Credentials = new NetworkCredential("nmotsumi@retrorabbit.co.za", "Nt0k0z01227"),
+                    Credentials = new NetworkCredential("nmotsumi@retrorabbit.co.za", "****"),
                     EnableSsl = true
                 };
                 MailAddress from = new MailAddress("nmotsumi@retrorabbit.co.za", "Ntokozo Motsumi");

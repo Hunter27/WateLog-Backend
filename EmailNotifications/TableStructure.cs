@@ -70,11 +70,14 @@ namespace EmailNotifications
                 {
                     Append("</tr>");
                 }
-                public void AddCell(string innerText, string classAttributes = "", string id = "", string colSpan = "",string align ="")
+                public void AddCell(string innerText, string classAttributes = "", string id = "", string colSpan = "",string align ="", string  fontColor= "", string fontSize = "")
                 {
                     Append("<td");
-                    AddOptionalAttributes(classAttributes, id, colSpan,align);
+                    AddOptionalAttributes(classAttributes, id, colSpan,align); //put style value in here
+                    Append("<font");
+                    AppendOptionFont(classAttributes, id, fontSize, fontColor);
                     Append(innerText);
+                    Append("</font>");
                     Append("</td>");
                 }
             }
@@ -98,7 +101,30 @@ namespace EmailNotifications
                     _sb.Append(toAppend);
                 }
 
-                protected void AddOptionalAttributes(string className = "", string id = "", string colSpan = "",string align ="")
+                protected void AppendOptionFont(string className = "", string id = "", string fontSize ="", string fontColor="")
+                {
+                
+                    if (!string.IsNullOrEmpty(id))
+                    {
+                        _sb.Append($" id=\"{id}\"");
+                    }
+                    if (!string.IsNullOrEmpty(className))
+                    {
+                        _sb.Append($" class=\"{className}\"");
+                    }
+                    if (!string.IsNullOrEmpty(fontSize))
+                    {
+                        _sb.Append($" size=\"{fontSize}\"");
+                    }
+                    if (!string.IsNullOrEmpty(fontColor))
+                    {
+                        _sb.Append($" color=\"{fontColor}\"");
+                    }
+                _sb.Append(">");
+                    
+                }
+
+            protected void AddOptionalAttributes(string className = "", string id = "", string colSpan = "",string align ="")
                 {
 
                     if (!string.IsNullOrEmpty(id))
