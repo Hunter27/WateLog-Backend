@@ -37,7 +37,14 @@ namespace WaterLog_Backend.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<SegmentLeaksEntry>> Get(int id)
         {
-            return await _db.SegmentLeaks.FindAsync(id);
+            var leaks = await _db.SegmentLeaks.FindAsync(id);
+            
+            if(leaks == null)
+            {
+                return NotFound();
+            }
+
+            return leaks;
         }
         /*
                 [HttpGet]
@@ -73,6 +80,19 @@ namespace WaterLog_Backend.Controllers
             var entry = await _db.SegmentLeaks.FindAsync(id);
             _db.SegmentLeaks.Remove(entry);
             await _db.SaveChangesAsync();
+        }
+
+        [HttpPatch("{id}")]
+        public async Task Patch([FromBody] SegmentLeaksEntry value)
+        {
+            var entry = _db.SegmentLeaks.FirstOrDefault(segL => segL.Id == value.Id);
+
+            if(entry != null)
+            {
+                entry.LatestTimeStamp = value.LatestTimeStamp;
+               await _db.SaveChangesAsync();
+            }
+            
         }
     }
 }

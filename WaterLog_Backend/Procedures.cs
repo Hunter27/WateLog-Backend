@@ -76,8 +76,9 @@ namespace WaterLog_Backend
         }
 
 
-        public async Task<int> getCorrespondingSensorAsync()
+        public async Task triggerInsert()
         {
+            
             SegmentsController segController = getSegmentsController();
             IEnumerable<SegmentsEntry> allSegments = segController.Get().Result.Value;
             int segmentInid = -1;
@@ -159,9 +160,6 @@ namespace WaterLog_Backend
                 await updateSegmentsEventAsync(segmentid, "normal", r1.Value, r2.Value);
             }
 
-
-
-            return 7;
         }
 
         private string calculateSeverity(int segmentid)
@@ -191,7 +189,7 @@ namespace WaterLog_Backend
             entry.LatestTimeStamp = updated;
             entry.ResolvedStatus = resolvedStatus;
             entry.Id = leakId;
-            await controller.Put(leakId,entry);
+            await controller.Patch(entry);
             
         }
 
