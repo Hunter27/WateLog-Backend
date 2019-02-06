@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Cors;
@@ -16,15 +15,11 @@ namespace WaterLog_Backend.Controllers
 
     [Route("api/[controller]")]
     [ApiController]
-    public class ReadingsController : ControllerBase
+    public class SegmentLeaksController : ControllerBase
     {
         private readonly DatabaseContext _db;
         readonly IConfiguration _config;
-        
-
-        
-
-        public ReadingsController(DatabaseContext context, IConfiguration config)
+        public SegmentLeaksController(DatabaseContext context, IConfiguration config)
         {
             _db = context;
             _config = config;
@@ -32,42 +27,41 @@ namespace WaterLog_Backend.Controllers
 
         // GET api/values
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ReadingsEntry>>> Get()
+        public async Task<ActionResult<IEnumerable<SegmentLeaksEntry>>> Get()
         {
 
-            return await _db.Readings.ToListAsync();
+            return await _db.SegmentLeaks.ToListAsync();
         }
 
         // GET api/values/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<ReadingsEntry>> Get(int id)
+        public async Task<ActionResult<SegmentLeaksEntry>> Get(int id)
         {
-            return await _db.Readings.FindAsync(id);
+            return await _db.SegmentLeaks.FindAsync(id);
         }
-      
+        /*
+                [HttpGet]
+                public async Task<ActionResult<ICollection<MonitorsEntry>>> Get2()
+                {
+
+                    return await _db.Monitors.ToListAsync();
+                }
+                */
         // POST api/values
         [HttpPost]
-        public async Task Post([FromBody] ReadingsEntry value)
+        public async Task Post([FromBody] SegmentLeaksEntry value)
         {
-           
-            value.TimesStamp = DateTime.UtcNow;
-            await _db.Readings.AddAsync(value);
+            await _db.SegmentLeaks.AddAsync(value);
             await _db.SaveChangesAsync();
 
-            //Perform changes to SegmentEvents Table
-
-            Procedures pr = new Procedures(value, this);
-            int val = await pr.getCorrespondingSensorAsync();
-
-
-            
+            ;
         }
 
         // PUT api/values/5
         [HttpPut("{id}")]
-        public async Task Put(int id, [FromBody] ReadingsEntry value)
+        public async Task Put(int id, [FromBody] SegmentLeaksEntry value)
         {
-            var entry = await _db.Readings.FindAsync(id);
+            var entry = await _db.SegmentLeaks.FindAsync(id);
             entry = value;
             await _db.SaveChangesAsync();
         }
@@ -76,8 +70,8 @@ namespace WaterLog_Backend.Controllers
         [HttpDelete("{id}")]
         public async Task Delete(int id)
         {
-            var entry = await _db.Readings.FindAsync(id);
-            _db.Readings.Remove(entry);
+            var entry = await _db.SegmentLeaks.FindAsync(id);
+            _db.SegmentLeaks.Remove(entry);
             await _db.SaveChangesAsync();
         }
     }
