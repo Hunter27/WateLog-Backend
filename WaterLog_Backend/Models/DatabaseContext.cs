@@ -14,7 +14,7 @@ namespace WaterLog_Backend.Models
 
         }
 
-        
+        public DatabaseContext() { }
         public DbSet<LocationsEntry> Locations { get; set; }
         public DbSet<LocationSegmentsEntry> LocationSegments { get; set; }
         public DbSet<MonitorsEntry> Monitors { get; set; }

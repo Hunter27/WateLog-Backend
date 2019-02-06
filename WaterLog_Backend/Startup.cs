@@ -54,7 +54,7 @@ namespace WebApplication1
 
             // Shows UseCors with named policy.
             app.UseCors("CorsPolicy");
-
+            UpdateDatabase(app);
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
