@@ -38,24 +38,41 @@ namespace EmailNotifications
 
         static void Main(string[] args)
         {
-           
 
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            using (TableStructure.Table table = new TableStructure.Table(sb, id: "some-id",align:"center"))
+            {
+          
+                table.StartBody();
+                string[] items= { "1", "2", "3", "4" };
+                foreach (var alert in items)
+                {
+                    using (var tr = table.AddRow(classAttributes: "someattributes"))
+                    {
+                        tr.AddCell(alert,align:"center");
+
+                    }
+                }
+                table.EndBody();
+            }
+            string outS = sb.ToString();
+            
             try
             {
                 var client = new SmtpClient("smtp.gmail.com", 587)
                 {
-                    Credentials = new NetworkCredential("nmotsumi@retrorabbit.co.za", "*****"),
+                    Credentials = new NetworkCredential("nmotsumi@retrorabbit.co.za", "Nt0k0z01227"),
                     EnableSsl = true
                 };
                 MailAddress from = new MailAddress("nmotsumi@retrorabbit.co.za", "Ntokozo Motsumi");
-                MailAddress to = new MailAddress("dadams@retrorabbit.co.za", "Darren Adams");
+                MailAddress to = new MailAddress("ntokozo.motsumi@gmail.com", "Ntokozo Motsumi");
                 MailMessage message = new MailMessage(from, to);
                 
                 message.Subject = "Send Using Web Mail";
 
                 // SEND IN HTML FORMAT (comment this line to send plain text).
                 message.IsBodyHtml = true ;
-                message.Body = "<HTML><BODY><B>Hello World!</B></BODY></HTML>";
+                message.Body = outS;
                 client.Send(message);
 
     
