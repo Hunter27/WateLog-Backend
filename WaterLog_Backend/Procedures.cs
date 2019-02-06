@@ -22,70 +22,27 @@ namespace WaterLog_Backend
         public SegmentEventsController getSegmentsEventsController()
         {
             return _service.GetSegmentEventsController();
-            /*var builder = new ConfigurationBuilder();
-            builder.AddUserSecrets<Startup>();
-            var config = builder.Build();
-            //string mySecret = config["Localhost:ConnectionString"];
-
-            var optionsBuilder = new DbContextOptionsBuilder<DatabaseContext>();
-            optionsBuilder.UseSqlServer(config.GetSection("LocalConnectionString").Value);
-            DatabaseContext _context = new DatabaseContext(optionsBuilder.Options);
-
-            SegmentEventsController _controller = new SegmentEventsController(_context, config);
-            return _controller;*/
+           
         }
 
 
         public MonitorsController getMonitorsController()
         {
             return _service.GetMonitorsController();
-            /*var builder = new ConfigurationBuilder();
-            builder.AddUserSecrets<Startup>();
-            var config = builder.Build();
-            //string mySecret = config["Localhost:ConnectionString"];
-
-            var optionsBuilder = new DbContextOptionsBuilder<DatabaseContext>();
-            optionsBuilder.UseSqlServer(config.GetSection("LocalConnectionString").Value);
-            DatabaseContext _context = new DatabaseContext(optionsBuilder.Options);
-
-            MonitorsController _controller = new MonitorsController(_context, config);
-            return _controller;*/
+           
 
         }
 
         public SegmentLeaksController getSegmentLeaksController()
         {
             return _service.GetSegmentLeaksController();
-            /*var builder = new ConfigurationBuilder();
-            builder.AddUserSecrets<Startup>();
-            var config = builder.Build();
-            //string mySecret = config["Localhost:ConnectionString"];
-
-            var optionsBuilder = new DbContextOptionsBuilder<DatabaseContext>();
-            optionsBuilder.UseSqlServer(config.GetSection("LocalConnectionString").Value);
-            //optionsBuilder.UseSqlServer("Server = localhost; Database = waterlog; User Id = test; Password = test123");
-            //optionsBuilder.UseSqlServer(mySecret);
-            DatabaseContext _context = new DatabaseContext(optionsBuilder.Options);
-
-            SegmentLeaksController _controller = new SegmentLeaksController(_context, config);
-            return _controller;*/
+           
 
         }
 
         public SegmentsController getSegmentsController()
         {
             return _service.GetSegmentsController();
-            /*var builder = new ConfigurationBuilder();
-            builder.AddUserSecrets<Startup>();
-            var config = builder.Build();
-            //string mySecret = config["Localhost:ConnectionString"];
-
-            var optionsBuilder = new DbContextOptionsBuilder<DatabaseContext>();
-            optionsBuilder.UseSqlServer(config.GetSection("LocalConnectionString").Value);
-            DatabaseContext _context = new DatabaseContext(optionsBuilder.Options);
-
-           SegmentsController _controller = new SegmentsController(_context, config);
-            return _controller;*/
 
         }
 
@@ -251,13 +208,13 @@ namespace WaterLog_Backend
             return ((leak.LatestTimeStamp - leak.OriginalTimeStamp).TotalDays.ToString());
         }
 
-        private double calculateTotalCost(SegmentLeaksEntry leak)
+        public double calculateTotalCost(SegmentLeaksEntry leak)
         {
             SegmentEventsController controller = getSegmentsEventsController();
             var list = controller.Get().Result.Value;
             var entry = list.Where(inlist => inlist.SegmentId == leak.SegmentId).Last();
 
-            var timebetween = (leak.OriginalTimeStamp - leak.LatestTimeStamp).TotalHours;
+            var timebetween = (leak.LatestTimeStamp - leak.OriginalTimeStamp).TotalHours;
             var perhour = calculatePerHourCost(leak);
             return (timebetween * perhour);
         }
@@ -267,7 +224,7 @@ namespace WaterLog_Backend
             return "https://localhost:3000/segment/" + segmentId;
         }
 
-        private double calculatePerHourCost(SegmentLeaksEntry leak)
+        public double calculatePerHourCost(SegmentLeaksEntry leak)
         {
             SegmentEventsController controller = getSegmentsEventsController();
             var list = controller.Get().Result.Value;
@@ -283,6 +240,29 @@ namespace WaterLog_Backend
             double usageperhour = usageperpoll * 60;
 
             return (usageperhour * currentTariff);
+        }
+
+        public double calculateLitresPerHour(SegmentLeaksEntry leak)
+        {
+            SegmentEventsController controller = getSegmentsEventsController();
+            var list = controller.Get().Result.Value;
+            var entry = list.Where(inlist => inlist.SegmentId == leak.SegmentId).Last();
+            double usageperpoll = (entry.FlowIn - entry.FlowOut);
+
+            //Transform ml to l per 1 min
+            usageperpoll *= 0.001;
+            return (usageperpoll * 60);
+        }
+
+        public double calculateTotaLitres(SegmentLeaksEntry leak)
+        {
+            SegmentEventsController controller = getSegmentsEventsController();
+            var list = controller.Get().Result.Value;
+            var entry = list.Where(inlist => inlist.SegmentId == leak.SegmentId).Last();
+
+            var timebetween = (leak.LatestTimeStamp - leak.OriginalTimeStamp).TotalHours;
+            var perhour = calculateLitresPerHour(leak);
+            return (timebetween * perhour);
         }
 
         private string getSegmentStatus(int segmentId)

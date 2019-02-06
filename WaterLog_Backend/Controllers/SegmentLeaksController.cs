@@ -19,10 +19,12 @@ namespace WaterLog_Backend.Controllers
     {
         private readonly DatabaseContext _db;
         readonly IConfiguration _config;
-        public SegmentLeaksController(DatabaseContext context, IConfiguration config)
+        private IControllerService _service;
+        public SegmentLeaksController(DatabaseContext context, IConfiguration config,IControllerService service)
         {
             _db = context;
             _config = config;
+            _service = service;
         }
 
         // GET api/values
@@ -31,6 +33,23 @@ namespace WaterLog_Backend.Controllers
         {
 
             return await _db.SegmentLeaks.ToListAsync();
+        }
+
+
+        [Route("costs/{id}")]
+        public async Task<ActionResult<string>> GetCost(int id)
+        {
+            SegmentLeaksEntry leaks = _db.SegmentLeaks.Find(id);
+            Procedures procedures = new Procedures(_service);
+            return ("{total: " + procedures.calculateTotalCost(leaks) + ", perhour: " +procedures.calculatePerHourCost(leaks) + "}");
+        }
+
+        [Route("litres/{id}")]
+        public async Task<ActionResult<string>> GetLitres(int id)
+        {
+            SegmentLeaksEntry leaks = _db.SegmentLeaks.Find(id);
+            Procedures procedures = new Procedures(_service);
+            return ("{total: " + procedures.calculateTotaLitres(leaks) + ", perhour: " + procedures.calculateLitresPerHour(leaks) + "}");
         }
 
         // GET api/values/5
@@ -46,14 +65,7 @@ namespace WaterLog_Backend.Controllers
 
             return leaks;
         }
-        /*
-                [HttpGet]
-                public async Task<ActionResult<ICollection<MonitorsEntry>>> Get2()
-                {
-
-                    return await _db.Monitors.ToListAsync();
-                }
-                */
+       
         // POST api/values
         [HttpPost]
         public async Task Post([FromBody] SegmentLeaksEntry value)

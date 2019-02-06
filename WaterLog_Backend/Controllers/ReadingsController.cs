@@ -40,6 +40,7 @@ namespace WaterLog_Backend.Controllers
             return await _db.Readings.ToListAsync();
         }
 
+
         // GET api/values/5
         [HttpGet("{id}")]
         public async Task<ActionResult<ReadingsEntry>> Get(int id)
