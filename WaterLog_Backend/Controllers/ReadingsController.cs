@@ -20,14 +20,16 @@ namespace WaterLog_Backend.Controllers
     {
         private readonly DatabaseContext _db;
         readonly IConfiguration _config;
+        private IControllerService _service;
         
 
         
 
-        public ReadingsController(DatabaseContext context, IConfiguration config)
+        public ReadingsController(DatabaseContext context, IConfiguration config,IControllerService service)
         {
             _db = context;
             _config = config;
+            _service = service;
         }
 
         // GET api/values
@@ -55,9 +57,9 @@ namespace WaterLog_Backend.Controllers
             await _db.SaveChangesAsync();
 
             //Perform changes to SegmentEvents Table
-
-            Procedures procedure = new Procedures(value, this);
-            await procedure.triggerInsert();
+            _service = new ControllerService(_db,_config);
+            Procedures procedure = new Procedures(_service);
+            await procedure.triggerInsert(value);
 
 
             

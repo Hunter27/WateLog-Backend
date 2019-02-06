@@ -1,29 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
+using WaterLog_Backend;
 using WaterLog_Backend.Models;
-
 namespace WebApplication1
 {
     public class Startup
     {
-        public string _secretConnection;
         public Startup(IConfiguration configuration)
         {
 
             Configuration = configuration;
-            //_secretConnection = "Server=localhost;Database=waterlog;User Id=test;Password=test123";
-            _secretConnection = "Server=dev.retrotest.co.za;Database=iot;User Id=group1;Password=fNX^r+UKy3@CtYh5";
+          
         }
 
         public IConfiguration Configuration { get; }
@@ -32,8 +23,8 @@ namespace WebApplication1
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
-            services.AddDbContext<DatabaseContext>(options => options.UseSqlServer(_secretConnection));
-
+            services.AddDbContext<DatabaseContext>(options => options.UseSqlServer(Configuration.GetSection("LocalLiveDBConnectionString").Value));
+            services.AddScoped<IControllerService, ControllerService>();
             services.AddCors(options =>
             {
                 options.AddPolicy("CorsPolicy",
@@ -43,9 +34,8 @@ namespace WebApplication1
                     .AllowCredentials());
             });
 
-            var connection = _secretConnection;
-            services.AddDbContext<DatabaseContext>
-                (options => options.UseSqlServer(connection));
+            
+            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -68,7 +58,7 @@ namespace WebApplication1
             app.UseHttpsRedirection();
             app.UseMvc();
 
-            UpdateDatabase(app);
+           // UpdateDatabase(app);
 
            
         }
