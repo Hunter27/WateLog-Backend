@@ -12,11 +12,11 @@ using WaterLog_Backend.Models;
 
 namespace WaterLog_Backend.Controllers
 {
+
     [Route("api/[controller]")]
     [ApiController]
-    public class SegmentEventsController : Controller
+    public class SegmentEventsController : ControllerBase
     {
-
         private readonly DatabaseContext _db;
         readonly IConfiguration _config;
         public SegmentEventsController(DatabaseContext context, IConfiguration config)
@@ -39,7 +39,7 @@ namespace WaterLog_Backend.Controllers
         {
             return await _db.SegmentEvents.FindAsync(id);
         }
-
+      
         // POST api/values
         [HttpPost]
         public async Task Post([FromBody] SegmentEventsEntry value)
@@ -68,6 +68,4 @@ namespace WaterLog_Backend.Controllers
             await _db.SaveChangesAsync();
         }
     }
-
 }
-
