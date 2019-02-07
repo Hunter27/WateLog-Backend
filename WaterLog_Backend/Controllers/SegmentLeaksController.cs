@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 using WaterLog_Backend.Models;
 
 namespace WaterLog_Backend.Controllers
@@ -45,7 +46,7 @@ namespace WaterLog_Backend.Controllers
                 return NotFound();
             }
             Procedures procedures = new Procedures(_service);
-            return ("{total: " + procedures.calculateTotalCost(leaks) + ", perhour: " +procedures.calculatePerHourCost(leaks) + "}");
+            return (JsonConvert.SerializeObject((procedures.calculateTotalCost(leaks), procedures.calculatePerHourCost(leaks))));
         }
 
         [Route("litres/{id}")]
@@ -57,7 +58,8 @@ namespace WaterLog_Backend.Controllers
                 return NotFound();
             }
             Procedures procedures = new Procedures(_service);
-            return ("{total: " + procedures.calculateTotaLitres(leaks) + ", perhour: " + procedures.calculateLitresPerHour(leaks) + "}");
+       
+            return (JsonConvert.SerializeObject((procedures.calculateTotaLitres(leaks), procedures.calculateLitresPerHour(leaks))));
         }
 
         //Resolve Leakage
