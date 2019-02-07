@@ -5,8 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using EmailNotifications;
 using WaterLog_Backend.Controllers;
 using WaterLog_Backend.Models;
+
 using WebApplication1;
 
 namespace WaterLog_Backend
@@ -123,6 +125,11 @@ namespace WaterLog_Backend
                 {
                     //Normal Add
                     await createSegmentLeaksAsync(segmentid,calculateSeverity(segmentid),"unresolved");
+                    //insert email stuff here
+                  string[] template = populateEmail(segmentid);
+                    Email email = new Email(template);
+                    email.sendEmail();
+
                 }
             }
             else
@@ -193,19 +200,28 @@ namespace WaterLog_Backend
             return false;
         }
 
-        public EmailTemplate populateEmail(int sectionid)
+        public string[] populateEmail(int sectionid)
         {
             SegmentLeaksController controller = getSegmentLeaksController();
             var leaks = controller.Get().Result.Value;
             var leak = leaks.Where(sudo => sudo.SegmentId == sectionid).Single();
 
-            EmailTemplate template = new EmailTemplate("Segment" + leak.SegmentId, getSegmentStatus(leak.SegmentId), leak.Severity,getLeakPeriod(leak), calculateTotalCost(leak), calculatePerHourCost(leak), buildUrl(leak.SegmentId));
+            string[] template = { "Segment " + leak.SegmentId, getSegmentStatus(leak.SegmentId), leak.Severity, getLeakPeriod(leak), calculateTotalCost(leak).ToString(), calculatePerHourCost(leak).ToString(), buildUrl(leak.SegmentId) };
             return template;
         }
 
         private string getLeakPeriod(SegmentLeaksEntry leak)
         {
-            return ((leak.LatestTimeStamp - leak.OriginalTimeStamp).TotalDays.ToString());
+            
+            if (((leak.LatestTimeStamp - leak.OriginalTimeStamp).TotalHours) < 1)
+            {
+                return "1";
+            }
+            else
+            {
+                return ((leak.LatestTimeStamp - leak.OriginalTimeStamp).TotalDays.ToString());
+            }
+           
         }
 
         public double calculateTotalCost(SegmentLeaksEntry leak)
@@ -213,8 +229,16 @@ namespace WaterLog_Backend
             SegmentEventsController controller = getSegmentsEventsController();
             var list = controller.Get().Result.Value;
             var entry = list.Where(inlist => inlist.SegmentId == leak.SegmentId).Last();
-
+            
             var timebetween = (leak.LatestTimeStamp - leak.OriginalTimeStamp).TotalHours;
+            if (timebetween < 1)
+            {
+                timebetween = 1;
+            }
+            else
+            {
+                timebetween = (leak.LatestTimeStamp - leak.OriginalTimeStamp).TotalHours;
+            }
             var perhour = calculatePerHourCost(leak);
             return (timebetween * perhour);
         }

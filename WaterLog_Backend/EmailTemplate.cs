@@ -22,5 +22,7 @@ namespace WaterLog_Backend
             this.severity = severity;
             this.totalcost = totalcost;
         }
+        
+      
     }
 }

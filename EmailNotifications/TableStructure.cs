@@ -75,7 +75,7 @@ namespace EmailNotifications
                     Append("<td");
                     AddOptionalAttributes(classAttributes, id, colSpan, align, style); //put style value in here
                     Append("<font");
-                    AppendOptionFont(classAttributes, id, fontSize);
+                    AppendOptionFont(classAttributes, id, fontSize,align);
                     Append(innerText);
                     Append("</font>");
                     Append("</td>");
@@ -101,7 +101,7 @@ namespace EmailNotifications
                     _sb.Append(toAppend);
                 }
 
-                protected void AppendOptionFont(string className = "", string id = "", string fontSize ="")
+                protected void AppendOptionFont(string className = "", string id = "", string fontSize ="", string align = "")
                 {
                 
                     if (!string.IsNullOrEmpty(id))
@@ -116,7 +116,11 @@ namespace EmailNotifications
                     {
                         _sb.Append($" size=\"{fontSize}\"");
                     }
-                   
+                    if (!string.IsNullOrEmpty(align))
+                    {
+                        _sb.Append($" align=\"{align}\"");
+                    }
+
                 _sb.Append(">");
                     
                 }
@@ -136,7 +140,7 @@ namespace EmailNotifications
                     {
                         _sb.Append($" colspan=\"{colSpan}\"");
                     }
-                    if (!string.IsNullOrEmpty(colSpan))
+                    if (!string.IsNullOrEmpty(align))
                     {
                         _sb.Append($" align=\"{align}\"");
                     }
