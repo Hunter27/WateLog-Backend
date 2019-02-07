@@ -24,7 +24,7 @@ namespace CheckValues
             //string mySecret = config["Localhost:ConnectionString"];
 
             var optionsBuilder = new DbContextOptionsBuilder<DatabaseContext>();
-            optionsBuilder.UseSqlServer("Server=dev.retrotest.co.za;Database=iot;User Id=group1;Password=fNX^r+UKy3@CtYh5");
+            optionsBuilder.UseSqlServer("Server = localhost; Database = waterlog; User Id = test; Password = test123");
             //optionsBuilder.UseSqlServer(mySecret);
             DatabaseContext _context = new DatabaseContext(optionsBuilder.Options);
 

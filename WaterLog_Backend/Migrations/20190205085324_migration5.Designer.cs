@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WaterLog_Backend.Models;
 
 namespace WaterLog_Backend.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20190205085324_migration5")]
+    partial class migration5
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -103,42 +105,17 @@ namespace WaterLog_Backend.Migrations
 
                     b.Property<string>("EventType");
 
-                    b.Property<double>("FlowIn");
-
-                    b.Property<double>("FlowOut");
-
                     b.Property<int>("SegmentId");
 
                     b.Property<DateTime>("TimeStamp");
+
+                    b.Property<double>("Value");
 
                     b.HasKey("Id");
 
                     b.HasIndex("SegmentId");
 
                     b.ToTable("SegmentEvents");
-                });
-
-            modelBuilder.Entity("WaterLog_Backend.Models.SegmentLeaksEntry", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<DateTime>("LatestTimeStamp");
-
-                    b.Property<DateTime>("OriginalTimeStamp");
-
-                    b.Property<string>("ResolvedStatus");
-
-                    b.Property<int>("SegmentId");
-
-                    b.Property<string>("Severity");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SegmentId");
-
-                    b.ToTable("SegmentLeaks");
                 });
 
             modelBuilder.Entity("WaterLog_Backend.Models.SegmentsEntry", b =>
@@ -178,14 +155,6 @@ namespace WaterLog_Backend.Migrations
                 });
 
             modelBuilder.Entity("WaterLog_Backend.Models.SegmentEventsEntry", b =>
-                {
-                    b.HasOne("WaterLog_Backend.Models.SegmentsEntry", "SegmentsEntry")
-                        .WithMany()
-                        .HasForeignKey("SegmentId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("WaterLog_Backend.Models.SegmentLeaksEntry", b =>
                 {
                     b.HasOne("WaterLog_Backend.Models.SegmentsEntry", "SegmentsEntry")
                         .WithMany()
