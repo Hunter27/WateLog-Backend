@@ -126,7 +126,7 @@ namespace WaterLog_Backend
                     //Normal Add
                     await createSegmentLeaksAsync(segmentid,calculateSeverity(segmentid),"unresolved");
                     //insert email stuff here
-                  string[] template = populateEmail(segmentid);
+                    string[] template = populateEmail(segmentid);
                     Email email = new Email(template);
                     email.sendEmail();
 
@@ -206,7 +206,7 @@ namespace WaterLog_Backend
             var leaks = controller.Get().Result.Value;
             var leak = leaks.Where(sudo => sudo.SegmentId == sectionid).Single();
 
-            string[] template = { "Segment " + leak.SegmentId, getSegmentStatus(leak.SegmentId), leak.Severity, getLeakPeriod(leak), calculateTotalCost(leak).ToString(), calculatePerHourCost(leak).ToString(), buildUrl(leak.SegmentId) };
+            string[] template = { "Segment " + leak.SegmentId, getSegmentStatus(leak.SegmentId), leak.Severity, getLeakPeriod(leak), calculateTotalCost(leak).ToString(), calculatePerHourCost(leak).ToString(), calculateLitresPerHour(leak).ToString(), buildUrl(leak.SegmentId) };
             return template;
         }
 
@@ -260,6 +260,8 @@ namespace WaterLog_Backend
 
             return (usageperpoll * currentTariff);
         }
+
+       
 
         public double calculateLitresPerHour(SegmentLeaksEntry leak)
         {
