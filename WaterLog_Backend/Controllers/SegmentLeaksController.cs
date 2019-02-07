@@ -60,6 +60,20 @@ namespace WaterLog_Backend.Controllers
             return ("{total: " + procedures.calculateTotaLitres(leaks) + ", perhour: " + procedures.calculateLitresPerHour(leaks) + "}");
         }
 
+        //Resolve Leakage
+        [HttpPost("resolve")]
+        public async Task<ActionResult<SegmentLeaksEntry>> Resolve([FromForm] int id)
+        {
+            var leaks = await _db.SegmentLeaks.FindAsync(id);
+            if(leaks == null)
+            {
+                return NotFound();
+            }
+            leaks.ResolvedStatus = "resolved";
+            await _db.SaveChangesAsync();
+            return leaks;
+
+        }
         // GET api/values/5
         [HttpGet("{id}")]
         public async Task<ActionResult<SegmentLeaksEntry>> Get(int id)
