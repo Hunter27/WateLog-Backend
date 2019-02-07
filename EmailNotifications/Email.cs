@@ -14,7 +14,6 @@ namespace EmailNotifications
         static bool mailSent = false;
 
         string[] values;
-        double totalcost, perhourcost;
         public Email(string[] emailValue)
         {
             values = emailValue;
@@ -40,26 +39,23 @@ namespace EmailNotifications
             mailSent = true;
         }
 
-       
-
+  
         public void sendEmail()
         {
             string[] styleProperties = { "color:red;padding-top: 40px;font-weight: bold", "color:red;font-weight:bold", "color:black;padding-top: 11px",
                                             "color:red;padding-top: 35px;font-weight: bold","color:black","color:black;padding-top: 20px",
                                                "color:grey" ,"color:grey","color:red;padding-top: 24px","color:red;","color:grey;padding-top: 9px"};
             string[] fontSizeProperties = {"6" ,"3","3","6","4","6","4","4","2","1","3" };
-            string imgSrc = "logo.PNG";
-            //string path = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
             System.Text.StringBuilder sb = new System.Text.StringBuilder();
             using (TableStructure.Table table = new TableStructure.Table(sb, id: "some-id",align:"center"))
             {
           
                 table.StartBody();
                 int count = 0;
-                
+                // Line for debugging, will not remove
                 string[] items = { values[0] + " has a " + values[1], "("+ values[2]+")","This problem has been unresolved for " + values[3]+" days",
                                     "R " + values[4], "Has been lost",values[6]+"L or R "+ values[5]," is being lost!", "per hour","Resolve issue or precess","www.google.co.za","call third party help: 011111929292"};
-                foreach (var alert in items)
+                foreach (var alert in values)
                 {
                     using (var tr = table.AddRow(classAttributes: "someattributes"))
                     {
@@ -70,13 +66,8 @@ namespace EmailNotifications
                         else
                         {
                             tr.AddCell(alert, align: "center", style: styleProperties[count], fontSize: fontSizeProperties[count]);
-
                         }
-                       // Configuration.GetSection("LocalLiveDBConnectionString").Value)
                         count++;
-                    
-
-
                     }
                 }
                 using (var tr = table.AddRow(classAttributes: "someattributes2"))
@@ -106,7 +97,6 @@ namespace EmailNotifications
                 // SEND IN HTML FORMAT (comment this line to send plain text).
                 message.IsBodyHtml = true ;
                 message.Body = outS;
-                //string sFile = @"C:\Users\Nthokozo Motsumi\Documents\WaterLog\WaterLog-Back-End\EmailNotifications\logo.PNG";
                 string current =  Directory.GetCurrentDirectory();
                 string sFile = current + @"\logo.PNG";
                 Attachment data = new Attachment(sFile, System.Net.Mime.MediaTypeNames.Application.Octet);
@@ -116,7 +106,7 @@ namespace EmailNotifications
 
     
 
-                // TODO: Replace with the name of your remote SMTP server.
+                
              
             }
             catch (Exception e)
