@@ -98,7 +98,7 @@ namespace WaterLog_Backend
                 // Update SegmentLeaks
                 SegmentLeaksController segmentLeaks = getSegmentLeaksController();
 
-                //Case - doesn't exist
+                
                 IEnumerable<SegmentLeaksEntry> allLeaks = segmentLeaks.Get().Result.Value;
                 if (allLeaks.Any(leak => leak.SegmentId == segmentid))
                 {
@@ -230,16 +230,11 @@ namespace WaterLog_Backend
             var list = controller.Get().Result.Value;
             var entry = list.Where(inlist => inlist.SegmentId == leak.SegmentId).Last();
 
-            double currentTariff = 127.00;
+            double currentTariff = 37.5;
 
             double usageperpoll = (entry.FlowIn - entry.FlowOut);
 
-            //Transform ml to l per 1 min
-            usageperpoll *= 0.001;
-
-            double usageperhour = usageperpoll * 60;
-
-            return (usageperhour * currentTariff);
+            return (usageperpoll * currentTariff);
         }
 
         public double calculateLitresPerHour(SegmentLeaksEntry leak)
@@ -249,9 +244,8 @@ namespace WaterLog_Backend
             var entry = list.Where(inlist => inlist.SegmentId == leak.SegmentId).Last();
             double usageperpoll = (entry.FlowIn - entry.FlowOut);
 
-            //Transform ml to l per 1 min
-            usageperpoll *= 0.001;
-            return (usageperpoll * 60);
+           
+            return (usageperpoll);
         }
 
         public double calculateTotaLitres(SegmentLeaksEntry leak)

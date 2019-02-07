@@ -40,6 +40,10 @@ namespace WaterLog_Backend.Controllers
         public async Task<ActionResult<string>> GetCost(int id)
         {
             SegmentLeaksEntry leaks = _db.SegmentLeaks.Find(id);
+            if (leaks == null)
+            {
+                return NotFound();
+            }
             Procedures procedures = new Procedures(_service);
             return ("{total: " + procedures.calculateTotalCost(leaks) + ", perhour: " +procedures.calculatePerHourCost(leaks) + "}");
         }
@@ -48,6 +52,10 @@ namespace WaterLog_Backend.Controllers
         public async Task<ActionResult<string>> GetLitres(int id)
         {
             SegmentLeaksEntry leaks = _db.SegmentLeaks.Find(id);
+            if(leaks == null)
+            {
+                return NotFound();
+            }
             Procedures procedures = new Procedures(_service);
             return ("{total: " + procedures.calculateTotaLitres(leaks) + ", perhour: " + procedures.calculateLitresPerHour(leaks) + "}");
         }
