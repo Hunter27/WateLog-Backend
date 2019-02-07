@@ -38,20 +38,25 @@ namespace EmailNotifications
 
         static void Main(string[] args)
         {
+            string[] styleProperties = { "color:red;padding-top: 40px", "color:red;font-weight:bold", "color:black;padding-top: 11px",
+                                            "color:red;padding-top: 35px","color:black","color:black;padding-top: 20px",
+                                               "color:grey" ,"color:grey","color:red;padding-top: 24px","color:red;","color:grey;padding-top: 9px"};
+            string[] fontSizeProperties = {"10" ,"3","3","10","4","9","5","5","3","2","3" };
 
             System.Text.StringBuilder sb = new System.Text.StringBuilder();
             using (TableStructure.Table table = new TableStructure.Table(sb, id: "some-id",align:"center"))
             {
           
                 table.StartBody();
-                string[] items= { "1", "2", "3", "4" };
+                int count = 0;
+                string[] items= { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"};
                 foreach (var alert in items)
                 {
                     using (var tr = table.AddRow(classAttributes: "someattributes"))
                     {
-                        tr.AddCell(alert,align:"center",fontColor:"red");
-                        TableStructure.Row rr = new TableStructure.Row(sb, id: "some-id");
-                        rr.Dispose();
+                        tr.AddCell(alert,align:"center",style: styleProperties[count], fontSize:fontSizeProperties[count]);
+                        count++;
+                    
 
 
                     }
@@ -64,7 +69,7 @@ namespace EmailNotifications
             {
                 var client = new SmtpClient("smtp.gmail.com", 587)
                 {
-                    Credentials = new NetworkCredential("nmotsumi@retrorabbit.co.za", "****"),
+                    Credentials = new NetworkCredential("nmotsumi@retrorabbit.co.za", "Nt0k0z01227"),
                     EnableSsl = true
                 };
                 MailAddress from = new MailAddress("nmotsumi@retrorabbit.co.za", "Ntokozo Motsumi");

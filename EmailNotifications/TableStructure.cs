@@ -70,12 +70,12 @@ namespace EmailNotifications
                 {
                     Append("</tr>");
                 }
-                public void AddCell(string innerText, string classAttributes = "", string id = "", string colSpan = "",string align ="", string  fontColor= "", string fontSize = "")
+                public void AddCell(string innerText, string classAttributes = "", string id = "", string colSpan = "",string align ="", string  style= "", string fontSize = "")
                 {
                     Append("<td");
-                    AddOptionalAttributes(classAttributes, id, colSpan,align); //put style value in here
+                    AddOptionalAttributes(classAttributes, id, colSpan, align, style); //put style value in here
                     Append("<font");
-                    AppendOptionFont(classAttributes, id, fontSize, fontColor);
+                    AppendOptionFont(classAttributes, id, fontSize);
                     Append(innerText);
                     Append("</font>");
                     Append("</td>");
@@ -101,7 +101,7 @@ namespace EmailNotifications
                     _sb.Append(toAppend);
                 }
 
-                protected void AppendOptionFont(string className = "", string id = "", string fontSize ="", string fontColor="")
+                protected void AppendOptionFont(string className = "", string id = "", string fontSize ="")
                 {
                 
                     if (!string.IsNullOrEmpty(id))
@@ -116,15 +116,12 @@ namespace EmailNotifications
                     {
                         _sb.Append($" size=\"{fontSize}\"");
                     }
-                    if (!string.IsNullOrEmpty(fontColor))
-                    {
-                        _sb.Append($" color=\"{fontColor}\"");
-                    }
+                   
                 _sb.Append(">");
                     
                 }
 
-            protected void AddOptionalAttributes(string className = "", string id = "", string colSpan = "",string align ="")
+            protected void AddOptionalAttributes(string className = "", string id = "", string colSpan = "",string align ="", string style = "")
                 {
 
                     if (!string.IsNullOrEmpty(id))
@@ -142,6 +139,10 @@ namespace EmailNotifications
                     if (!string.IsNullOrEmpty(colSpan))
                     {
                         _sb.Append($" align=\"{align}\"");
+                    }
+                    if (!string.IsNullOrEmpty(style))
+                    {
+                        _sb.Append($" style=\"{style}\"");
                     }
                 _sb.Append(">");
                 }
