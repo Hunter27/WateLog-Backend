@@ -69,7 +69,7 @@ namespace EmailNotifications
             {
                 var client = new SmtpClient("smtp.gmail.com", 587)
                 {
-                    Credentials = new NetworkCredential("nmotsumi@retrorabbit.co.za", "Nt0k0z01227"),
+                    Credentials = new NetworkCredential("nmotsumi@retrorabbit.co.za", "****"),
                     EnableSsl = true
                 };
                 MailAddress from = new MailAddress("nmotsumi@retrorabbit.co.za", "Ntokozo Motsumi");
