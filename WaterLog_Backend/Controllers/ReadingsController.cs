@@ -21,9 +21,6 @@ namespace WaterLog_Backend.Controllers
         private readonly DatabaseContext _db;
         readonly IConfiguration _config;
         private IControllerService _service;
-        
-
-        
 
         public ReadingsController(DatabaseContext context, IConfiguration config,IControllerService service)
         {
@@ -36,10 +33,8 @@ namespace WaterLog_Backend.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ReadingsEntry>>> Get()
         {
-
             return await _db.Readings.ToListAsync();
         }
-
 
         // GET api/values/5
         [HttpGet("{id}")]
@@ -51,8 +46,7 @@ namespace WaterLog_Backend.Controllers
         // POST api/values
         [HttpPost]
         public async Task Post([FromBody] ReadingsEntry value)
-        {
-           
+        {         
             value.TimesStamp = DateTime.UtcNow;
             await _db.Readings.AddAsync(value);
             await _db.SaveChangesAsync();
@@ -60,10 +54,7 @@ namespace WaterLog_Backend.Controllers
             //Perform changes to SegmentEvents Table
             _service = new ControllerService(_db,_config);
             Procedures procedure = new Procedures(_service);
-            await procedure.triggerInsert(value);
-
-
-            
+            await procedure.triggerInsert(value);   
         }
 
         // PUT api/values/5

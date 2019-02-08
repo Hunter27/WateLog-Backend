@@ -21,7 +21,6 @@ namespace WaterLog_Backend.Models
         public DbSet<ReadingsEntry> Readings { get; set; }
         public DbSet<SegmentEventsEntry> SegmentEvents { get; set; }
         public DbSet<SegmentsEntry> Segments { get; set; }
-        public DbSet<SegmentLeaksEntry> SegmentLeaks { get; set; }
-        
+        public DbSet<SegmentLeaksEntry> SegmentLeaks { get; set; }       
     }
 }

@@ -32,7 +32,6 @@ namespace WaterLog_Backend.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<SegmentLeaksEntry>>> Get()
         {
-
             return await _db.SegmentLeaks.ToListAsync();
         }
 
@@ -57,8 +56,7 @@ namespace WaterLog_Backend.Controllers
             {
                 return NotFound();
             }
-            Procedures procedures = new Procedures(_service);
-       
+            Procedures procedures = new Procedures(_service);      
             return (JsonConvert.SerializeObject((procedures.calculateTotaLitres(leaks), procedures.calculateLitresPerHour(leaks))));
         }
 
@@ -74,7 +72,6 @@ namespace WaterLog_Backend.Controllers
             leaks.ResolvedStatus = "resolved";
             await _db.SaveChangesAsync();
             return leaks;
-
         }
         // GET api/values/5
         [HttpGet("{id}")]
@@ -86,7 +83,6 @@ namespace WaterLog_Backend.Controllers
             {
                 return NotFound();
             }
-
             return leaks;
         }
        
@@ -96,8 +92,6 @@ namespace WaterLog_Backend.Controllers
         {
             await _db.SegmentLeaks.AddAsync(value);
             await _db.SaveChangesAsync();
-
-            ;
         }
 
         // PUT api/values/5
@@ -127,8 +121,7 @@ namespace WaterLog_Backend.Controllers
             {
                 entry.LatestTimeStamp = value.LatestTimeStamp;
                await _db.SaveChangesAsync();
-            }
-            
+            }           
         }
     }
 }

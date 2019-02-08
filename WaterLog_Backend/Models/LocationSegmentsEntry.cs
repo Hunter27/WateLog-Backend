@@ -16,7 +16,6 @@ namespace WaterLog_Backend.Models
         [ForeignKey("SegmentId")]
         public SegmentsEntry segmentsEntry { get; set; }
     }
-
        
-    }
+ }
 

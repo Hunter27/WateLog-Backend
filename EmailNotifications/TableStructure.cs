@@ -120,9 +120,7 @@ namespace EmailNotifications
                     {
                         _sb.Append($" align=\"{align}\"");
                     }
-
-                _sb.Append(">");
-                    
+                _sb.Append(">");                  
                 }
 
             protected void AddOptionalAttributes(string className = "", string id = "", string colSpan = "",string align ="", string style = "")

@@ -10,8 +10,6 @@ namespace Tests
         {
             Results val = new Results();
             Assert.AreNotEqual(0, val.getLen());
-
-
         }
 
         [Test]
@@ -19,8 +17,6 @@ namespace Tests
         {
             Results val = new Results();
             Assert.AreEqual(1, val.getFirstID());
-
-
         }
     }
 }

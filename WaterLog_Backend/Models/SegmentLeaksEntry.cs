@@ -10,10 +10,8 @@ namespace WaterLog_Backend.Models
     {
         public int Id { get; set; }
         public int SegmentId { get; set; }
-
         [ForeignKey("SegmentId")]
         public SegmentsEntry SegmentsEntry { get; set; }
-
         public string Severity { get; set; }
         public DateTime OriginalTimeStamp { get; set; }
         public DateTime LatestTimeStamp { get; set; }

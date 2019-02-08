@@ -17,16 +17,12 @@ namespace WaterLog_Backend.Models
 
         public IEnumerable<EventsList> ListEvents()
         {
-
             return db.SegmentLeaks.ToList().Select(e => new EventsList
             {
                 Id  = e.Id,
                 OriginalTimeStamp = e.OriginalTimeStamp,
                 Severity = e.Severity
-
-
             }).AsQueryable();
-
         }
     }
 }

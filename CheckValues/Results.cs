@@ -47,17 +47,16 @@ namespace CheckValues
         public int getLen()
         {
 
-            /*  MonitorsController _controller = getController();
-              Task<ActionResult<ICollection<MonitorsEntry>>> item = _controller.Get2();
-              ActionResult<ICollection<MonitorsEntry>> item2 = item.Result;
-              ICollection<MonitorsEntry> item3 = item2.Value;
-              return item3.Count;*/
-            return 3;
-
-            ;
-
-
-
+            MonitorsController _controller = getController();
+            Task<ActionResult<IEnumerable<MonitorsEntry>>> item = _controller.Get();
+            ActionResult<IEnumerable<MonitorsEntry>> item2 = item.Result;
+            IEnumerable<MonitorsEntry> item3 = item2.Value;
+            int count = 0;
+            foreach (MonitorsEntry itemv in item3)
+            {
+                count++;
+            }
+            return count;
         }
 
         public int getFirstID()
@@ -67,7 +66,6 @@ namespace CheckValues
             ActionResult<MonitorsEntry> item2 = item.Result;
             MonitorsEntry item3 = item2.Value;
             return item3.Id;
-
         }
     }
 }
