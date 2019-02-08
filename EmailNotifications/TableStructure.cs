@@ -194,7 +194,7 @@ namespace EmailNotifications
                 }
                 if (!string.IsNullOrEmpty(source))
                 {
-                    _sb.Append($" src=\"cid:{source}\"");
+                    _sb.Append($" src=\"{source}\"");
                 }
                 _sb.Append(">");
             }

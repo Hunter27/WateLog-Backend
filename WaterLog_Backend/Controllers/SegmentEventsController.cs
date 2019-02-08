@@ -44,7 +44,7 @@ namespace WaterLog_Backend.Controllers
             }
             return segment;
         }
-      
+
         // POST api/values
         [HttpPost]
         public async Task Post([FromBody] SegmentEventsEntry value)

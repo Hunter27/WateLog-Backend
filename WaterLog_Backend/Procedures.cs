@@ -15,43 +15,23 @@ namespace WaterLog_Backend
 {
     public class Procedures
     {
-        IControllerService _service;
-        public Procedures(IControllerService service)
+        DatabaseContext _db;
+        IConfiguration _config;
+        public Procedures(DatabaseContext db,IConfiguration cfg)
         {
-            _service = service;
-        }
-
-        public SegmentEventsController getSegmentsEventsController()
-        {
-            return _service.GetSegmentEventsController();
-        }
-
-        public MonitorsController getMonitorsController()
-        {
-            return _service.GetMonitorsController();
-        }
-
-        public SegmentLeaksController getSegmentLeaksController()
-        {
-            return _service.GetSegmentLeaksController();
-        }
-
-        public SegmentsController getSegmentsController()
-        {
-            return _service.GetSegmentsController();
+            _db = db;
+            _config = cfg;
         }
 
         public async Task triggerInsert(ReadingsEntry value)
         {
-
-            SegmentsController segController = getSegmentsController();
-            IEnumerable<SegmentsEntry> allSegments = segController.Get().Result.Value;
+            IEnumerable<SegmentsEntry> allSegments = _db.Segments;
             int segmentInid = -1;
             int segmentOutid = -1;
             int segmentid = -1;
             foreach (SegmentsEntry seg in allSegments)
             {
-                if (seg.SenseIDIn == value.SenseID)
+                if (seg.SenseIDIn == value.MonitorsId)
                 {
                     segmentInid = seg.SenseIDIn;
                     segmentOutid = seg.SenseIDOut;
@@ -60,7 +40,7 @@ namespace WaterLog_Backend
                 }
             }
 
-            IEnumerable<ReadingsEntry> allReadings = getReadingsController().Get().Result.Value;
+            IEnumerable<ReadingsEntry> allReadings = _db.Readings;
             allReadings = allReadings.OrderByDescending(read => read.TimesStamp);
             ReadingsEntry r1 = null, r2 = null;
             Boolean found1 = false, found2 = false;
@@ -70,12 +50,12 @@ namespace WaterLog_Backend
                 {
                     break;
                 }
-                if (read.SenseID == segmentInid && found1 == false)
+                if (read.MonitorsId == segmentInid && found1 == false)
                 {
                     r1 = read;
                     found1 = true;
                 }
-                if (read.SenseID == segmentOutid && found2 == false)
+                if (read.MonitorsId == segmentOutid && found2 == false)
                 {
                     r2 = read;
                     found2 = true;
@@ -85,23 +65,17 @@ namespace WaterLog_Backend
             if (isLeakage(r1.Value, r2.Value))
             {
                 //Updateleakagestatus
-                await updateSegmentsEventAsync(segmentid, "leak", r1.Value, r2.Value);
-                // Update SegmentLeaks
-                SegmentLeaksController segmentLeaks = getSegmentLeaksController();
-                IEnumerable<SegmentLeaksEntry> allLeaks = segmentLeaks.Get().Result.Value;
-                if (allLeaks.Any(leak => leak.SegmentId == segmentid))
+                IEnumerable<SegmentLeaksEntry> allLeaks = _db.SegmentLeaks;
+                if (allLeaks.Any(leak => leak.SegmentsId == segmentid))
                 {
-                    //At least an instance of the leak exists
-                    SegmentLeaksEntry latestEntry = allLeaks.Where(leak => leak.SegmentId == segmentid).Last();
+                    SegmentLeaksEntry latestEntry = allLeaks.Where(leak => leak.SegmentsId == segmentid).Last();
                     //Check in SegmentEntry if latest event related to entry has been resolved.
                     if (latestEntry != null)
                     {
-                        SegmentEventsController controller = getSegmentsEventsController();
-                        IEnumerable<SegmentEventsEntry> allEvents = controller.Get().Result.Value;
-                        SegmentEventsEntry entry = allEvents.Where(leak => leak.SegmentId == segmentid).Last();
+                        IEnumerable<SegmentEventsEntry> allEvents = _db.SegmentEvents;
+                        SegmentEventsEntry entry = allEvents.Where(leak => leak.SegmentsId == segmentid).Last();
                         if (entry.EventType == "leak")
                         {
-                            //Latest event related to segment is still leaking.
                             await updateSegmentLeaksAsync(latestEntry.Id, segmentid, calculateSeverity(segmentid), latestEntry.OriginalTimeStamp, entry.TimeStamp, "unresolved");
                         }
                     }
@@ -110,9 +84,8 @@ namespace WaterLog_Backend
                 {
                     //Normal Add
                     await createSegmentLeaksAsync(segmentid, calculateSeverity(segmentid), "unresolved");
-                    //inst email stuff here
                     string[] template = populateEmail(segmentid);
-                    Email email = new Email(template);
+                    Email email = new Email(template,_config);
                     email.sendEmail();
                 }
             }
@@ -123,52 +96,49 @@ namespace WaterLog_Backend
             }
         }
 
-        private ReadingsController getReadingsController()
-        {
-            return _service.GetReadingsController();
-        }
+        
 
         private string calculateSeverity(int segmentid)
         {
-            return "normal";
+            return "severe";
         }
 
         public async Task createSegmentLeaksAsync(int segId, string severity, string resolvedStatus)
         {
-            SegmentLeaksController controller = getSegmentLeaksController();
             SegmentLeaksEntry entry = new SegmentLeaksEntry();
-            entry.SegmentId = segId;
+            entry.SegmentsId = segId;
             entry.Severity = severity;
             entry.LatestTimeStamp = DateTime.UtcNow;
             entry.OriginalTimeStamp = DateTime.UtcNow;
             entry.ResolvedStatus = resolvedStatus;
-            await controller.Post(entry);
+            await _db.SegmentLeaks.AddAsync(entry);
+            await _db.SaveChangesAsync();
         }
 
         public async Task updateSegmentLeaksAsync(int leakId, int segId, string severity, DateTime original, DateTime updated, string resolvedStatus)
         {
-            SegmentLeaksController controller = getSegmentLeaksController();
+            //SegmentLeaksController controller = getSegmentLeaksController();
             SegmentLeaksEntry entry = new SegmentLeaksEntry();
-            entry.SegmentId = segId;
+            entry.SegmentsId = segId;
             entry.Severity = severity;
             entry.OriginalTimeStamp = original;
             entry.LatestTimeStamp = updated;
             entry.ResolvedStatus = resolvedStatus;
             entry.Id = leakId;
-            await controller.Patch(entry);
-
+            await _db.SegmentLeaks.AddAsync(entry);
+            await _db.SaveChangesAsync();
         }
 
         public async Task updateSegmentsEventAsync(int id, string status, double inv, double outv)
         {
-            SegmentEventsController controller = getSegmentsEventsController();
             SegmentEventsEntry entry = new SegmentEventsEntry();
             entry.TimeStamp = DateTime.UtcNow;
-            entry.SegmentId = id;
+            entry.SegmentsId = id;
             entry.FlowIn = inv;
             entry.FlowOut = outv;
             entry.EventType = status;
-            await controller.Post(entry);
+            await _db.SegmentEvents.AddAsync(entry);
+            await _db.SaveChangesAsync();
         }
 
 
@@ -184,10 +154,9 @@ namespace WaterLog_Backend
 
         public string[] populateEmail(int sectionid)
         {
-            SegmentLeaksController controller = getSegmentLeaksController();
-            var leaks = controller.Get().Result.Value;
-            var leak = leaks.Where(sudo => sudo.SegmentId == sectionid).Single();
-            string[] template = { "Segment " + leak.SegmentId, getSegmentStatus(leak.SegmentId), leak.Severity, getLeakPeriod(leak), calculateTotalCost(leak).ToString(), calculatePerHourCost(leak).ToString(), buildUrl(leak.SegmentId) };
+            var leaks = _db.SegmentLeaks;
+            var leak = leaks.Where(sudo => sudo.SegmentsId == sectionid).Single();
+            string[] template = { "Segment " + leak.SegmentsId, getSegmentStatus(leak.SegmentsId), leak.Severity, getLeakPeriod(leak), calculateTotalCost(leak).ToString(), calculatePerHourCost(leak).ToString(), calculateLitresPerHour(leak).ToString(), buildUrl(leak.SegmentsId) };
             return template;
         }
 
@@ -206,13 +175,12 @@ namespace WaterLog_Backend
 
         public double calculateTotalCost(SegmentLeaksEntry leak)
         {
-            SegmentEventsController controller = getSegmentsEventsController();
-            var list = controller.Get().Result.Value;
-            var entry = list.Where(inlist => inlist.SegmentId == leak.SegmentId).Last();
+            var list = _db.SegmentEvents;
+            var entry = list.Where(inlist => inlist.SegmentsId == leak.SegmentsId).Last();
             var timebetween = (leak.LatestTimeStamp - leak.OriginalTimeStamp).TotalHours;
             if (timebetween < 1)
             {
-                timebetween = 1;
+                return calculatePerHourCost(leak)/60;
             }
             else
             {
@@ -224,14 +192,13 @@ namespace WaterLog_Backend
 
         private string buildUrl(int segmentId)
         {
-            return "https://localhost:3000/segment/" + segmentId;
+            return "https://iot.retrotest.co.za/alert/segment/" + segmentId;
         }
 
         public double calculatePerHourCost(SegmentLeaksEntry leak)
         {
-            SegmentEventsController controller = getSegmentsEventsController();
-            var list = controller.Get().Result.Value;
-            var entry = list.Where(inlist => inlist.SegmentId == leak.SegmentId).Last();
+            var list = _db.SegmentEvents;
+            var entry = list.Where(inlist => inlist.SegmentsId == leak.SegmentsId).Last();
             double currentTariff = 37.5;
             double usageperpoll = (entry.FlowIn - entry.FlowOut);
             return (usageperpoll * currentTariff);
@@ -239,18 +206,16 @@ namespace WaterLog_Backend
 
         public double calculateLitresPerHour(SegmentLeaksEntry leak)
         {
-            SegmentEventsController controller = getSegmentsEventsController();
-            var list = controller.Get().Result.Value;
-            var entry = list.Where(inlist => inlist.SegmentId == leak.SegmentId).Last();
+            var list = _db.SegmentEvents;
+            var entry = list.Where(inlist => inlist.SegmentsId == leak.SegmentsId).Last();
             double usageperpoll = (entry.FlowIn - entry.FlowOut);
             return (usageperpoll);
         }
 
         public double calculateTotaLitres(SegmentLeaksEntry leak)
         {
-            SegmentEventsController controller = getSegmentsEventsController();
-            var list = controller.Get().Result.Value;
-            var entry = list.Where(inlist => inlist.SegmentId == leak.SegmentId).Last();
+            var list = _db.SegmentEvents;
+            var entry = list.Where(inlist => inlist.SegmentsId == leak.SegmentsId).Last();
             var timebetween = (leak.LatestTimeStamp - leak.OriginalTimeStamp).TotalHours;
             var perhour = calculateLitresPerHour(leak);
             return (timebetween * perhour);
@@ -258,9 +223,8 @@ namespace WaterLog_Backend
 
         private string getSegmentStatus(int segmentId)
         {
-            SegmentEventsController controller = getSegmentsEventsController();
-            var list = controller.Get().Result.Value;
-            var entry = list.Where(inlist => inlist.SegmentId == segmentId).Last();
+            var list = _db.SegmentEvents;
+            var entry = list.Where(inlist => inlist.SegmentsId == segmentId).Last();
             return entry.EventType;
         }
     }

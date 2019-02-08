@@ -22,7 +22,7 @@ namespace WaterLog_Backend.Controllers
         readonly IConfiguration _config;
         private IControllerService _service;
 
-        public ReadingsController(DatabaseContext context, IConfiguration config,IControllerService service)
+        public ReadingsController(DatabaseContext context, IConfiguration config, IControllerService service)
         {
             _db = context;
             _config = config;
@@ -42,17 +42,16 @@ namespace WaterLog_Backend.Controllers
         {
             return await _db.Readings.FindAsync(id);
         }
-      
+
         // POST api/values
         [HttpPost]
         public async Task Post([FromBody] ReadingsEntry value)
-        {         
+        {
             value.TimesStamp = DateTime.UtcNow;
             await _db.Readings.AddAsync(value);
             await _db.SaveChangesAsync();
-            _service = new ControllerService(_db,_config);
-            Procedures procedure = new Procedures(_service);
-            await procedure.triggerInsert(value);   
+            Procedures procedure = new Procedures(_db, _config);
+            await procedure.triggerInsert(value);
         }
 
         // PUT api/values/5
