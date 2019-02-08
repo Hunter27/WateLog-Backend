@@ -80,6 +80,7 @@ namespace WaterLog_Backend
                     r2 = read;
                     found2 = true;
                 }
+
             }
 
             if (isLeakage(r1.Value, r2.Value))

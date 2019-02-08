@@ -21,22 +21,15 @@ namespace CheckValues
             var builder = new ConfigurationBuilder();
             builder.AddUserSecrets<Startup>();
             var config = builder.Build();
-            //string mySecret = config["Localhost:ConnectionString"];
-
             var optionsBuilder = new DbContextOptionsBuilder<DatabaseContext>();
             optionsBuilder.UseSqlServer("Server = localhost; Database = waterlog; User Id = test; Password = test123");
-            //optionsBuilder.UseSqlServer(mySecret);
             DatabaseContext _context = new DatabaseContext(optionsBuilder.Options);
-
             MonitorsController _controller = new MonitorsController(_context, config);
             return _controller;
-
         }
 
         public void item()
         {
-
-
             MonitorsController _controller = getController();
             Task<ActionResult<MonitorsEntry>> item = _controller.Get(1);
             ActionResult<MonitorsEntry> item2 = item.Result;
@@ -46,7 +39,6 @@ namespace CheckValues
         }
         public int getLen()
         {
-
             MonitorsController _controller = getController();
             Task<ActionResult<IEnumerable<MonitorsEntry>>> item = _controller.Get();
             ActionResult<IEnumerable<MonitorsEntry>> item2 = item.Result;

@@ -50,8 +50,6 @@ namespace WaterLog_Backend.Controllers
             value.TimesStamp = DateTime.UtcNow;
             await _db.Readings.AddAsync(value);
             await _db.SaveChangesAsync();
-
-            //Perform changes to SegmentEvents Table
             _service = new ControllerService(_db,_config);
             Procedures procedure = new Procedures(_service);
             await procedure.triggerInsert(value);   

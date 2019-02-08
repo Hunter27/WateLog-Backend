@@ -12,9 +12,7 @@ namespace WebApplication1
     {
         public Startup(IConfiguration configuration)
         {
-
             Configuration = configuration;
-          
         }
 
         public IConfiguration Configuration { get; }
@@ -33,34 +31,22 @@ namespace WebApplication1
                     .AllowAnyHeader()
                     .AllowCredentials());
             });
-
-            
-            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-
-            // Shows UseCors with named policy.
             app.UseCors("CorsPolicy");
-           // UpdateDatabase(app);
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
             else
             {
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
-
             app.UseHttpsRedirection();
             app.UseMvc();
-
-           // UpdateDatabase(app);
-
-           
         }
 
         private static void UpdateDatabase(IApplicationBuilder app)
