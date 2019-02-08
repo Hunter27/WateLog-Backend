@@ -70,16 +70,41 @@ namespace EmailNotifications
                 {
                     Append("</tr>");
                 }
-                public void AddCell(string innerText, string classAttributes = "", string id = "", string colSpan = "",string align ="", string  style= "", string fontSize = "")
+                public void AddCell(string innerText, string classAttributes = "", string id = "", string colSpan = "",string align ="", string  style= "", string fontSize = "",bool url = false)
                 {
                     Append("<td");
                     AddOptionalAttributes(classAttributes, id, colSpan, align, style); //put style value in here
+                    if (url == false)
+                    {
                     Append("<font");
-                    AppendOptionFont(classAttributes, id, fontSize,align);
+                    AppendOptionFont(classAttributes, id, fontSize, align);
                     Append(innerText);
                     Append("</font>");
+
+                    }
+                    else
+                    {
+                        Append("<a href="+innerText+">");
+                        Append("<font");
+                        AppendOptionFont(classAttributes, id, fontSize, align);
+                        Append("Here");
+                        Append("</font>");
+
+                        Append("</a>");
+
+                }
+                   
                     Append("</td>");
                 }
+                public void AddImage(string source, string classAttributes = "", string style = "", string id = "", string align = "", string sizeX="",string sizeY = "")
+                {
+                    Append("<td");
+                    AddOptionalAttributes(classAttributes, id, align);
+                    Append("<img");
+                    AddOptionImage(source, id, style, sizeX, sizeY);
+                    Append("</img>");
+                    Append("</td>");
+            }
             }
 
             public abstract class HtmlBase
@@ -101,7 +126,7 @@ namespace EmailNotifications
                     _sb.Append(toAppend);
                 }
 
-                protected void AppendOptionFont(string className = "", string id = "", string fontSize ="", string align = "")
+            protected void AppendOptionFont(string className = "", string id = "", string fontSize = "", string align = "")
                 {
                 
                     if (!string.IsNullOrEmpty(id))
@@ -148,7 +173,36 @@ namespace EmailNotifications
                     }
                 _sb.Append(">");
                 }
+            protected void AddOptionImage(string source, string id = "", string style="",string align = "", string sizeX = "", string sizeY = "")
+            {
+
+                if (!string.IsNullOrEmpty(id))
+                {
+                    _sb.Append($" id=\"{source}\"");
+                }
+                if (!string.IsNullOrEmpty(style))
+                {
+                    _sb.Append($" style=\"{style}\"");
+                }
+                if (!string.IsNullOrEmpty(sizeX))
+                {
+                    _sb.Append($" width=\"{sizeX}\"");
+                }
+                if (!string.IsNullOrEmpty(sizeY))
+                {
+                    _sb.Append($" height=\"{sizeY}\"");
+                }
+                if (!string.IsNullOrEmpty(align))
+                {
+                    _sb.Append($" align=\"{align}\"");
+                }
+                if (!string.IsNullOrEmpty(source))
+                {
+                    _sb.Append($" src=\"cid:{source}\"");
+                }
+                _sb.Append(">");
             }
+        }
         }
     }
 
