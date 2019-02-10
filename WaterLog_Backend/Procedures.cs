@@ -28,7 +28,7 @@ namespace WaterLog_Backend
             SegmentsEntry segment = await _db.Segments.Where(ins => ins.SenseIDIn == value.MonitorsId).SingleOrDefaultAsync();
             if (segment == null)
             {
-                return;
+              return;
             }
             //IEnumerable<SegmentsEntry> allSegments = _db.Segments;
             int segmentInid = -1;
@@ -44,9 +44,7 @@ namespace WaterLog_Backend
 
             if (isLeakage(reading1.Value, reading2.Value))
             {
-
                 await CreateSegmentsEventAsync(segmentid, "leak", reading1.Value, reading2.Value);
-
                 //Updateleakagestatus
                 if (await _db.SegmentLeaks.AnyAsync(leak => leak.SegmentsId == segmentid))
                 {
@@ -54,7 +52,6 @@ namespace WaterLog_Backend
                     //Check in SegmentEntry if latest event related to entry has been resolved.
                     if (latestEntry != null)
                     {
-
                         SegmentEventsEntry entry = (await _db.SegmentEvents.Where(leak => leak.SegmentsId == segmentid).OrderByDescending(lks => lks.TimeStamp).FirstAsync());
                         if (entry.EventType == "leak")
                         {
@@ -105,7 +102,6 @@ namespace WaterLog_Backend
             entry.LatestTimeStamp = updated;
             entry.ResolvedStatus = resolvedStatus;
             entry.Id = leakId;
-
             var old = await _db.SegmentLeaks.FindAsync(leakId);
             _db.Entry(old).CurrentValues.SetValues(entry);
             await _db.SaveChangesAsync();
@@ -119,11 +115,9 @@ namespace WaterLog_Backend
             entry.FlowIn = inv;
             entry.FlowOut = outv;
             entry.EventType = status;
-
             await _db.SegmentEvents.AddAsync(entry);
             await _db.SaveChangesAsync();
         }
-
 
         public Boolean isLeakage(double first, double second)
         {
@@ -145,7 +139,6 @@ namespace WaterLog_Backend
 
         private string getLeakPeriod(SegmentLeaksEntry leak)
         {
-
             if (((leak.LatestTimeStamp - leak.OriginalTimeStamp).TotalHours) < 1)
             {
                 return "1";
