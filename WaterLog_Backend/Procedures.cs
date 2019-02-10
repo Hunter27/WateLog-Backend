@@ -30,11 +30,11 @@ namespace WaterLog_Backend
             {
               return;
             }
-            //IEnumerable<SegmentsEntry> allSegments = _db.Segments;
+            
             int segmentInid = -1;
             int segmentOutid = -1;
             int segmentid = -1;
-
+            
             segmentInid = segment.SenseIDIn;
             segmentOutid = segment.SenseIDOut;
             segmentid = segment.Id;
@@ -94,7 +94,6 @@ namespace WaterLog_Backend
 
         public async Task updateSegmentLeaksAsync(int leakId, int segId, string severity, DateTime original, DateTime updated, string resolvedStatus)
         {
-            //SegmentLeaksController controller = getSegmentLeaksController();
             SegmentLeaksEntry entry = new SegmentLeaksEntry();
             entry.SegmentsId = segId;
             entry.Severity = severity;
