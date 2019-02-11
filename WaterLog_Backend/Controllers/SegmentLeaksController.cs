@@ -39,7 +39,7 @@ namespace WaterLog_Backend.Controllers
         [Route("costs/{id}")]
         public async Task<ActionResult<string>> GetCost(int id)
         {
-            SegmentLeaksEntry leaks = _db.SegmentLeaks.Find(id);
+            SegmentLeaksEntry leaks = await _db.SegmentLeaks.FindAsync(id);
             if (leaks == null)
             {
                 return NotFound();
@@ -51,7 +51,7 @@ namespace WaterLog_Backend.Controllers
         [Route("litres/{id}")]
         public async Task<ActionResult<string>> GetLitres(int id)
         {
-            SegmentLeaksEntry leaks = _db.SegmentLeaks.Find(id);
+            SegmentLeaksEntry leaks = await _db.SegmentLeaks.FindAsync(id);
             if (leaks == null)
             {
                 return NotFound();
@@ -98,8 +98,8 @@ namespace WaterLog_Backend.Controllers
         [HttpPut("{id}")]
         public async Task Put(int id, [FromBody] SegmentLeaksEntry value)
         {
-            var entry = await _db.SegmentLeaks.FindAsync(id);
-            entry = value;
+            var old = await _db.SegmentLeaks.FindAsync(id);
+            _db.Entry(old).CurrentValues.SetValues(value);
             await _db.SaveChangesAsync();
         }
 

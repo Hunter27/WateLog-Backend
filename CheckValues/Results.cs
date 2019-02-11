@@ -15,16 +15,33 @@ namespace CheckValues
 {
     public class Results
     {
-
         public MonitorsController getController()
         {
+            string connection = "";
+            IConfiguration chosenconfig;
+            var jsonconfig = new ConfigurationBuilder()
+            .AddJsonFile("appsettings.json")
+            .Build();
             var builder = new ConfigurationBuilder();
             builder.AddUserSecrets<Startup>();
-            var config = builder.Build();
+
+            var usersecretsconfig = builder.Build();
+
+            if (jsonconfig.GetSection("LocalLiveDBConnectionString").Exists())
+            {
+                connection = jsonconfig.GetSection("LocalLiveDBConnectionString").Value;
+                chosenconfig = jsonconfig;
+            }
+            else
+            {
+                connection = usersecretsconfig.GetSection("LocalLiveDBConnectionString").Value;
+                chosenconfig = usersecretsconfig;
+            }
+
             var optionsBuilder = new DbContextOptionsBuilder<DatabaseContext>();
-            optionsBuilder.UseSqlServer("Server = localhost; Database = waterlog; User Id = test; Password = test123");
+            optionsBuilder.UseSqlServer(connection);
             DatabaseContext _context = new DatabaseContext(optionsBuilder.Options);
-            MonitorsController _controller = new MonitorsController(_context, config);
+            MonitorsController _controller = new MonitorsController(_context, chosenconfig);
             return _controller;
         }
 
