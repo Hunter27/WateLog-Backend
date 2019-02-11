@@ -18,26 +18,30 @@ namespace CheckValues
         public MonitorsController getController()
         {
             string connection = "";
-            var _config = new ConfigurationBuilder()
+            IConfiguration chosenconfig;
+            var jsonconfig = new ConfigurationBuilder()
             .AddJsonFile("appsettings.json")
             .Build();
             var builder = new ConfigurationBuilder();
             builder.AddUserSecrets<Startup>();
-            var config = builder.Build();
 
-            if (config.GetSection("LocalLiveDBConnectionString").Exists())
+            var usersecretsconfig = builder.Build();
+
+            if (jsonconfig.GetSection("LocalLiveDBConnectionString").Exists())
             {
-                connection = config.GetSection("LocalLiveDBConnectionString").Value;
+                connection = jsonconfig.GetSection("LocalLiveDBConnectionString").Value;
+                chosenconfig = jsonconfig;
             }
             else
             {
-                connection = _config.GetSection("LocalLiveDBConnectionString").Value;
+                connection = usersecretsconfig.GetSection("LocalLiveDBConnectionString").Value;
+                chosenconfig = usersecretsconfig;
             }
 
             var optionsBuilder = new DbContextOptionsBuilder<DatabaseContext>();
             optionsBuilder.UseSqlServer(connection);
             DatabaseContext _context = new DatabaseContext(optionsBuilder.Options);
-            MonitorsController _controller = new MonitorsController(_context, config);
+            MonitorsController _controller = new MonitorsController(_context, chosenconfig);
             return _controller;
         }
 
