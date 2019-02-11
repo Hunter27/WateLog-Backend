@@ -10,6 +10,7 @@ using WaterLog_Backend.Controllers;
 using WaterLog_Backend.Models;
 
 using WebApplication1;
+using NUnit.Framework;
 
 namespace WaterLog_Backend
 {
@@ -226,6 +227,85 @@ namespace WaterLog_Backend
             var list = _db.SegmentEvents;
             var entry = list.Where(inlist => inlist.SegmentsId == segmentId).Last();
             return entry.EventType;
+        }
+
+        //Calculates the data points of the wastage based on period
+        public DataPoints<DateTime,double> CalculatePeriodWastage(Period timeframe)
+        {
+            switch (timeframe)
+            {
+                case Period.Daily:
+                    return CalculateDailyWastage(_db.SegmentEvents.Where(a => a.EventType == "leak" && a.TimeStamp.Month == DateTime.Now.Month && a.TimeStamp.Day == DateTime.Now.Day && a.TimeStamp.Year == DateTime.Now.Year).GroupBy(b => b.TimeStamp.Hour).ToList());
+                case Period.Monthly:
+                    return (CalculateMonthlyWastage());
+                case Period.Seasonally:
+                    return null;
+                default:
+                    return null;
+            }
+        }
+
+        private void CalculateSeasonallyWastage()
+        {
+            //Get Summer
+            DateTime summerBegin = new DateTime(0,12,1);
+            DateTime summerEnd = new DateTime(0, 2, 28);
+           var summerList = _db.SegmentEvents.Where(a => a.EventType == "leak").Where(b => b.TimeStamp.Month >= summerBegin.Month && b.TimeStamp.Day >= summerBegin.Day && b.TimeStamp.Month <= summerEnd.Month && b.TimeStamp.Day <= summerEnd.Day).ToListAsync();
+            //Get Winter
+            DateTime winterBegin = new DateTime(0, 6, 1);
+            DateTime winterEnd = new DateTime(0, 8, 31);
+            var winter = _db.SegmentEvents.Where(a => a.EventType == "leak").Where(b => b.TimeStamp.Month >= winterBegin.Month && b.TimeStamp.Day >= winterBegin.Day && b.TimeStamp.Month <= winterEnd.Month && b.TimeStamp.Day <= winterEnd.Day).ToListAsync();
+            //Get Autumn
+            DateTime autumnBegin = new DateTime(0, 3, 1);
+            DateTime autumnEnd = new DateTime(0, 5, 31);
+            var autumn = _db.SegmentEvents.Where(a => a.EventType == "leak").Where(b => b.TimeStamp.Month >= autumnBegin.Month && b.TimeStamp.Day >= autumnBegin.Day && b.TimeStamp.Month <= autumnEnd.Month && b.TimeStamp.Day <= autumnEnd.Day).ToListAsync();
+            //Get Spring
+            DateTime springBegin = new DateTime(0, 9, 1);
+            DateTime springEnd = new DateTime(0, 11, 30);
+            var spring = _db.SegmentEvents.Where(a => a.EventType == "leak").Where(b => b.TimeStamp.Month >= springBegin.Month && b.TimeStamp.Day >= springBegin.Day && b.TimeStamp.Month <= springEnd.Month && b.TimeStamp.Day <= springEnd.Day).ToListAsync();
+
+            //Generate new DataPoints
+            DataPoints<DateTime, double> seasonDataSet = new DataPoints<DateTime, double>();
+            throw new NotImplementedException();
+
+            
+
+        }
+
+        private DataPoints<DateTime,double> CalculateMonthlyWastage()
+        {
+            throw new NotImplementedException();
+        }
+
+        public DataPoints<DateTime,double> CalculateDailyWastage(List<IGrouping<int,SegmentEventsEntry>> list)
+        {
+            DataPoints<DateTime, double> daily = new DataPoints<DateTime, double>();
+            var totalForHour = 0.0;
+            for (int i = 0; i < list.Count; i++)
+            {
+                //We have a list per hour of current day.
+                //Group these groups by segmentId
+                totalForHour = 0.0;
+                var segments = list.ElementAt(i).GroupBy(a => a.SegmentsId);
+                foreach(IGrouping<int,SegmentEventsEntry> lst in segments)
+                {
+                    foreach(SegmentEventsEntry lst2 in lst)
+                    {
+                        totalForHour += ((lst2.FlowIn - lst2.FlowOut) / 60);
+                       
+                    }
+
+                }
+                daily.AddPoint(list.ElementAt(i).ElementAt(0).TimeStamp, totalForHour);
+            }
+            return daily;
+        }
+
+        public enum Period
+        {
+            Daily,
+            Seasonally,
+            Monthly
         }
     }
 }
