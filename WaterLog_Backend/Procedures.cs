@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using EmailNotifications;
 using WaterLog_Backend.Controllers;
 using WaterLog_Backend.Models;
-
 using WebApplication1;
 
 namespace WaterLog_Backend
@@ -22,7 +21,7 @@ namespace WaterLog_Backend
             _db = db;
             _config = cfg;
         }
-
+        
         public async Task triggerInsert(ReadingsEntry value)
         {
             SegmentsEntry segment = await _db.Segments.Where(ins => ins.SenseIDIn == value.MonitorsId).SingleOrDefaultAsync();
@@ -30,11 +29,11 @@ namespace WaterLog_Backend
             {
               return;
             }
-            //IEnumerable<SegmentsEntry> allSegments = _db.Segments;
+            
             int segmentInid = -1;
             int segmentOutid = -1;
             int segmentid = -1;
-
+            
             segmentInid = segment.SenseIDIn;
             segmentOutid = segment.SenseIDOut;
             segmentid = segment.Id;
@@ -79,7 +78,7 @@ namespace WaterLog_Backend
         {
             return "severe";
         }
-
+        
         public async Task createSegmentLeaksAsync(int segId, string severity, string resolvedStatus)
         {
             SegmentLeaksEntry entry = new SegmentLeaksEntry();
@@ -91,10 +90,9 @@ namespace WaterLog_Backend
             await _db.SegmentLeaks.AddAsync(entry);
             await _db.SaveChangesAsync();
         }
-
+        
         public async Task updateSegmentLeaksAsync(int leakId, int segId, string severity, DateTime original, DateTime updated, string resolvedStatus)
         {
-            //SegmentLeaksController controller = getSegmentLeaksController();
             SegmentLeaksEntry entry = new SegmentLeaksEntry();
             entry.SegmentsId = segId;
             entry.Severity = severity;

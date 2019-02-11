@@ -15,8 +15,6 @@ namespace CheckValues
 {
     public class Results
     {
-        
-
         public MonitorsController getController()
         {
             string connection = "";
