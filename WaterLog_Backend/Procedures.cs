@@ -237,7 +237,7 @@ namespace WaterLog_Backend
                 case Period.Daily:
                     return CalculateDailyWastage(_db.SegmentEvents.Where(a => a.EventType == "leak" && a.TimeStamp.Month == DateTime.Now.Month && a.TimeStamp.Day == DateTime.Now.Day && a.TimeStamp.Year == DateTime.Now.Year).GroupBy(b => b.TimeStamp.Hour).ToList());
                 case Period.Monthly:
-                    return (CalculateMonthlyWastage());
+                    return (CalculateMonthlyWastage(_db.SegmentEvents.Where(a => a.EventType == "leak" && a.TimeStamp.Month == DateTime.Now.Month && a.TimeStamp.Day == DateTime.Now.Day && a.TimeStamp.Year == DateTime.Now.Year).GroupBy(b => b.TimeStamp.Day).ToList()));
                 case Period.Seasonally:
                     return null;
                 default:
@@ -272,9 +272,28 @@ namespace WaterLog_Backend
 
         }
 
-        private DataPoints<DateTime,double> CalculateMonthlyWastage()
+        public DataPoints<DateTime,double> CalculateMonthlyWastage(List<IGrouping<int,SegmentEventsEntry>> list)
         {
-            throw new NotImplementedException();
+            DataPoints<DateTime, double> monthly = new DataPoints<DateTime, double>();
+            var totalForDay = 0.0;
+            for (int i = 0; i < list.Count; i++)
+            {
+                //We have a list per hour of current day.
+                //Group these groups by segmentId
+                totalForDay = 0.0;
+                var segments = list.ElementAt(i).GroupBy(a => a.SegmentsId);
+                foreach (IGrouping<int, SegmentEventsEntry> lst in segments)
+                {
+                    foreach (SegmentEventsEntry lst2 in lst)
+                    {
+                        totalForDay += ((lst2.FlowIn - lst2.FlowOut) / 60);
+
+                    }
+
+                }
+                monthly.AddPoint(list.ElementAt(i).ElementAt(0).TimeStamp, totalForDay);
+            }
+            return monthly;
         }
 
         public DataPoints<DateTime,double> CalculateDailyWastage(List<IGrouping<int,SegmentEventsEntry>> list)
