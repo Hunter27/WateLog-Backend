@@ -18,7 +18,7 @@ namespace Tests
             Assert.AreEqual(1, val.getFirstID());
         }
 
-        [Test()]
+        [Test]
         public void TestCalculateDailyWastage()
         {
             var build = new ConfigurationBuilder();
@@ -27,10 +27,10 @@ namespace Tests
             var dataset = GetTestDataDaily();
             Procedures proc = new Procedures(new DatabaseContext(),_config);
 
-            Assert.IsTrue(expected.Equals(proc.CalculateDailyWastage(dataset)));
+            Assert.IsTrue(expected.Equals((proc.CalculateDailyWastage(dataset))[0]));
         }
 
-        [TestCase()]
+        [Test]
         public void TestCalculateMonthlyWastage()
         {
             var build = new ConfigurationBuilder();
@@ -39,7 +39,13 @@ namespace Tests
             var dataset = GetTestDataMonthly();
             Procedures proc = new Procedures(new DatabaseContext(), _config);
 
-            Assert.IsTrue(expected.Equals(proc.CalculateMonthlyWastage(dataset)));
+            Assert.IsTrue(expected.Equals((proc.CalculateMonthlyWastage(dataset))[0]));
+        }
+
+        [Test]
+        public void TestCalculateSeasonallyWastage()
+        {
+            
         }
 
         public DataPoints<DateTime, double> GetTestExpectedMonthly()
