@@ -28,8 +28,7 @@ namespace WaterLog_Backend.Controllers
         // GET api/values
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Monitor>>> Get()
-        {
-            
+        {         
             return await _db.Monitor.ToListAsync();
         }
 
@@ -46,15 +45,14 @@ namespace WaterLog_Backend.Controllers
         {
             await _db.Monitor.AddAsync(value);
             await _db.SaveChangesAsync();
-            
         }
 
         // PUT api/values/5
         [HttpPut("{id}")]
         public async Task Put(int id, [FromBody] Monitor value)
         {
-            var entry = await _db.Monitor.FindAsync(id);
-            entry = value;
+            var old = await _db.Monitors.FindAsync(id);
+            _db.Entry(old).CurrentValues.SetValues(value);
             await _db.SaveChangesAsync();
         }
 

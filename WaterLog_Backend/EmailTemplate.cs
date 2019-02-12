@@ -21,6 +21,6 @@ namespace WaterLog_Backend
             this.resolveurl = resolveurl;
             this.severity = severity;
             this.totalcost = totalcost;
-        }
+        }    
     }
 }

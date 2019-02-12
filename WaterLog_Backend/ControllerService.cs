@@ -24,6 +24,7 @@ namespace WaterLog_Backend
            segmentleaksController = new  ActionableEventsController(context,config,this);
            segmentsController = new SegmentsController(context,config);
         }
+
         public MonitorsController GetMonitorsController()
         {
             return monitorController;

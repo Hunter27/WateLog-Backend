@@ -94,7 +94,6 @@ namespace WaterLog_Backend.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("MonitorId");
-
                     b.ToTable("Reading");
                 });
 
@@ -112,7 +111,6 @@ namespace WaterLog_Backend.Migrations
 
                     b.HasIndex("Monitor2Id")
                         .IsUnique();
-
                     b.ToTable("Segment");
                 });
 
@@ -128,13 +126,11 @@ namespace WaterLog_Backend.Migrations
 
                     b.Property<double>("FlowOut");
 
-                    b.Property<int>("SegmentId");
+                    b.Property<int>("SegmentsId");
 
                     b.Property<DateTime>("TimeStamp");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("SegmentId");
 
                     b.ToTable("SegmentEvent");
                 });
@@ -153,26 +149,15 @@ namespace WaterLog_Backend.Migrations
                         .WithOne("Location")
                         .HasForeignKey("WaterLog_Backend.Models.Location", "MonitorId")
                         .OnDelete(DeleteBehavior.Cascade);
-                });
-
             modelBuilder.Entity("WaterLog_Backend.Models.Reading", b =>
-                {
                     b.HasOne("WaterLog_Backend.Models.Monitor", "Monitor")
                         .WithMany("Reading")
                         .HasForeignKey("MonitorId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
             modelBuilder.Entity("WaterLog_Backend.Models.Segment", b =>
-                {
                     b.HasOne("WaterLog_Backend.Models.Monitor", "Monitor")
                         .WithOne("Segment")
                         .HasForeignKey("WaterLog_Backend.Models.Segment", "Monitor2Id")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
             modelBuilder.Entity("WaterLog_Backend.Models.SegmentEvent", b =>
-                {
                     b.HasOne("WaterLog_Backend.Models.Segment", "Segment")
                         .WithMany("SegmentEvent")
                         .HasForeignKey("SegmentId")

@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 using WaterLog_Backend.Models;
 
 namespace WaterLog_Backend.Controllers
@@ -44,20 +45,20 @@ namespace WaterLog_Backend.Controllers
             {
                 return NotFound();
             }
-            Procedures procedures = new Procedures(_service);
-            return ("{total: " + procedures.calculateTotalCost(leaks) + ", perhour: " +procedures.calculatePerHourCost(leaks) + "}");
+            Procedures procedures = new Procedures(_db, _config);
+            return (JsonConvert.SerializeObject((procedures.calculateTotalCost(leaks), procedures.calculatePerHourCost(leaks))));
         }
 
         [Route("litres/{id}")]
         public async Task<ActionResult<string>> GetLitres(int id)
         {
             ActionableEvent leaks = await _db.ActionableEvent.FindAsync(id);
-            if(leaks == null)
+            if (leaks == null)
             {
                 return NotFound();
             }
-            Procedures procedures = new Procedures(_service);
-            return ("{total: " + procedures.calculateTotaLitres(leaks) + ", perhour: " + procedures.calculateLitresPerHour(leaks) + "}");
+            Procedures procedures = new Procedures(_db, _config);
+            return (JsonConvert.SerializeObject((procedures.calculateTotaLitres(leaks), procedures.calculateLitresPerHour(leaks))));
         }
 
         //Resolve Leakage
@@ -65,37 +66,33 @@ namespace WaterLog_Backend.Controllers
         public async Task<ActionResult<ActionableEvent>> Resolve([FromForm] int id)
         {
             var leaks = await _db.ActionableEvent.FindAsync(id);
-            if(leaks == null)
+            if (leaks == null)
             {
                 return NotFound();
             }
             leaks.Status = "resolved";
             await _db.SaveChangesAsync();
             return leaks;
-
         }
         // GET api/values/5
         [HttpGet("{id}")]
         public async Task<ActionResult<ActionableEvent>> Get(int id)
         {
             var leaks = await _db.ActionableEvent.FindAsync(id);
-            
-            if(leaks == null)
+
+            if (leaks == null)
             {
                 return NotFound();
             }
-
             return leaks;
         }
-       
+
         // POST api/values
         [HttpPost]
         public async Task Post([FromBody] ActionableEvent value)
         {
             await _db.ActionableEvent.AddAsync(value);
             await _db.SaveChangesAsync();
-
-            ;
         }
 
         // PUT api/values/5
@@ -103,7 +100,7 @@ namespace WaterLog_Backend.Controllers
         public async Task Put(int id, [FromBody] ActionableEvent value)
         {
             var entry = await _db.ActionableEvent.FindAsync(id);
-            entry = value;
+            _db.Entry(old).CurrentValues.SetValues(value);
             await _db.SaveChangesAsync();
         }
 
@@ -117,16 +114,19 @@ namespace WaterLog_Backend.Controllers
         }
 
         [HttpPatch("{id}")]
+            await _db.SaveChangesAsync();
+        }
+
+        [HttpPatch("{id}")]
         public async Task Patch([FromBody] ActionableEvent value)
         {
             var entry = _db.ActionableEvent.FirstOrDefault(segL => segL.Id == value.Id);
 
-            if(entry != null)
+            if (entry != null)
             {
                 entry.LatestTimeStamp = value.LatestTimeStamp;
-               await _db.SaveChangesAsync();
+                await _db.SaveChangesAsync();
             }
-            
         }
     }
 }

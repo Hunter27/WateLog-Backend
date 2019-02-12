@@ -54,6 +54,5 @@ namespace WaterLog_Backend.Models
                 .WithMany(b => b.ActionableEvent)
                 .HasForeignKey(c => c.SegmentId);
         }
-        
     }
 }

@@ -10,10 +10,9 @@ namespace WaterLog_Backend.Models
     {
         public int Id { get; set; }
         public double Value { get; set; }
-        public DateTime TimesStamp { get; set; }
+        public DateTime TimesStamp { get; set; } 
         public int MonitorId { get; set; }
         public virtual Monitor Monitor { get; set; }
-
 
     }
 }
