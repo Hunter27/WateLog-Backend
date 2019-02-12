@@ -33,6 +33,7 @@ namespace WaterLog_Backend.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Reading>>> Get()
         {
+            return await _db.Reading.ToListAsync();
         }
 
         // GET api/values/5
@@ -57,7 +58,7 @@ namespace WaterLog_Backend.Controllers
         [HttpPut("{id}")]
         public async Task Put(int id, [FromBody] Reading value)
         {
-            var old = await _db.Readings.FindAsync(id);
+            var old = await _db.Reading.FindAsync(id);
             _db.Entry(old).CurrentValues.SetValues(value);
             await _db.SaveChangesAsync();
         }

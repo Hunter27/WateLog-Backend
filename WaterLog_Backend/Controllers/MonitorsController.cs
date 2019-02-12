@@ -51,7 +51,7 @@ namespace WaterLog_Backend.Controllers
         [HttpPut("{id}")]
         public async Task Put(int id, [FromBody] Monitor value)
         {
-            var old = await _db.Monitors.FindAsync(id);
+            var old = await _db.Monitor.FindAsync(id);
             _db.Entry(old).CurrentValues.SetValues(value);
             await _db.SaveChangesAsync();
         }

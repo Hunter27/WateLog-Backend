@@ -99,7 +99,7 @@ namespace WaterLog_Backend.Controllers
         [HttpPut("{id}")]
         public async Task Put(int id, [FromBody] ActionableEvent value)
         {
-            var entry = await _db.ActionableEvent.FindAsync(id);
+            var old = await _db.ActionableEvent.FindAsync(id);
             _db.Entry(old).CurrentValues.SetValues(value);
             await _db.SaveChangesAsync();
         }
@@ -110,10 +110,6 @@ namespace WaterLog_Backend.Controllers
         {
             var entry = await _db.ActionableEvent.FindAsync(id);
             _db.ActionableEvent.Remove(entry);
-            await _db.SaveChangesAsync();
-        }
-
-        [HttpPatch("{id}")]
             await _db.SaveChangesAsync();
         }
 

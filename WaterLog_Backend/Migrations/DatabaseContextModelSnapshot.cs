@@ -13,7 +13,6 @@ namespace WaterLog_Backend.Migrations
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
-#pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "2.2.1-servicing-10028")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
@@ -144,26 +143,36 @@ namespace WaterLog_Backend.Migrations
                 });
 
             modelBuilder.Entity("WaterLog_Backend.Models.Location", b =>
-                {
-                    b.HasOne("WaterLog_Backend.Models.Monitor", "Monitor")
-                        .WithOne("Location")
-                        .HasForeignKey("WaterLog_Backend.Models.Location", "MonitorId")
-                        .OnDelete(DeleteBehavior.Cascade);
+            {
+                b.HasOne("WaterLog_Backend.Models.Monitor", "Monitor")
+                    .WithOne("Location")
+                    .HasForeignKey("WaterLog_Backend.Models.Location", "MonitorId")
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
             modelBuilder.Entity("WaterLog_Backend.Models.Reading", b =>
-                    b.HasOne("WaterLog_Backend.Models.Monitor", "Monitor")
-                        .WithMany("Reading")
-                        .HasForeignKey("MonitorId")
+            {
+                b.HasOne("WaterLog_Backend.Models.Monitor", "Monitor")
+                    .WithMany("Reading")
+                    .HasForeignKey("MonitorId")
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
             modelBuilder.Entity("WaterLog_Backend.Models.Segment", b =>
-                    b.HasOne("WaterLog_Backend.Models.Monitor", "Monitor")
-                        .WithOne("Segment")
-                        .HasForeignKey("WaterLog_Backend.Models.Segment", "Monitor2Id")
+            {
+                b.HasOne("WaterLog_Backend.Models.Monitor", "Monitor")
+                    .WithOne("Segment")
+                    .HasForeignKey("WaterLog_Backend.Models.Segment", "Monitor2Id")
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
             modelBuilder.Entity("WaterLog_Backend.Models.SegmentEvent", b =>
-                    b.HasOne("WaterLog_Backend.Models.Segment", "Segment")
-                        .WithMany("SegmentEvent")
-                        .HasForeignKey("SegmentId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-#pragma warning restore 612, 618
+            {
+                b.HasOne("WaterLog_Backend.Models.Segment", "Segment")
+                    .WithMany("SegmentEvent")
+                    .HasForeignKey("SegmentId")
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
         }
     }
 }
