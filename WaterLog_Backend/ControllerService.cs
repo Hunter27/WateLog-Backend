@@ -13,7 +13,7 @@ namespace WaterLog_Backend
         private MonitorsController monitorController;
         private ReadingsController readingsController;
         private SegmentEventsController segmenteventsController;
-        private SegmentLeaksController segmentleaksController;
+        private ActionableEventsController segmentleaksController;
         private SegmentsController segmentsController;
 
         public ControllerService(DatabaseContext context, IConfiguration config)
@@ -21,7 +21,7 @@ namespace WaterLog_Backend
            monitorController = new MonitorsController(context,config);
            readingsController = new ReadingsController(context, config,this);
            segmenteventsController = new SegmentEventsController(context,config);
-           segmentleaksController = new  SegmentLeaksController(context,config,this);
+           segmentleaksController = new  ActionableEventsController(context,config,this);
            segmentsController = new SegmentsController(context,config);
         }
         public MonitorsController GetMonitorsController()
@@ -39,7 +39,7 @@ namespace WaterLog_Backend
             return segmenteventsController;
         }
 
-        public SegmentLeaksController GetSegmentLeaksController()
+        public ActionableEventsController GetSegmentLeaksController()
         {
             return segmentleaksController;
         }
@@ -55,7 +55,7 @@ namespace WaterLog_Backend
         MonitorsController GetMonitorsController();
         ReadingsController GetReadingsController();
         SegmentEventsController GetSegmentEventsController();
-        SegmentLeaksController GetSegmentLeaksController();
+        ActionableEventsController GetSegmentLeaksController();
         SegmentsController GetSegmentsController();
     }
 }

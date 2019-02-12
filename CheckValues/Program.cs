@@ -6,7 +6,7 @@ namespace CheckValues
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+           //Reserved project for future usage
         }
     }
 }

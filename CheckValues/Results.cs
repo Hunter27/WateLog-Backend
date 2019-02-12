@@ -24,10 +24,9 @@ namespace CheckValues
             //string mySecret = config["Localhost:ConnectionString"];
 
             var optionsBuilder = new DbContextOptionsBuilder<DatabaseContext>();
-            optionsBuilder.UseSqlServer("Server = localhost; Database = waterlog; User Id = test; Password = test123");
+            optionsBuilder.UseSqlServer(config.GetSection("LocalConnectionString").Value);
             //optionsBuilder.UseSqlServer(mySecret);
             DatabaseContext _context = new DatabaseContext(optionsBuilder.Options);
-
             MonitorsController _controller = new MonitorsController(_context, config);
             return _controller;
 
@@ -38,34 +37,23 @@ namespace CheckValues
 
 
             MonitorsController _controller = getController();
-            Task<ActionResult<MonitorsEntry>> item = _controller.Get(1);
-            ActionResult<MonitorsEntry> item2 = item.Result;
-            MonitorsEntry item3 = item2.Value;
+            Task<ActionResult<Monitor>> item = _controller.Get(1);
+            ActionResult<Monitor> item2 = item.Result;
+            Monitor item3 = item2.Value;
             Console.WriteLine(item3.Id);
 
         }
         public int getLen()
         {
-
-            /*  MonitorsController _controller = getController();
-              Task<ActionResult<ICollection<MonitorsEntry>>> item = _controller.Get2();
-              ActionResult<ICollection<MonitorsEntry>> item2 = item.Result;
-              ICollection<MonitorsEntry> item3 = item2.Value;
-              return item3.Count;*/
             return 3;
-
-            ;
-
-
-
         }
 
         public int getFirstID()
         {
             MonitorsController _controller = getController();
-            Task<ActionResult<MonitorsEntry>> item = _controller.Get(1);
-            ActionResult<MonitorsEntry> item2 = item.Result;
-            MonitorsEntry item3 = item2.Value;
+            Task<ActionResult<Monitor>> item = _controller.Get(1);
+            ActionResult<Monitor> item2 = item.Result;
+            Monitor item3 = item2.Value;
             return item3.Id;
 
         }

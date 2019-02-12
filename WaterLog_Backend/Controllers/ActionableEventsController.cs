@@ -15,12 +15,12 @@ namespace WaterLog_Backend.Controllers
 
     [Route("api/[controller]")]
     [ApiController]
-    public class SegmentLeaksController : ControllerBase
+    public class ActionableEventsController : ControllerBase
     {
         private readonly DatabaseContext _db;
         readonly IConfiguration _config;
         private IControllerService _service;
-        public SegmentLeaksController(DatabaseContext context, IConfiguration config,IControllerService service)
+        public ActionableEventsController(DatabaseContext context, IConfiguration config,IControllerService service)
         {
             _db = context;
             _config = config;
@@ -29,17 +29,17 @@ namespace WaterLog_Backend.Controllers
 
         // GET api/values
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<SegmentLeaksEntry>>> Get()
+        public async Task<ActionResult<IEnumerable<ActionableEvent>>> Get()
         {
 
-            return await _db.SegmentLeaks.ToListAsync();
+            return await _db.ActionableEvent.ToListAsync();
         }
 
 
         [Route("costs/{id}")]
         public async Task<ActionResult<string>> GetCost(int id)
         {
-            SegmentLeaksEntry leaks = _db.SegmentLeaks.Find(id);
+            ActionableEvent leaks = await _db.ActionableEvent.FindAsync(id);
             if (leaks == null)
             {
                 return NotFound();
@@ -51,7 +51,7 @@ namespace WaterLog_Backend.Controllers
         [Route("litres/{id}")]
         public async Task<ActionResult<string>> GetLitres(int id)
         {
-            SegmentLeaksEntry leaks = _db.SegmentLeaks.Find(id);
+            ActionableEvent leaks = await _db.ActionableEvent.FindAsync(id);
             if(leaks == null)
             {
                 return NotFound();
@@ -62,23 +62,23 @@ namespace WaterLog_Backend.Controllers
 
         //Resolve Leakage
         [HttpPost("resolve")]
-        public async Task<ActionResult<SegmentLeaksEntry>> Resolve([FromForm] int id)
+        public async Task<ActionResult<ActionableEvent>> Resolve([FromForm] int id)
         {
-            var leaks = await _db.SegmentLeaks.FindAsync(id);
+            var leaks = await _db.ActionableEvent.FindAsync(id);
             if(leaks == null)
             {
                 return NotFound();
             }
-            leaks.ResolvedStatus = "resolved";
+            leaks.Status = "resolved";
             await _db.SaveChangesAsync();
             return leaks;
 
         }
         // GET api/values/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<SegmentLeaksEntry>> Get(int id)
+        public async Task<ActionResult<ActionableEvent>> Get(int id)
         {
-            var leaks = await _db.SegmentLeaks.FindAsync(id);
+            var leaks = await _db.ActionableEvent.FindAsync(id);
             
             if(leaks == null)
             {
@@ -90,9 +90,9 @@ namespace WaterLog_Backend.Controllers
        
         // POST api/values
         [HttpPost]
-        public async Task Post([FromBody] SegmentLeaksEntry value)
+        public async Task Post([FromBody] ActionableEvent value)
         {
-            await _db.SegmentLeaks.AddAsync(value);
+            await _db.ActionableEvent.AddAsync(value);
             await _db.SaveChangesAsync();
 
             ;
@@ -100,9 +100,9 @@ namespace WaterLog_Backend.Controllers
 
         // PUT api/values/5
         [HttpPut("{id}")]
-        public async Task Put(int id, [FromBody] SegmentLeaksEntry value)
+        public async Task Put(int id, [FromBody] ActionableEvent value)
         {
-            var entry = await _db.SegmentLeaks.FindAsync(id);
+            var entry = await _db.ActionableEvent.FindAsync(id);
             entry = value;
             await _db.SaveChangesAsync();
         }
@@ -111,15 +111,15 @@ namespace WaterLog_Backend.Controllers
         [HttpDelete("{id}")]
         public async Task Delete(int id)
         {
-            var entry = await _db.SegmentLeaks.FindAsync(id);
-            _db.SegmentLeaks.Remove(entry);
+            var entry = await _db.ActionableEvent.FindAsync(id);
+            _db.ActionableEvent.Remove(entry);
             await _db.SaveChangesAsync();
         }
 
         [HttpPatch("{id}")]
-        public async Task Patch([FromBody] SegmentLeaksEntry value)
+        public async Task Patch([FromBody] ActionableEvent value)
         {
-            var entry = _db.SegmentLeaks.FirstOrDefault(segL => segL.Id == value.Id);
+            var entry = _db.ActionableEvent.FirstOrDefault(segL => segL.Id == value.Id);
 
             if(entry != null)
             {

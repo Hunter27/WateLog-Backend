@@ -4,163 +4,180 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace WaterLog_Backend.Migrations
 {
-    public partial class Migration1 : Migration
+    public partial class Initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Locations",
-                columns: table => new
-                {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    Name = table.Column<string>(nullable: true),
-                    Long = table.Column<double>(nullable: false),
-                    Lat = table.Column<double>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Locations", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Monitors",
+                name: "Monitor",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     Type = table.Column<string>(nullable: true),
                     Max_flow = table.Column<double>(nullable: false),
-                    Long = table.Column<double>(nullable: false),
-                    Lat = table.Column<double>(nullable: false),
                     Status = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Monitors", x => x.Id);
+                    table.PrimaryKey("PK_Monitor", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Segments",
-                columns: table => new
-                {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Segments", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Readings",
+                name: "Location",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    SenseID = table.Column<int>(nullable: false),
-                    Value = table.Column<double>(nullable: false),
-                    TimesStamp = table.Column<DateTime>(nullable: false)
+                    Long = table.Column<double>(nullable: false),
+                    Lat = table.Column<double>(nullable: false),
+                    MonitorId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Readings", x => x.Id);
+                    table.PrimaryKey("PK_Location", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Readings_Monitors_SenseID",
-                        column: x => x.SenseID,
-                        principalTable: "Monitors",
+                        name: "FK_Location_Monitor_MonitorId",
+                        column: x => x.MonitorId,
+                        principalTable: "Monitor",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "LocationSegments",
+                name: "Reading",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    LocationId = table.Column<int>(nullable: false),
+                    Value = table.Column<double>(nullable: false),
+                    TimesStamp = table.Column<DateTime>(nullable: false),
+                    MonitorId = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Reading", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Reading_Monitor_MonitorId",
+                        column: x => x.MonitorId,
+                        principalTable: "Monitor",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Segment",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    Monitor1Id = table.Column<int>(nullable: false),
+                    Monitor2Id = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Segment", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Segment_Monitor_Monitor2Id",
+                        column: x => x.Monitor2Id,
+                        principalTable: "Monitor",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ActionableEvent",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    Severity = table.Column<string>(nullable: true),
+                    OriginalTimeStamp = table.Column<DateTime>(nullable: false),
+                    LatestTimeStamp = table.Column<DateTime>(nullable: false),
+                    Status = table.Column<string>(nullable: true),
                     SegmentId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_LocationSegments", x => x.Id);
+                    table.PrimaryKey("PK_ActionableEvent", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_LocationSegments_Locations_LocationId",
-                        column: x => x.LocationId,
-                        principalTable: "Locations",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_LocationSegments_Segments_SegmentId",
+                        name: "FK_ActionableEvent_Segment_SegmentId",
                         column: x => x.SegmentId,
-                        principalTable: "Segments",
+                        principalTable: "Segment",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "SegmentEvents",
+                name: "SegmentEvent",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    SegmentId = table.Column<int>(nullable: false),
                     EventType = table.Column<string>(nullable: true),
                     TimeStamp = table.Column<DateTime>(nullable: false),
-                    Value = table.Column<double>(nullable: false)
+                    FlowIn = table.Column<double>(nullable: false),
+                    FlowOut = table.Column<double>(nullable: false),
+                    SegmentId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_SegmentEvents", x => x.Id);
+                    table.PrimaryKey("PK_SegmentEvent", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_SegmentEvents_Segments_SegmentId",
+                        name: "FK_SegmentEvent_Segment_SegmentId",
                         column: x => x.SegmentId,
-                        principalTable: "Segments",
+                        principalTable: "Segment",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_LocationSegments_LocationId",
-                table: "LocationSegments",
-                column: "LocationId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_LocationSegments_SegmentId",
-                table: "LocationSegments",
+                name: "IX_ActionableEvent_SegmentId",
+                table: "ActionableEvent",
                 column: "SegmentId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Readings_SenseID",
-                table: "Readings",
-                column: "SenseID");
+                name: "IX_Location_MonitorId",
+                table: "Location",
+                column: "MonitorId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_SegmentEvents_SegmentId",
-                table: "SegmentEvents",
+                name: "IX_Reading_MonitorId",
+                table: "Reading",
+                column: "MonitorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Segment_Monitor2Id",
+                table: "Segment",
+                column: "Monitor2Id",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SegmentEvent_SegmentId",
+                table: "SegmentEvent",
                 column: "SegmentId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "LocationSegments");
+                name: "ActionableEvent");
 
             migrationBuilder.DropTable(
-                name: "Readings");
+                name: "Location");
 
             migrationBuilder.DropTable(
-                name: "SegmentEvents");
+                name: "Reading");
 
             migrationBuilder.DropTable(
-                name: "Locations");
+                name: "SegmentEvent");
 
             migrationBuilder.DropTable(
-                name: "Monitors");
+                name: "Segment");
 
             migrationBuilder.DropTable(
-                name: "Segments");
+                name: "Monitor");
         }
     }
 }

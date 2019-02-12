@@ -7,9 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WaterLog_Backend", "WaterLo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnitTesting", "UnitTesting\UnitTesting.csproj", "{C691194C-8470-4B1F-8176-A75E90683BDC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CheckValues", "CheckValues\CheckValues.csproj", "{2B58AF73-69A3-41F3-A2AB-DE2D92BB1FC4}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmailNotifications", "EmailNotifications\EmailNotifications.csproj", "{5FA464E4-A742-4B2B-9FE5-6E8FC042A53F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CheckValues", "CheckValues\CheckValues.csproj", "{2B58AF73-69A3-41F3-A2AB-DE2D92BB1FC4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,10 +27,6 @@ Global
 		{2B58AF73-69A3-41F3-A2AB-DE2D92BB1FC4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2B58AF73-69A3-41F3-A2AB-DE2D92BB1FC4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2B58AF73-69A3-41F3-A2AB-DE2D92BB1FC4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5FA464E4-A742-4B2B-9FE5-6E8FC042A53F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5FA464E4-A742-4B2B-9FE5-6E8FC042A53F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5FA464E4-A742-4B2B-9FE5-6E8FC042A53F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5FA464E4-A742-4B2B-9FE5-6E8FC042A53F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

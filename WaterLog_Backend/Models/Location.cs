@@ -5,14 +5,15 @@ using System.Threading.Tasks;
 
 namespace WaterLog_Backend.Models
 {
-    public class MonitorsEntry
+    public class Location
     {
         public int Id { get; set; }
-        public string Type { get; set; }
-        public double Max_flow { get; set; }
+        
         public double Long { get; set; }
         public double Lat { get; set; }
-        public string Status { get; set; }
-       
+        public int MonitorId { get; set; }
+        public virtual Monitor Monitor { get; set; }
+
+
     }
 }

@@ -27,17 +27,17 @@ namespace WaterLog_Backend.Controllers
 
         // GET api/values
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<SegmentEventsEntry>>> Get()
+        public async Task<ActionResult<IEnumerable<SegmentEvent>>> Get()
         {
 
-            return await _db.SegmentEvents.ToListAsync();
+            return await _db.SegmentEvent.ToListAsync();
         }
 
         // GET api/values/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<SegmentEventsEntry>> Get(int id)
+        public async Task<ActionResult<SegmentEvent>> Get(int id)
         {
-            var segment = await _db.SegmentEvents.FindAsync(id);
+            var segment = await _db.SegmentEvent.FindAsync(id);
 
             if (segment == null)
             {
@@ -48,18 +48,18 @@ namespace WaterLog_Backend.Controllers
       
         // POST api/values
         [HttpPost]
-        public async Task Post([FromBody] SegmentEventsEntry value)
+        public async Task Post([FromBody] SegmentEvent value)
         {
-            await _db.SegmentEvents.AddAsync(value);
+            await _db.SegmentEvent.AddAsync(value);
             await _db.SaveChangesAsync();
 
         }
 
         // PUT api/values/5
         [HttpPut("{id}")]
-        public async Task Put(int id, [FromBody] SegmentEventsEntry value)
+        public async Task Put(int id, [FromBody] SegmentEvent value)
         {
-            var entry = await _db.SegmentEvents.FindAsync(id);
+            var entry = await _db.SegmentEvent.FindAsync(id);
             entry = value;
             await _db.SaveChangesAsync();
         }
@@ -68,8 +68,8 @@ namespace WaterLog_Backend.Controllers
         [HttpDelete("{id}")]
         public async Task Delete(int id)
         {
-            var entry = await _db.SegmentEvents.FindAsync(id);
-            _db.SegmentEvents.Remove(entry);
+            var entry = await _db.SegmentEvent.FindAsync(id);
+            _db.SegmentEvent.Remove(entry);
             await _db.SaveChangesAsync();
         }
     }

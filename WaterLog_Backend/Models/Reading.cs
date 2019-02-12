@@ -6,11 +6,13 @@ using System.Threading.Tasks;
 
 namespace WaterLog_Backend.Models
 {
-    public class SegmentsEntry
+    public class Reading
     {
         public int Id { get; set; }
-        public int SenseIDOut { get; set; }
-        public int SenseIDIn { get; set; }
+        public double Value { get; set; }
+        public DateTime TimesStamp { get; set; }
+        public int MonitorId { get; set; }
+        public virtual Monitor Monitor { get; set; }
 
 
     }

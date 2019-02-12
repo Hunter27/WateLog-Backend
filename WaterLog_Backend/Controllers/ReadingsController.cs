@@ -22,9 +22,6 @@ namespace WaterLog_Backend.Controllers
         readonly IConfiguration _config;
         private IControllerService _service;
         
-
-        
-
         public ReadingsController(DatabaseContext context, IConfiguration config,IControllerService service)
         {
             _db = context;
@@ -34,43 +31,39 @@ namespace WaterLog_Backend.Controllers
 
         // GET api/values
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ReadingsEntry>>> Get()
+        public async Task<ActionResult<IEnumerable<Reading>>> Get()
         {
-
-            return await _db.Readings.ToListAsync();
+            return await _db.Reading.ToListAsync();
         }
 
 
         // GET api/values/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<ReadingsEntry>> Get(int id)
+        public async Task<ActionResult<Reading>> Get(int id)
         {
-            return await _db.Readings.FindAsync(id);
+            return await _db.Reading.FindAsync(id);
         }
       
         // POST api/values
         [HttpPost]
-        public async Task Post([FromBody] ReadingsEntry value)
+        public async Task Post([FromBody] Reading value)
         {
            
             value.TimesStamp = DateTime.UtcNow;
-            await _db.Readings.AddAsync(value);
+            await _db.Reading.AddAsync(value);
             await _db.SaveChangesAsync();
 
             //Perform changes to SegmentEvents Table
             _service = new ControllerService(_db,_config);
             Procedures procedure = new Procedures(_service);
             await procedure.triggerInsert(value);
-
-
-            
         }
 
         // PUT api/values/5
         [HttpPut("{id}")]
-        public async Task Put(int id, [FromBody] ReadingsEntry value)
+        public async Task Put(int id, [FromBody] Reading value)
         {
-            var entry = await _db.Readings.FindAsync(id);
+            var entry = await _db.Reading.FindAsync(id);
             entry = value;
             await _db.SaveChangesAsync();
         }
@@ -79,8 +72,8 @@ namespace WaterLog_Backend.Controllers
         [HttpDelete("{id}")]
         public async Task Delete(int id)
         {
-            var entry = await _db.Readings.FindAsync(id);
-            _db.Readings.Remove(entry);
+            var entry = await _db.Reading.FindAsync(id);
+            _db.Reading.Remove(entry);
             await _db.SaveChangesAsync();
         }
     }

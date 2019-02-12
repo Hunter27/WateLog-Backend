@@ -19,26 +19,30 @@ namespace WaterLog_Backend.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("WaterLog_Backend.Models.LocationSegmentsEntry", b =>
+            modelBuilder.Entity("WaterLog_Backend.Models.ActionableEvent", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int>("LocationId");
+                    b.Property<DateTime>("LatestTimeStamp");
+
+                    b.Property<DateTime>("OriginalTimeStamp");
 
                     b.Property<int>("SegmentId");
 
-                    b.HasKey("Id");
+                    b.Property<string>("Severity");
 
-                    b.HasIndex("LocationId");
+                    b.Property<string>("Status");
+
+                    b.HasKey("Id");
 
                     b.HasIndex("SegmentId");
 
-                    b.ToTable("LocationSegments");
+                    b.ToTable("ActionableEvent");
                 });
 
-            modelBuilder.Entity("WaterLog_Backend.Models.LocationsEntry", b =>
+            modelBuilder.Entity("WaterLog_Backend.Models.Location", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -48,22 +52,21 @@ namespace WaterLog_Backend.Migrations
 
                     b.Property<double>("Long");
 
-                    b.Property<string>("Name");
+                    b.Property<int>("MonitorId");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Locations");
+                    b.HasIndex("MonitorId")
+                        .IsUnique();
+
+                    b.ToTable("Location");
                 });
 
-            modelBuilder.Entity("WaterLog_Backend.Models.MonitorsEntry", b =>
+            modelBuilder.Entity("WaterLog_Backend.Models.Monitor", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<double>("Lat");
-
-                    b.Property<double>("Long");
 
                     b.Property<double>("Max_flow");
 
@@ -73,16 +76,16 @@ namespace WaterLog_Backend.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Monitors");
+                    b.ToTable("Monitor");
                 });
 
-            modelBuilder.Entity("WaterLog_Backend.Models.ReadingsEntry", b =>
+            modelBuilder.Entity("WaterLog_Backend.Models.Reading", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int>("SenseID");
+                    b.Property<int>("MonitorId");
 
                     b.Property<DateTime>("TimesStamp");
 
@@ -90,12 +93,30 @@ namespace WaterLog_Backend.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("SenseID");
+                    b.HasIndex("MonitorId");
 
-                    b.ToTable("Readings");
+                    b.ToTable("Reading");
                 });
 
-            modelBuilder.Entity("WaterLog_Backend.Models.SegmentEventsEntry", b =>
+            modelBuilder.Entity("WaterLog_Backend.Models.Segment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("Monitor1Id");
+
+                    b.Property<int>("Monitor2Id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Monitor2Id")
+                        .IsUnique();
+
+                    b.ToTable("Segment");
+                });
+
+            modelBuilder.Entity("WaterLog_Backend.Models.SegmentEvent", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -115,80 +136,45 @@ namespace WaterLog_Backend.Migrations
 
                     b.HasIndex("SegmentId");
 
-                    b.ToTable("SegmentEvents");
+                    b.ToTable("SegmentEvent");
                 });
 
-            modelBuilder.Entity("WaterLog_Backend.Models.SegmentLeaksEntry", b =>
+            modelBuilder.Entity("WaterLog_Backend.Models.ActionableEvent", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<DateTime>("LatestTimeStamp");
-
-                    b.Property<DateTime>("OriginalTimeStamp");
-
-                    b.Property<string>("ResolvedStatus");
-
-                    b.Property<int>("SegmentId");
-
-                    b.Property<string>("Severity");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SegmentId");
-
-                    b.ToTable("SegmentLeaks");
-                });
-
-            modelBuilder.Entity("WaterLog_Backend.Models.SegmentsEntry", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("SenseIDIn");
-
-                    b.Property<int>("SenseIDOut");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Segments");
-                });
-
-            modelBuilder.Entity("WaterLog_Backend.Models.LocationSegmentsEntry", b =>
-                {
-                    b.HasOne("WaterLog_Backend.Models.LocationsEntry", "LocationsEntry")
-                        .WithMany()
-                        .HasForeignKey("LocationId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("WaterLog_Backend.Models.SegmentsEntry", "segmentsEntry")
-                        .WithMany()
+                    b.HasOne("WaterLog_Backend.Models.Segment", "Segment")
+                        .WithMany("ActionableEvent")
                         .HasForeignKey("SegmentId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("WaterLog_Backend.Models.ReadingsEntry", b =>
+            modelBuilder.Entity("WaterLog_Backend.Models.Location", b =>
                 {
-                    b.HasOne("WaterLog_Backend.Models.MonitorsEntry", "MonitorsEntry")
-                        .WithMany()
-                        .HasForeignKey("SenseID")
+                    b.HasOne("WaterLog_Backend.Models.Monitor", "Monitor")
+                        .WithOne("Location")
+                        .HasForeignKey("WaterLog_Backend.Models.Location", "MonitorId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("WaterLog_Backend.Models.SegmentEventsEntry", b =>
+            modelBuilder.Entity("WaterLog_Backend.Models.Reading", b =>
                 {
-                    b.HasOne("WaterLog_Backend.Models.SegmentsEntry", "SegmentsEntry")
-                        .WithMany()
-                        .HasForeignKey("SegmentId")
+                    b.HasOne("WaterLog_Backend.Models.Monitor", "Monitor")
+                        .WithMany("Reading")
+                        .HasForeignKey("MonitorId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("WaterLog_Backend.Models.SegmentLeaksEntry", b =>
+            modelBuilder.Entity("WaterLog_Backend.Models.Segment", b =>
                 {
-                    b.HasOne("WaterLog_Backend.Models.SegmentsEntry", "SegmentsEntry")
-                        .WithMany()
+                    b.HasOne("WaterLog_Backend.Models.Monitor", "Monitor")
+                        .WithOne("Segment")
+                        .HasForeignKey("WaterLog_Backend.Models.Segment", "Monitor2Id")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("WaterLog_Backend.Models.SegmentEvent", b =>
+                {
+                    b.HasOne("WaterLog_Backend.Models.Segment", "Segment")
+                        .WithMany("SegmentEvent")
                         .HasForeignKey("SegmentId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });

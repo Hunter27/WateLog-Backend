@@ -27,32 +27,25 @@ namespace WaterLog_Backend.Controllers
 
         // GET api/values
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<SegmentsEntry>>> Get()
+        public async Task<ActionResult<IEnumerable<Segment>>> Get()
         {
             
-            return await _db.Segments.ToListAsync();
+            return await _db.Segment.ToListAsync();
         }
 
 
         // GET api/values/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<SegmentsEntry>> Get(int id)
+        public async Task<ActionResult<Segment>> Get(int id)
         {
-            return await _db.Segments.FindAsync(id);
+            return await _db.Segment.FindAsync(id);
         }
-/*
-        [HttpGet]
-        public async Task<ActionResult<ICollection<MonitorsEntry>>> Get2()
-        {
-
-            return await _db.Monitors.ToListAsync();
-        }
-        */
+        
         // POST api/values
         [HttpPost]
-        public async Task Post([FromBody] SegmentsEntry value)
+        public async Task Post([FromBody] Segment value)
         {
-            await _db.Segments.AddAsync(value);
+            await _db.Segment.AddAsync(value);
             await _db.SaveChangesAsync();
             
             ;
@@ -60,9 +53,9 @@ namespace WaterLog_Backend.Controllers
 
         // PUT api/values/5
         [HttpPut("{id}")]
-        public async Task Put(int id, [FromBody] SegmentsEntry value)
+        public async Task Put(int id, [FromBody] Segment value)
         {
-            var entry = await _db.Segments.FindAsync(id);
+            var entry = await _db.Segment.FindAsync(id);
             entry = value;
             await _db.SaveChangesAsync();
         }
@@ -71,8 +64,8 @@ namespace WaterLog_Backend.Controllers
         [HttpDelete("{id}")]
         public async Task Delete(int id)
         {
-            var entry = await _db.Segments.FindAsync(id);
-            _db.Segments.Remove(entry);
+            var entry = await _db.Segment.FindAsync(id);
+            _db.Segment.Remove(entry);
             await _db.SaveChangesAsync();
         }
     }

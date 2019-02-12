@@ -2,7 +2,7 @@
 
 namespace WaterLog_Backend.Migrations
 {
-    public partial class Initial : Migration
+    public partial class Migration1 : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
