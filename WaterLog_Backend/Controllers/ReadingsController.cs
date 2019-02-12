@@ -58,8 +58,8 @@ namespace WaterLog_Backend.Controllers
         [HttpPut("{id}")]
         public async Task Put(int id, [FromBody] ReadingsEntry value)
         {
-            var entry = await _db.Readings.FindAsync(id);
-            entry = value;
+            var old = await _db.Readings.FindAsync(id);
+            _db.Entry(old).CurrentValues.SetValues(value);
             await _db.SaveChangesAsync();
         }
 
