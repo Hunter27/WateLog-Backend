@@ -45,7 +45,40 @@ namespace Tests
         [Test]
         public void TestCalculateSeasonallyWastage()
         {
-            
+            var build = new ConfigurationBuilder();
+            IConfiguration _config = build.Build();
+            var expected = GetTestExpectedSummer();
+            var dataset = GetTestDataSummer();
+            var empty = new List<SegmentEventsEntry>();
+            Procedures proc = new Procedures(new DatabaseContext(), _config);
+            Assert.IsTrue(expected.Equals((proc.CalculateSeasonallyWastage(dataset,empty,empty,empty))[0]));
+        }
+
+        private List<SegmentEventsEntry> GetTestDataSummer()
+        {
+            List<SegmentEventsEntry> lst = new List<SegmentEventsEntry>();
+            lst.Add(GetSegmentObject("leak", 120, 0, 1, "2/12/2019 12:04:00 PM"));
+            lst.Add(GetSegmentObject("leak", 240, 120, 1, "1 / 1 / 2019 12:10:15 PM"));
+            lst.Add(GetSegmentObject("leak", 120, 0, 2, "1/1/2019 12:20:0 PM"));
+            lst.Add(GetSegmentObject("leak", 240, 120, 2, "1/1/2019 12:50:15 PM"));
+            lst.Add(GetSegmentObject("leak", 600, 300, 1, "1/1/2019 13:10:15 PM"));
+            lst.Add(GetSegmentObject("leak", 120, 60, 3, "1/1/2019 13:20:00 PM"));
+            lst.Add(GetSegmentObject("leak", 240, 0, 1, "1/1/2019 13:40:00 PM"));
+            lst.Add(GetSegmentObject("leak", 60, 0, 3, "1/1/2019 14:05:15 PM"));
+            lst.Add(GetSegmentObject("leak", 60, 0, 1, "1/1/2019 14:10:15 PM"));
+            lst.Add(GetSegmentObject("leak", 120, 0, 1, "1/1/2019 14:55:15 PM"));
+
+            return lst;
+        }
+
+        private DataPoints<DateTime, double> GetTestExpectedSummer()
+        {
+            //Build data
+            DataPoints<DateTime, double> list = new DataPoints<DateTime, double>();
+            list.AddPoint((Convert.ToDateTime("2/12/2019 12:04:00 PM")), 2.0);
+            list.AddPoint((Convert.ToDateTime("1/1/2019 12:10:15 PM")), 20.0);
+
+            return list;
         }
 
         public DataPoints<DateTime, double> GetTestExpectedMonthly()
