@@ -5,6 +5,7 @@ namespace Tests
 {
     public class Tests
     {
+        
         [Test]
         public void FirstIdMonitor()
         {
