@@ -204,14 +204,14 @@ namespace WaterLog_Backend
         }
 
         //Calculates the data points of the wastage based on period
-        public DataPoints<DateTime,double>[] CalculatePeriodWastage(Period timeframe)
+        public async Task<DataPoints<DateTime, double>[]> CalculatePeriodWastageAsync(Period timeframe)
         {
             switch (timeframe)
             {
                 case Period.Daily:
-                    return CalculateDailyWastage(_db.SegmentEvents.Where(a => a.EventType == "leak" && a.TimeStamp.Month == DateTime.Now.Month && a.TimeStamp.Day == DateTime.Now.Day && a.TimeStamp.Year == DateTime.Now.Year).GroupBy(b => b.TimeStamp.Hour).ToList());
+                    return CalculateDailyWastage(await _db.SegmentEvents.Where(a => a.EventType == "leak" && a.TimeStamp.Month == DateTime.Now.Month && a.TimeStamp.Day == DateTime.Now.Day && a.TimeStamp.Year == DateTime.Now.Year).GroupBy(b => b.TimeStamp.Hour).ToListAsync());
                 case Period.Monthly:
-                    return (CalculateMonthlyWastage(_db.SegmentEvents.Where(a => a.EventType == "leak" && a.TimeStamp.Month == DateTime.Now.Month && a.TimeStamp.Day == DateTime.Now.Day && a.TimeStamp.Year == DateTime.Now.Year).GroupBy(b => b.TimeStamp.Day).ToList()));
+                    return (CalculateMonthlyWastage(await _db.SegmentEvents.Where(a => a.EventType == "leak").GroupBy(b => b.TimeStamp.Day).ToListAsync()));
                 case Period.Seasonally:
                     DateTime summerBegin = new DateTime(0, 12, 1);
                     DateTime summerEnd = new DateTime(0, 2, 28);
@@ -221,7 +221,7 @@ namespace WaterLog_Backend
                     DateTime autumnEnd = new DateTime(0, 5, 31);
                     DateTime springBegin = new DateTime(0, 9, 1);
                     DateTime springEnd = new DateTime(0, 11, 30);
-                    return CalculateSeasonallyWastage(_db.SegmentEvents.Where(a => a.EventType == "leak" && a.TimeStamp.Month >= summerBegin.Month && a.TimeStamp.Day >= summerBegin.Day && a.TimeStamp.Month <= summerEnd.Month && a.TimeStamp.Day <= summerEnd.Day).ToList(), _db.SegmentEvents.Where(a => a.EventType == "leak" && a.TimeStamp.Month >= winterBegin.Month && a.TimeStamp.Day >= winterBegin.Day && a.TimeStamp.Month <= winterEnd.Month && a.TimeStamp.Day <= winterEnd.Day).ToList(), _db.SegmentEvents.Where(a => a.EventType == "leak" && a.TimeStamp.Month >= autumnBegin.Month && a.TimeStamp.Day >= autumnBegin.Day && a.TimeStamp.Month <= autumnEnd.Month && a.TimeStamp.Day <= autumnEnd.Day).ToList(), _db.SegmentEvents.Where(a => a.EventType == "leak" && a.TimeStamp.Month >= springBegin.Month && a.TimeStamp.Day >= springBegin.Day && a.TimeStamp.Month <= springEnd.Month && a.TimeStamp.Day <= springEnd.Day).ToList());
+                    return CalculateSeasonallyWastage(await _db.SegmentEvents.Where(a => a.EventType == "leak" && a.TimeStamp.Month >= summerBegin.Month && a.TimeStamp.Day >= summerBegin.Day && a.TimeStamp.Month <= summerEnd.Month && a.TimeStamp.Day <= summerEnd.Day).ToListAsync(), _db.SegmentEvents.Where(a => a.EventType == "leak" && a.TimeStamp.Month >= winterBegin.Month && a.TimeStamp.Day >= winterBegin.Day && a.TimeStamp.Month <= winterEnd.Month && a.TimeStamp.Day <= winterEnd.Day).ToList(), _db.SegmentEvents.Where(a => a.EventType == "leak" && a.TimeStamp.Month >= autumnBegin.Month && a.TimeStamp.Day >= autumnBegin.Day && a.TimeStamp.Month <= autumnEnd.Month && a.TimeStamp.Day <= autumnEnd.Day).ToList(), _db.SegmentEvents.Where(a => a.EventType == "leak" && a.TimeStamp.Month >= springBegin.Month && a.TimeStamp.Day >= springBegin.Day && a.TimeStamp.Month <= springEnd.Month && a.TimeStamp.Day <= springEnd.Day).ToList());
                 default:
                     return null;
             }
