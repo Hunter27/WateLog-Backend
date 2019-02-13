@@ -23,35 +23,7 @@ namespace UnitTesting
     {
         private readonly HttpClient _client;
         private readonly DatabaseContext _context;
-        /*
-        IControllerService _service;
-        SegmentLeaksController _controller;
-        public SpecificLeaksEventsTest() {
-
-            _service = new 
-        }*/
-
-        /*public SpecificLeaksEventsTest()
-        {
-            // Set up server configuration
-            var configuration = new ConfigurationBuilder()
-            // Indicate the path for our source code
-            .SetBasePath(Directory.GetCurrentDirectory())
-            .Build();
-            // Create builder
-            var builder = new WebHostBuilder()
-            // Set test environment
-            .UseEnvironment("Testing")
-            .UseStartup<Startup>()
-            .UseConfiguration(configuration);
-            // Create test server
-            var server = new TestServer(builder);
-            // Create database context
-            this._context = server.Host.Services.GetService(typeof(DatabaseContext)) as DatabaseContext;
-            // Create client to query server endpoints
-            this._client = server.CreateClient();
-        }*/
-
+       
         private IQueryable<SegmentLeaksEntry> mockData = new List<SegmentLeaksEntry>
         {
             new SegmentLeaksEntry
@@ -74,14 +46,8 @@ namespace UnitTesting
             var mockContext = new Mock<DatabaseContext>();
             mockContext.Setup(s => s.SegmentLeaks).Returns(mockSet.Object);
             var LeaksController = new SegmentLeaksController(mockContext.Object, null, null);
-
-            int before = mockContext.Invocations.Count;
             var SegmentHistory = LeaksController.GetSegmentHistory(id);
-            int after = mockContext.Invocations.Count;
-            int insideFunction = 1;
-            Assert.AreEqual(before, after - insideFunction);
-
-            //mockContext.Verify(x => x.SegmentLeaks, Times.Once);
+            mockContext.Verify(x => x.SegmentLeaks, Times.Once);
         }
     }
 }
