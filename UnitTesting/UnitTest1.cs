@@ -24,7 +24,7 @@ namespace Tests
             DateTime start = new DateTime(2019, 02, 12);
             DateTime second = new DateTime(2019, 02, 13);
             DateTime end = new DateTime(2019, 02, 15);
-            var arr = f.generateUnixEpochFromDatetime(start, end, second.Subtract(start));
+            var arr = f.generateUnixEpochFromDatetime(start, end, 4);
 
             Assert.AreEqual(4, arr.Count);
         }

@@ -211,7 +211,7 @@ namespace WaterLog_Backend
                 case Period.Daily:
                     return CalculateDailyWastage(await _db.SegmentEvents.Where(a => a.EventType == "leak" && a.TimeStamp.Month == DateTime.Now.Month && a.TimeStamp.Day == DateTime.Now.Day && a.TimeStamp.Year == DateTime.Now.Year).GroupBy(b => b.TimeStamp.Hour).ToListAsync());
                 case Period.Monthly:
-                    return (CalculateMonthlyWastage(await _db.SegmentEvents.Where(a => a.EventType == "leak").GroupBy(b => b.TimeStamp.Day).ToListAsync()));
+                    return (CalculateMonthlyWastage(await _db.SegmentEvents.Where(a => a.EventType == "leak" && a.TimeStamp.Month == DateTime.Now.Month).GroupBy(b => b.TimeStamp.Day).ToListAsync()));
                 case Period.Seasonally:
                     DateTime summerBegin = new DateTime(0, 12, 1);
                     DateTime summerEnd = new DateTime(0, 2, 28);

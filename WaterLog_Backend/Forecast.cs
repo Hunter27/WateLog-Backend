@@ -15,7 +15,7 @@ namespace WaterLog_Backend
             
             double firstEpoch = new DateTimeOffset(first).ToUnixTimeSeconds();
             double lastEpoch = new DateTimeOffset(last).ToUnixTimeSeconds();
-            double epochDifference = (lastEpoch - firstEpoch)/(numberOfElements - 1);
+            double epochDifference = Math.Abs( (lastEpoch - firstEpoch))/(numberOfElements - 1);
             List<double> unixEpochDates = new List<double>();
 
             for(double i = firstEpoch; i <= lastEpoch; i = i + epochDifference)
