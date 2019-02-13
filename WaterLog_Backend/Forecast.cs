@@ -10,12 +10,12 @@ namespace WaterLog_Backend
 
         }
 
-        public List<Double> generateUnixEpochFromDatetime(DateTime first, DateTime last, TimeSpan difference)
+        public List<Double> generateUnixEpochFromDatetime(DateTime first, DateTime last, int numberOfElements)
         {
             
             double firstEpoch = new DateTimeOffset(first).ToUnixTimeSeconds();
             double lastEpoch = new DateTimeOffset(last).ToUnixTimeSeconds();
-            double epochDifference = difference.TotalSeconds;
+            double epochDifference = (lastEpoch - firstEpoch)/(numberOfElements - 1);
             List<double> unixEpochDates = new List<double>();
 
             for(double i = firstEpoch; i <= lastEpoch; i = i + epochDifference)
