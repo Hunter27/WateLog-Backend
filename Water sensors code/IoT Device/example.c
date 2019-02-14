@@ -16,6 +16,7 @@
 
 #include <common.h>
 #include <string.h>
+#include <math.h>
 
 #include <platform.h>
 #include <gsm.h>
@@ -104,30 +105,42 @@ static void modem_callback(void *cookie, const char* response, uint16_t len)
     dump_payload((uint8_t*)response, len);
 }
 
+int getFinalValue(int vals[]){
+	double value = pow(2,4)*vals[0]+pow(2,3)*vals[1]+pow(2,2)*vals[2]+2*vals[3]+1*vals[4];
+	return (int)value;
+}
+
 int main(void)
 {
     Platform_init();
-
-
-
     DEBUGOUT("initialising\n");
 
     Platform_GsmPinInit();
     Platform_GsmEnable();
-    gpio_pin_config_t gpioInConfig = { kGPIO_DigitalInput, 0 };
-    GPIO_PinInit(GPIOA, 18, &gpioInConfig);
-    GPIO_PinInit(GPIOA, 1, &gpioInConfig);
-    GPIO_PinInit(GPIOA, 2, &gpioInConfig);
-    GPIO_PinInit(GPIOA, 19, &gpioInConfig);
-    GPIO_PinInit(GPIOB, 0, &gpioInConfig);
-    uint32_t val = GPIO_ReadPinInput(GPIOA, 2);
-    uint32_t val2 = GPIO_ReadPinInput(GPIOA, 1);
-    uint32_t val3 = GPIO_ReadPinInput(GPIOA, 18);
-    uint32_t val4 = GPIO_ReadPinInput(GPIOA, 19);
-    uint32_t val5 = GPIO_ReadPinInput(GPIOB, 0);
-    DEBUGOUT("Value at pin 18 is");
-    DEBUGOUT(val);
 
+    gpio_pin_config_t gpioInConfig = { kGPIO_DigitalInput, 0 };
+    GPIO_PinInit(GPIOD, 7, &gpioInConfig);
+    GPIO_PinInit(GPIOD, 6, &gpioInConfig);
+    GPIO_PinInit(GPIOD, 5, &gpioInConfig);
+    GPIO_PinInit(GPIOD, 4, &gpioInConfig);
+    GPIO_PinInit(GPIOC, 2, &gpioInConfig);
+    int values[5];
+    values[0]= GPIO_ReadPinInput(GPIOD, 7);
+    values[1] = GPIO_ReadPinInput(GPIOD, 6);
+    values[2] = GPIO_ReadPinInput(GPIOD, 5);
+    values[3]= GPIO_ReadPinInput(GPIOD, 4);
+    values[4] = GPIO_ReadPinInput(GPIOC, 2);
+    DEBUGOUT("Value at pin 18 is");
+    int outV = getFinalValue(values);
+    char msg1[2];
+    sprintf(msg1, "%u", outV);
+    char a[] = "{\"Value\":\"xx\"}";
+    a[10]= msg1[0];
+    a[11]= msg1[1];
+
+
+
+//    DEBUGOUT(outS);
     Led_Background(100, 0, 100); /* magenta = waiting for gsm carrier */
 
     DEBUGOUT("creating Transport layers\n");
@@ -185,10 +198,10 @@ int main(void)
     DEBUGOUT("registering '%s'\n", topicName1);
     cr = Client_register(client, topicName1, &topic);
     ASSERT(cr == CLIENT_SUCCESS);
-    char* msg1 = "{\"Type\":\"Sensor\",\"Max_flow\":\"400\",\"Long\":\"21.345\",\"Lat\":\"22.345\",\"status\":\"Active\"}";
+    //char* msg1 = "{\"Type\":\"Sensor\",\"Max_flow\":\"400\",\"Long\":\"21.345\",\"Lat\":\"22.345\",\"status\":\"Active\"}";
     DEBUGOUT("publishing\n");
     cr = Client_publish(client, topic, MQTT_QOS1, false,
-                        (uint8_t*)msg1, strlen(msg1), NULL);
+                        (uint8_t*)a, strlen(a), NULL);
     ASSERT(cr == CLIENT_SUCCESS);
     uint32_t waitSeconds = 3 * 60;
     DEBUGOUT("waiting %d seconds\n", waitSeconds);
