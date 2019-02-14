@@ -54,6 +54,17 @@ namespace WaterLog_Backend.Controllers
                 await procedure.triggerInsert(value);
         }
 
+        [HttpPost("{value}")]
+        public async Task Post([FromBody] int value,int MonitorId)
+        {
+            ReadingsEntry reading = new ReadingsEntry();
+            reading.TimesStamp = DateTime.UtcNow;
+            reading.Value = value;
+            reading.MonitorsId = MonitorId;
+            await _db.Readings.AddAsync(reading);
+            await _db.SaveChangesAsync();
+        }
+
         // PUT api/values/5
         [HttpPut("{id}")]
         public async Task Put(int id, [FromBody] ReadingsEntry value)
