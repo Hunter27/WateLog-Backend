@@ -60,24 +60,26 @@ namespace WaterLog_Backend.Controllers
         }
 
         [Route("dailywastage")]
-        public Task<DataPoints<DateTime,double>> GetDailyWastageGraphData()
+        public async Task<DataPoints<DateTime,double>> GetDailyWastageGraphData()
         {
             Procedures proc = new Procedures(_db, _config);
-            return Task.Run(() => proc.CalculatePeriodWastageAsync(Procedures.Period.Daily).Result[0]);
+            var ret = await proc.CalculatePeriodWastageAsync(Procedures.Period.Daily);
+            return ret[0];
         }
 
         [Route("monthlywastage")]
-        public Task<DataPoints<DateTime, double>> GetMonthlyWastageGraphData()
+        public async Task<DataPoints<DateTime, double>> GetMonthlyWastageGraphData()
         {
             Procedures proc = new Procedures(_db, _config);
-            return Task.Run(() => proc.CalculatePeriodWastageAsync(Procedures.Period.Monthly).Result[0]);
+            var ret = await proc.CalculatePeriodWastageAsync(Procedures.Period.Monthly);
+            return ret[0];
         }
 
         [Route("seasonallywastage")]
-        public Task<DataPoints<DateTime, double>[]> GetSeasonallyWastageGraphData()
+        public async Task<DataPoints<DateTime, double>[]> GetSeasonallyWastageGraphData()
         {
             Procedures proc = new Procedures(_db, _config);
-            return proc.CalculatePeriodWastageAsync(Procedures.Period.Seasonally);
+            return await proc.CalculatePeriodWastageAsync(Procedures.Period.Seasonally);
         }
 
 
