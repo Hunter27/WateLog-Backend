@@ -8,8 +8,8 @@ using System.Threading.Tasks;
 using EmailNotifications;
 using WaterLog_Backend.Controllers;
 using WaterLog_Backend.Models;
+
 using WebApplication1;
-using NUnit.Framework;
 
 namespace WaterLog_Backend
 {
@@ -17,49 +17,66 @@ namespace WaterLog_Backend
     {
         DatabaseContext _db;
         IConfiguration _config;
-<<<<<<< HEAD
         public Procedures() {
 
         }
         public Procedures(DatabaseContext db,IConfiguration cfg)
-=======
-        public Procedures(DatabaseContext db, IConfiguration cfg)
->>>>>>> 5c9ae812b49773536478f4579e07ac3932fde59f
         {
             _db = db;
             _config = cfg;
         }
-        
+
         public async Task triggerInsert(ReadingsEntry value)
         {
-            SegmentsEntry segment = await _db.Segments.Where(ins => ins.SenseIDIn == value.MonitorsId).SingleOrDefaultAsync();
-            if (segment == null)
-            {
-              return;
-            }
-            
+            IEnumerable<SegmentsEntry> allSegments = _db.Segments;
             int segmentInid = -1;
             int segmentOutid = -1;
             int segmentid = -1;
-            
-            segmentInid = segment.SenseIDIn;
-            segmentOutid = segment.SenseIDOut;
-            segmentid = segment.Id;
-
-            ReadingsEntry reading1 = await _db.Readings.Where(r => r.MonitorsId == segmentInid).OrderByDescending(r => r.TimesStamp).FirstAsync();
-            ReadingsEntry reading2 = await _db.Readings.Where(re => re.MonitorsId == segmentOutid).OrderByDescending(re => re.TimesStamp).FirstAsync();
-
-            if (isLeakage(reading1.Value, reading2.Value))
+            foreach (SegmentsEntry seg in allSegments)
             {
-                await CreateSegmentsEventAsync(segmentid, "leak", reading1.Value, reading2.Value);
-                //Updateleakagestatus
-                if (await _db.SegmentLeaks.AnyAsync(leak => leak.SegmentsId == segmentid))
+                if (seg.SenseIDIn == value.MonitorsId)
                 {
-                    SegmentLeaksEntry latestEntry = await _db.SegmentLeaks.Where(leak => leak.SegmentsId == segmentid).OrderByDescending(lk => lk.LatestTimeStamp).FirstAsync();
+                    segmentInid = seg.SenseIDIn;
+                    segmentOutid = seg.SenseIDOut;
+                    segmentid = seg.Id;
+                    break;
+                }
+            }
+
+            IEnumerable<ReadingsEntry> allReadings = _db.Readings;
+            allReadings = allReadings.OrderByDescending(read => read.TimesStamp);
+            ReadingsEntry r1 = null, r2 = null;
+            Boolean found1 = false, found2 = false;
+            foreach (ReadingsEntry read in allReadings)
+            {
+                if (found1 && found2)
+                {
+                    break;
+                }
+                if (read.MonitorsId == segmentInid && found1 == false)
+                {
+                    r1 = read;
+                    found1 = true;
+                }
+                if (read.MonitorsId == segmentOutid && found2 == false)
+                {
+                    r2 = read;
+                    found2 = true;
+                }
+            }
+
+            if (isLeakage(r1.Value, r2.Value))
+            {
+                //Updateleakagestatus
+                IEnumerable<SegmentLeaksEntry> allLeaks = _db.SegmentLeaks;
+                if (allLeaks.Any(leak => leak.SegmentsId == segmentid))
+                {
+                    SegmentLeaksEntry latestEntry = allLeaks.Where(leak => leak.SegmentsId == segmentid).Last();
                     //Check in SegmentEntry if latest event related to entry has been resolved.
                     if (latestEntry != null)
                     {
-                        SegmentEventsEntry entry = (await _db.SegmentEvents.Where(leak => leak.SegmentsId == segmentid).OrderByDescending(lks => lks.TimeStamp).FirstAsync());
+                        IEnumerable<SegmentEventsEntry> allEvents = _db.SegmentEvents;
+                        SegmentEventsEntry entry = allEvents.Where(leak => leak.SegmentsId == segmentid).Last();
                         if (entry.EventType == "leak")
                         {
                             await updateSegmentLeaksAsync(latestEntry.Id, segmentid, latestEntry.OriginalTimeStamp, entry.TimeStamp, "unresolved");
@@ -71,18 +88,17 @@ namespace WaterLog_Backend
                     //Normal Add
                     await createSegmentLeaksAsync(segmentid, "unresolved");
                     string[] template = populateEmail(segmentid);
-                    Email email = new Email(template, _config);
+                    Email email = new Email(template,_config);
                     email.sendEmail();
                 }
             }
             else
             {
                 //Updatewithoutleakagestatus
-                await CreateSegmentsEventAsync(segmentid, "normal", reading1.Value, reading2.Value);
+                await updateSegmentsEventAsync(segmentid, "normal", r1.Value, r2.Value);
             }
         }
 
-<<<<<<< HEAD
         public string calculateSeverity(SegmentLeaksEntry entry)
         {
             
@@ -92,9 +108,6 @@ namespace WaterLog_Backend
         }
 
         public string calculateSeverityGivenValue(double value)
-=======
-        private string calculateSeverity(int segmentid)
->>>>>>> 5c9ae812b49773536478f4579e07ac3932fde59f
         {
             if (value >= 100)
             {
@@ -125,6 +138,7 @@ namespace WaterLog_Backend
 
         public async Task updateSegmentLeaksAsync(int leakId, int segId, DateTime original, DateTime updated, string resolvedStatus)
         {
+            //SegmentLeaksController controller = getSegmentLeaksController();
             SegmentLeaksEntry entry = new SegmentLeaksEntry();
             entry.SegmentsId = segId;
             entry.OriginalTimeStamp = original;
@@ -136,7 +150,7 @@ namespace WaterLog_Backend
             await _db.SaveChangesAsync();
         }
 
-        public async Task CreateSegmentsEventAsync(int id, string status, double inv, double outv)
+        public async Task updateSegmentsEventAsync(int id, string status, double inv, double outv)
         {
             SegmentEventsEntry entry = new SegmentEventsEntry();
             entry.TimeStamp = DateTime.UtcNow;
@@ -147,6 +161,7 @@ namespace WaterLog_Backend
             await _db.SegmentEvents.AddAsync(entry);
             await _db.SaveChangesAsync();
         }
+
 
         public Boolean isLeakage(double first, double second)
         {
@@ -168,6 +183,7 @@ namespace WaterLog_Backend
 
         private string getLeakPeriod(SegmentLeaksEntry leak)
         {
+
             if (((leak.LatestTimeStamp - leak.OriginalTimeStamp).TotalHours) < 1)
             {
                 return "1";
@@ -185,7 +201,7 @@ namespace WaterLog_Backend
             var timebetween = (leak.LatestTimeStamp - leak.OriginalTimeStamp).TotalHours;
             if (timebetween < 1)
             {
-                return calculatePerHourCost(leak) / 60;
+                return calculatePerHourCost(leak)/60;
             }
             else
             {
@@ -231,142 +247,6 @@ namespace WaterLog_Backend
             var list = _db.SegmentEvents;
             var entry = list.Where(inlist => inlist.SegmentsId == segmentId).Last();
             return entry.EventType;
-        }
-
-        //Calculates the data points of the wastage based on period
-        public DataPoints<DateTime,double>[] CalculatePeriodWastage(Period timeframe)
-        {
-            switch (timeframe)
-            {
-                case Period.Daily:
-                    return CalculateDailyWastage(_db.SegmentEvents.Where(a => a.EventType == "leak" && a.TimeStamp.Month == DateTime.Now.Month && a.TimeStamp.Day == DateTime.Now.Day && a.TimeStamp.Year == DateTime.Now.Year).GroupBy(b => b.TimeStamp.Hour).ToList());
-                case Period.Monthly:
-                    return (CalculateMonthlyWastage(_db.SegmentEvents.Where(a => a.EventType == "leak" && a.TimeStamp.Month == DateTime.Now.Month && a.TimeStamp.Day == DateTime.Now.Day && a.TimeStamp.Year == DateTime.Now.Year).GroupBy(b => b.TimeStamp.Day).ToList()));
-                case Period.Seasonally:
-                    DateTime summerBegin = new DateTime(0, 12, 1);
-                    DateTime summerEnd = new DateTime(0, 2, 28);
-                    DateTime winterBegin = new DateTime(0, 6, 1);
-                    DateTime winterEnd = new DateTime(0, 8, 31);
-                    DateTime autumnBegin = new DateTime(0, 3, 1);
-                    DateTime autumnEnd = new DateTime(0, 5, 31);
-                    DateTime springBegin = new DateTime(0, 9, 1);
-                    DateTime springEnd = new DateTime(0, 11, 30);
-                    return CalculateSeasonallyWastage(_db.SegmentEvents.Where(a => a.EventType == "leak" && a.TimeStamp.Month >= summerBegin.Month && a.TimeStamp.Day >= summerBegin.Day && a.TimeStamp.Month <= summerEnd.Month && a.TimeStamp.Day <= summerEnd.Day).ToList(), _db.SegmentEvents.Where(a => a.EventType == "leak" && a.TimeStamp.Month >= winterBegin.Month && a.TimeStamp.Day >= winterBegin.Day && a.TimeStamp.Month <= winterEnd.Month && a.TimeStamp.Day <= winterEnd.Day).ToList(), _db.SegmentEvents.Where(a => a.EventType == "leak" && a.TimeStamp.Month >= autumnBegin.Month && a.TimeStamp.Day >= autumnBegin.Day && a.TimeStamp.Month <= autumnEnd.Month && a.TimeStamp.Day <= autumnEnd.Day).ToList(), _db.SegmentEvents.Where(a => a.EventType == "leak" && a.TimeStamp.Month >= springBegin.Month && a.TimeStamp.Day >= springBegin.Day && a.TimeStamp.Month <= springEnd.Month && a.TimeStamp.Day <= springEnd.Day).ToList());
-                default:
-                    return null;
-            }
-        }
-
-        //Returns an array of yearly sorted data
-        // 0 - summer
-        // 1 - winter
-        // 2 - spring
-        // 3 - autumn
-        public DataPoints<DateTime, double>[] CalculateSeasonallyWastage(List<SegmentEventsEntry> summer, List<SegmentEventsEntry> winter, List<SegmentEventsEntry> autumn, List<SegmentEventsEntry> spring)
-        {
-            //Get Summer
-            var sortedSummer = CalculateYearlyWastage(summer.GroupBy(a => a.TimeStamp.Month).ToList());
-            //Get Winter
-            var sortedWinter = CalculateYearlyWastage(winter.GroupBy(a => a.TimeStamp.Month).ToList());
-            //Get Autumn
-            var sortedAutumn = CalculateYearlyWastage(autumn.GroupBy(a => a.TimeStamp.Month).ToList());
-            //Get Spring
-            var sortedSpring = CalculateYearlyWastage(spring.GroupBy(a => a.TimeStamp.Month).ToList());
-
-            DataPoints<DateTime, double>[] arrayOfSeasons = new DataPoints<DateTime, double>[4];
-
-            arrayOfSeasons[0] = sortedSummer[0];
-            arrayOfSeasons[1] = sortedWinter[0];
-            arrayOfSeasons[2] = sortedSpring[0];
-            arrayOfSeasons[3] = sortedAutumn[0];
-
-            return arrayOfSeasons;
-        }
-
-        public DataPoints<DateTime, double>[] CalculateYearlyWastage(List<IGrouping<int, SegmentEventsEntry>> list)
-        {
-            DataPoints<DateTime, double> yearly = new DataPoints<DateTime, double>();
-            var totalForMonth = 0.0;
-            for (int i = 0; i < list.Count; i++)
-            {
-                //We have a list per hour of current day.
-                //Group these groups by segmentId
-                totalForMonth = 0.0;
-                var segments = list.ElementAt(i).GroupBy(a => a.SegmentsId);
-                foreach (IGrouping<int, SegmentEventsEntry> lst in segments)
-                {
-                    foreach (SegmentEventsEntry lst2 in lst)
-                    {
-                        totalForMonth += ((lst2.FlowIn - lst2.FlowOut) / 60);
-
-                    }
-
-                }
-                yearly.AddPoint(list.ElementAt(i).ElementAt(0).TimeStamp, totalForMonth);
-            }
-            DataPoints<DateTime, double>[] ret = new DataPoints<DateTime, double>[1];
-            
-            ret[0] = yearly;
-            return ret;
-        }
-
-        public DataPoints<DateTime,double>[] CalculateMonthlyWastage(List<IGrouping<int,SegmentEventsEntry>> list)
-        {
-            DataPoints<DateTime, double> monthly = new DataPoints<DateTime, double>();
-            var totalForDay = 0.0;
-            for (int i = 0; i < list.Count; i++)
-            {
-                //We have a list per hour of current day.
-                //Group these groups by segmentId
-                totalForDay = 0.0;
-                var segments = list.ElementAt(i).GroupBy(a => a.SegmentsId);
-                foreach (IGrouping<int, SegmentEventsEntry> lst in segments)
-                {
-                    foreach (SegmentEventsEntry lst2 in lst)
-                    {
-                        totalForDay += ((lst2.FlowIn - lst2.FlowOut) / 60);
-
-                    }
-
-                }
-                monthly.AddPoint(list.ElementAt(i).ElementAt(0).TimeStamp, totalForDay);
-            }
-            DataPoints<DateTime, double>[] ret = new DataPoints<DateTime, double>[1];
-            ret[0] = monthly;
-            return ret;
-        }
-
-        public DataPoints<DateTime,double>[] CalculateDailyWastage(List<IGrouping<int,SegmentEventsEntry>> list)
-        {
-            DataPoints<DateTime, double> daily = new DataPoints<DateTime, double>();
-            var totalForHour = 0.0;
-            for (int i = 0; i < list.Count; i++)
-            {
-                //We have a list per hour of current day.
-                //Group these groups by segmentId
-                totalForHour = 0.0;
-                var segments = list.ElementAt(i).GroupBy(a => a.SegmentsId);
-                foreach(IGrouping<int,SegmentEventsEntry> lst in segments)
-                {
-                    foreach(SegmentEventsEntry lst2 in lst)
-                    {
-                        totalForHour += ((lst2.FlowIn - lst2.FlowOut) / 60);
-                       
-                    }
-
-                }
-                daily.AddPoint(list.ElementAt(i).ElementAt(0).TimeStamp, totalForHour);
-            }
-            DataPoints<DateTime, double>[] ret = new DataPoints<DateTime, double>[1];
-            ret[0] = daily;
-            return ret;
-        }
-
-        public enum Period
-        {
-            Daily,
-            Seasonally,
-            Monthly
         }
     }
 }
