@@ -36,10 +36,10 @@ namespace UnitTesting
             mockContext.Setup(dbc => dbc.TankLevels).Returns(mockSet.Object);
             var tankLevelsController = new TankLevelsController(mockContext.Object, null);
             mockContext.Setup(x => x.TankLevels.FindAsync(id))
-                .Returns(Task.FromResult(mockData.Where(x => x.Tank_Id == id).First()));
+                .Returns(Task.FromResult(mockData.Where(x => x.TankId == id).First()));
             var levels = tankLevelsController.Get(id).Result;
             Assert.IsNotNull(levels);
-            Assert.AreEqual(levels.Value.Tank_Id, id);
+            Assert.AreEqual(levels.Value.TankId, id);
             Assert.AreEqual(levels.Value.Instruction, "Turn off");
         }
     }

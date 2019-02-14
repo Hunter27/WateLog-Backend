@@ -9,9 +9,9 @@ namespace WaterLog_Backend.Models
     public class TankLevelsEntry
     {
         [Key]
-        public int Tank_Id { get; set; }
+        public int TankId { get; set; }
         public int Percentage { get; set; }
-        public string Level_Status { get; set; }
+        public string LevelStatus { get; set; }
         public string Instruction { get; set; }
         
     }

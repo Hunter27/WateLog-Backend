@@ -51,18 +51,38 @@ namespace WaterLog_Backend.Controllers
         [HttpPut("{id}")]
         public async Task Put(int id, [FromBody] TankLevelsEntry value)
         {
-            var old = await _db.TankLevels.FindAsync(id);
-            _db.Entry(old).CurrentValues.SetValues(value);
-            await _db.SaveChangesAsync();
+            try {
+                var old = await _db.TankLevels.FindAsync(id);
+                _db.Entry(old).CurrentValues.SetValues(value);
+                await _db.SaveChangesAsync();
+            }
+            catch (Exception error)
+            {
+                throw new Exception(error.Message);
+            }
         }
+            
 
-        // DELETE api/values/5
-        [HttpDelete("{id}")]
+
+
+
+
+
+
+// DELETE api/values/5
+[HttpDelete("{id}")]
         public async Task Delete(int id)
         {
-            var entry = await _db.TankLevels.FindAsync(id);
-            _db.TankLevels.Remove(entry);
-            await _db.SaveChangesAsync();
+            try
+            {
+                var entry = await _db.TankLevels.FindAsync(id);
+                _db.TankLevels.Remove(entry);
+                await _db.SaveChangesAsync();
+            }
+            catch (Exception error)
+            {
+                throw new Exception(error.Message);
+            }
         }
     }
 }
