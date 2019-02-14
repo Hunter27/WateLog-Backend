@@ -38,7 +38,6 @@ namespace Tests
             var expected = GetTestExpectedMonthly();
             var dataset = GetTestDataMonthly();
             Procedures proc = new Procedures(new DatabaseContext(), _config);
-
             Assert.IsTrue(expected.Equals((proc.CalculateMonthlyWastage(dataset))[0]));
         }
 
@@ -88,6 +87,15 @@ namespace Tests
             list.AddPoint((Convert.ToDateTime("1/1/2019 12:04:00 PM")), 8.0);
             list.AddPoint((Convert.ToDateTime("2/1/2019 13:10:15 PM")), 10.0);
             list.AddPoint((Convert.ToDateTime("3/1/2019 14:05:15 PM")), 4.0);
+            list.AddPoint((Convert.ToDateTime("2000/4/1")), 0.0);
+            list.AddPoint((Convert.ToDateTime("2000/5/1")), 0.0);
+            list.AddPoint((Convert.ToDateTime("2000/6/1")), 0.0);
+            list.AddPoint((Convert.ToDateTime("2000/7/1")), 0.0);
+            list.AddPoint((Convert.ToDateTime("2000/8/1")), 0.0);
+            list.AddPoint((Convert.ToDateTime("2000/9/1")), 0.0);
+            list.AddPoint((Convert.ToDateTime("2000/10/1")), 0.0);
+            list.AddPoint((Convert.ToDateTime("2000/11/1")), 0.0);
+            list.AddPoint((Convert.ToDateTime("2000/12/1")), 0.0);
 
             return list;
         }
