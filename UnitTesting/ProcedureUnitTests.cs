@@ -47,7 +47,7 @@ namespace Tests
 
         private List<SegmentEventsEntry> GetTestDataSummer()
         {
-            List<SegmentEventsEntry> lst = new List<SegmentEventsEntry>();
+            var lst = new List<SegmentEventsEntry>();
             lst.Add(GetSegmentObject("leak", 120, 0, 1, "2/12/2019 12:04:00 PM"));
             lst.Add(GetSegmentObject("leak", 240, 120, 1, "1 / 1 / 2019 12:10:15 PM"));
             lst.Add(GetSegmentObject("leak", 120, 0, 2, "1/1/2019 12:20:0 PM"));
@@ -65,7 +65,7 @@ namespace Tests
         private DataPoints<DateTime, double> GetTestExpectedSummer()
         {
             //Build data
-            DataPoints<DateTime, double> list = new DataPoints<DateTime, double>();
+            var list = new DataPoints<DateTime, double>();
             list.AddPoint((Convert.ToDateTime("2/12/2019 12:04:00 PM")), 2.0);
             list.AddPoint((Convert.ToDateTime("1/1/2019 12:10:15 PM")), 20.0);
             return list;
@@ -74,7 +74,7 @@ namespace Tests
         public DataPoints<DateTime, double> GetTestExpectedMonthly()
         {
             //Build data
-            DataPoints<DateTime, double> list = new DataPoints<DateTime, double>();
+            var list = new DataPoints<DateTime, double>();
             list.AddPoint((Convert.ToDateTime("1/1/2019 12:04:00 PM")), 8.0);
             list.AddPoint((Convert.ToDateTime("2/1/2019 13:10:15 PM")), 10.0);
             list.AddPoint((Convert.ToDateTime("3/1/2019 14:05:15 PM")), 4.0);
@@ -92,7 +92,7 @@ namespace Tests
 
         public List<IGrouping<int, SegmentEventsEntry>> GetTestDataMonthly()
         {
-            List<SegmentEventsEntry> lst = new List<SegmentEventsEntry>();
+            var lst = new List<SegmentEventsEntry>();
             lst.Add(GetSegmentObject("leak", 120, 0, 1, "1/1/2019 12:04:00 PM"));
             lst.Add(GetSegmentObject("leak", 240, 120, 1, "1 / 1 / 2019 12:10:15 PM"));
             lst.Add(GetSegmentObject("leak", 120, 0, 2, "1/1/2019 12:20:0 PM"));
@@ -109,7 +109,7 @@ namespace Tests
         public DataPoints<DateTime,double> GetTestExpectedDaily()
         {
             //Build data
-            DataPoints<DateTime, double> list = new DataPoints<DateTime, double>();
+            var list = new DataPoints<DateTime, double>();
             list.AddPoint((Convert.ToDateTime("1/1/2019 12:04:00 PM")),8.0);
             list.AddPoint((Convert.ToDateTime("1/1/2019 13:10:15 PM")), 10.0);
             list.AddPoint((Convert.ToDateTime("1/1/2019 14:05:15 PM")), 4.0);
@@ -119,7 +119,7 @@ namespace Tests
 
         public List<IGrouping<int, SegmentEventsEntry>> GetTestDataDaily()
         {
-            List<SegmentEventsEntry> lst = new List<SegmentEventsEntry>();
+            var lst = new List<SegmentEventsEntry>();
             lst.Add(GetSegmentObject("leak", 120, 0, 1, "1/1/2019 12:04:00 PM"));
             lst.Add(GetSegmentObject("leak", 240, 120, 1, "1 / 1 / 2019 12:10:15 PM"));
             lst.Add(GetSegmentObject("leak", 120, 0, 2, "1/1/2019 12:20:0 PM"));
@@ -135,7 +135,7 @@ namespace Tests
 
         public SegmentEventsEntry GetSegmentObject(string eve,double inn, double outt,int segid,string time)
         {
-            SegmentEventsEntry obj = new SegmentEventsEntry();
+            var obj = new SegmentEventsEntry();
             obj.EventType = eve;
             obj.FlowIn = inn;
             obj.FlowOut = outt;
