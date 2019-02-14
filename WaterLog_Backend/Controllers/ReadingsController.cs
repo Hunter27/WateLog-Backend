@@ -47,20 +47,34 @@ namespace WaterLog_Backend.Controllers
         [HttpPost]
         public async Task Post([FromBody] ReadingsEntry value)
         {
-            value.TimesStamp = DateTime.UtcNow;
-            await _db.Readings.AddAsync(value);
-            await _db.SaveChangesAsync();
-            Procedures procedure = new Procedures(_db, _config);
-            await procedure.triggerInsert(value);
+            try
+            {
+                value.TimesStamp = DateTime.UtcNow;
+                await _db.Readings.AddAsync(value);
+                await _db.SaveChangesAsync();
+                Procedures procedure = new Procedures(_db, _config);
+                await procedure.triggerInsert(value);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("error", e);
+            }
         }
 
         // PUT api/values/5
         [HttpPut("{id}")]
         public async Task Put(int id, [FromBody] ReadingsEntry value)
         {
-            var entry = await _db.Readings.FindAsync(id);
-            entry = value;
+            try
+            {
+                var old = await _db.Readings.FindAsync(id);
+            _db.Entry(old).CurrentValues.SetValues(value);
             await _db.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("error", e);
+            }
         }
 
         // DELETE api/values/5

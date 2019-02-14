@@ -10,8 +10,8 @@ using WaterLog_Backend.Models;
 namespace WaterLog_Backend.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20190206055359_migrate6")]
-    partial class migrate6
+    [Migration("20190212134358_Migration4")]
+    partial class Migration4
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -84,15 +84,13 @@ namespace WaterLog_Backend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int>("SenseID");
+                    b.Property<int>("MonitorsId");
 
                     b.Property<DateTime>("TimesStamp");
 
                     b.Property<double>("Value");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("SenseID");
 
                     b.ToTable("Readings");
                 });
@@ -109,13 +107,11 @@ namespace WaterLog_Backend.Migrations
 
                     b.Property<double>("FlowOut");
 
-                    b.Property<int>("SegmentId");
+                    b.Property<int>("SegmentsId");
 
                     b.Property<DateTime>("TimeStamp");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("SegmentId");
 
                     b.ToTable("SegmentEvents");
                 });
@@ -132,13 +128,11 @@ namespace WaterLog_Backend.Migrations
 
                     b.Property<string>("ResolvedStatus");
 
-                    b.Property<int>("SegmentId");
+                    b.Property<int>("SegmentsId");
 
                     b.Property<string>("Severity");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("SegmentId");
 
                     b.ToTable("SegmentLeaks");
                 });
@@ -166,30 +160,6 @@ namespace WaterLog_Backend.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("WaterLog_Backend.Models.SegmentsEntry", "segmentsEntry")
-                        .WithMany()
-                        .HasForeignKey("SegmentId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("WaterLog_Backend.Models.ReadingsEntry", b =>
-                {
-                    b.HasOne("WaterLog_Backend.Models.MonitorsEntry", "MonitorsEntry")
-                        .WithMany()
-                        .HasForeignKey("SenseID")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("WaterLog_Backend.Models.SegmentEventsEntry", b =>
-                {
-                    b.HasOne("WaterLog_Backend.Models.SegmentsEntry", "SegmentsEntry")
-                        .WithMany()
-                        .HasForeignKey("SegmentId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("WaterLog_Backend.Models.SegmentLeaksEntry", b =>
-                {
-                    b.HasOne("WaterLog_Backend.Models.SegmentsEntry", "SegmentsEntry")
                         .WithMany()
                         .HasForeignKey("SegmentId")
                         .OnDelete(DeleteBehavior.Cascade);
