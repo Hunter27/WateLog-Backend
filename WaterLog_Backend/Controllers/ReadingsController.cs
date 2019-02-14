@@ -47,8 +47,9 @@ namespace WaterLog_Backend.Controllers
         [HttpPost]
         public async Task Post([FromBody] ReadingsEntry value)
         {
-            value.TimesStamp = DateTime.Now;
+            try
             {
+                value.TimesStamp = DateTime.Now;
                 await _db.Readings.AddAsync(value);
                 await _db.SaveChangesAsync();
                 Procedures procedure = new Procedures(_db, _config);
