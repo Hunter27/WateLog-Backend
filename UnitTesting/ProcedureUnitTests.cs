@@ -133,7 +133,7 @@ namespace Tests
             return lst.GroupBy(a => a.TimeStamp.Hour).ToList();    
         }
 
-        public SegmentEventsEntry GetSegmentObject(string eve,double inn, double outt,int segid,string time)
+        public SegmentEventsEntry GetSegmentEventsObject(string eve,double inn, double outt,int segid,string time)
         {
             var obj = new SegmentEventsEntry();
             obj.EventType = eve;
