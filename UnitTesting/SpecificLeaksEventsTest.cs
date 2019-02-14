@@ -21,8 +21,6 @@ namespace UnitTesting
 {
     class SpecificLeaksEventsTest
     {
-        private readonly HttpClient _client;
-        private readonly DatabaseContext _context;
        
         private IQueryable<SegmentLeaksEntry> mockData = new List<SegmentLeaksEntry>
         {
