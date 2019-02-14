@@ -1,17 +1,8 @@
-/*
+/* Code adapted from dev-Kit to received data from arduino and post it
  * Copyright 2017-2018 Myriad Group AG
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+   http://www.apache.org/licenses/LICENSE-2.0
  */
 
 #include <common.h>
@@ -117,7 +108,6 @@ int main(void)
 
     Platform_GsmPinInit();
     Platform_GsmEnable();
-
     gpio_pin_config_t gpioInConfig = { kGPIO_DigitalInput, 0 };
     GPIO_PinInit(GPIOD, 7, &gpioInConfig);
     GPIO_PinInit(GPIOD, 6, &gpioInConfig);
@@ -137,18 +127,13 @@ int main(void)
     char a[] = "{\"Value\":\"xx\"}";
     a[10]= msg1[0];
     a[11]= msg1[1];
-
-
-
-//    DEBUGOUT(outS);
     Led_Background(100, 0, 100); /* magenta = waiting for gsm carrier */
 
     DEBUGOUT("creating Transport layers\n");
-
     Transport* transport = gsm_uart_transport_create();
     ASSERT(transport != NULL);
     transport = line_buffer_transport_create(transport,
-                                             gsm_buffer, sizeof(gsm_buffer));
+                                          gsm_buffer, sizeof(gsm_buffer));
     ASSERT(transport != NULL);
 
 #if (defined(DEBUG_LOG_MODEM) && (DEBUG_LOG_MODEM > 0))
@@ -160,10 +145,8 @@ int main(void)
     Transport* modem = modem_transport_create(transport, 0);
     ASSERT(modem != NULL);
     Modem_set_modem_callback(modem, modem_callback, NULL);
-
     transport = base64_codec_create(modem);
     ASSERT(transport != NULL);
-
     transport = thingstream_transport_create(transport,
                                              thingstream_buffer,
                                              THINGSTREAM_BUFFER_LENGTH);
@@ -177,40 +160,30 @@ int main(void)
 
     Client* client = Client_create(transport, "OLO1VRHTMQCYVYNSWMUX");
     ASSERT(client != NULL);
-
     TransportResult tRes = Modem_send_line(modem, "AT+CIMI\n", 60000);
     DEBUGOUT("%s: Modem_send_line: %d\n", Platform_getTimeString(), tRes);
     ASSERT(tRes == TRANSPORT_SUCCESS);
     DEBUGOUT("connecting\n");
-
     ClientResult cr = Client_connect(client, true, NULL, NULL);
     DEBUGOUT("Client_connect => %d\n", cr);
     ASSERT(cr == CLIENT_SUCCESS);
-
     Led_Background(0, 0, 100); /* blue = connected */
-
     Client_set_subscribe_callback(client, subscribe_callback, NULL);
-
     Topic topic;
-
-
     const char* topicName1 = "/TestSend";
     DEBUGOUT("registering '%s'\n", topicName1);
     cr = Client_register(client, topicName1, &topic);
     ASSERT(cr == CLIENT_SUCCESS);
-    //char* msg1 = "{\"Type\":\"Sensor\",\"Max_flow\":\"400\",\"Long\":\"21.345\",\"Lat\":\"22.345\",\"status\":\"Active\"}";
     DEBUGOUT("publishing\n");
     cr = Client_publish(client, topic, MQTT_QOS1, false,
-                        (uint8_t*)a, strlen(a), NULL);
+                       (uint8_t*)a, strlen(a), NULL);
     ASSERT(cr == CLIENT_SUCCESS);
     uint32_t waitSeconds = 3 * 60;
     DEBUGOUT("waiting %d seconds\n", waitSeconds);
     cr = Client_run(client, waitSeconds * 1000);
     ASSERT(cr == CLIENT_SUCCESS);
-
     cr = Client_disconnect(client, 0);
     ASSERT(cr == CLIENT_SUCCESS);
-
     Led_Background(0, 100, 0);  /* green = disconnected */
 
     transport->shutdown(transport);
