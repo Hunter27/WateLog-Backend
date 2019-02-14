@@ -97,7 +97,7 @@ static void modem_callback(void *cookie, const char* response, uint16_t len)
 }
 
 int getFinalValue(int vals[]){
-	double value = pow(2,4)*vals[0]+pow(2,3)*vals[1]+pow(2,2)*vals[2]+2*vals[3]+1*vals[4];
+	double value = (pow(2,4)*vals[0])+(pow(2,3)*vals[1])+(pow(2,2)*vals[2])+(2*vals[3])+(1*vals[4]);
 	return (int)value;
 }
 
