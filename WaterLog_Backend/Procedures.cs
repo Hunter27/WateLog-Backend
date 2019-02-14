@@ -537,7 +537,6 @@ namespace WaterLog_Backend
             {
                 List<double> vals = arrayOfSeasons[0].getv();
                 double sum = 0;
-
                 for (int i = 0; i < vals.Count; i++)
                 {
                     sum += vals[i];

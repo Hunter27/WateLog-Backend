@@ -20,7 +20,6 @@ namespace Tests
             var expected = GetTestExpectedDaily();
             var dataset = GetTestDataDaily();
             Procedures proc = new Procedures(new DatabaseContext(), _config);
-
             Assert.IsTrue(expected.Equals((proc.CalculateDailyWastage(dataset))[0]));
         }
 
@@ -144,8 +143,6 @@ namespace Tests
 
         private DataPoints<DateTime, double> GetTestExpectedSummarySummer()
         {
-            //Build data
-
             DataPoints<DateTime, double> list = new DataPoints<DateTime, double>();
             list.AddPoint((Convert.ToDateTime("2/12/2019 12:04:00 PM")), 2.0);
             list.AddPoint((Convert.ToDateTime("1/1/2019 12:10:15 PM")), 30.0);
@@ -153,8 +150,6 @@ namespace Tests
         }
         private DataPoints<String, double> GetTestExpectedSummarySummerCost()
         {
-            //Build data
-
             DataPoints<String, double> list = new DataPoints<String, double>();
             list.AddPoint("Summer", 1184.0);
             list.AddPoint("Winter", 0.0);
