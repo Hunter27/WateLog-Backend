@@ -64,7 +64,7 @@ namespace WaterLog_Backend.Controllers
         {
             Procedures proc = new Procedures(_db, _config);
             var ret = await proc.CalculatePeriodWastageAsync(Procedures.Period.Daily);
-            return ret[0];
+            return ret.FirstOrDefault();
         }
 
         [Route("monthlywastage")]
@@ -72,7 +72,7 @@ namespace WaterLog_Backend.Controllers
         {
             Procedures proc = new Procedures(_db, _config);
             var ret = await proc.CalculatePeriodWastageAsync(Procedures.Period.Monthly);
-            return ret[0];
+            return ret.FirstOrDefault();
         }
 
         [Route("seasonallywastage")]
