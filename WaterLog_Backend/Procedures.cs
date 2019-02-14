@@ -36,8 +36,15 @@ namespace WaterLog_Backend
             segmentOutid = segment.SenseIDOut;
             segmentid = segment.Id;
 
-            ReadingsEntry reading1 = await _db.Readings.Where(r => r.MonitorsId == segmentInid).OrderByDescending(r => r.TimesStamp).FirstAsync();
-            ReadingsEntry reading2 = await _db.Readings.Where(re => re.MonitorsId == segmentOutid).OrderByDescending(re => re.TimesStamp).FirstAsync();
+            ReadingsEntry reading1 = await _db.Readings
+            .Where(r => r.MonitorsId == segmentInid)
+            .OrderByDescending(r => r.TimesStamp)
+            .FirstAsync();
+
+            ReadingsEntry reading2 = await _db.Readings
+            .Where(re => re.MonitorsId == segmentOutid)
+            .OrderByDescending(re => re.TimesStamp)
+            .FirstAsync();
 
             if (isLeakage(reading1.Value, reading2.Value))
             {
@@ -45,11 +52,18 @@ namespace WaterLog_Backend
                 //Updateleakagestatus
                 if (await _db.SegmentLeaks.AnyAsync(leak => leak.SegmentsId == segmentid))
                 {
-                    SegmentLeaksEntry latestEntry = await _db.SegmentLeaks.Where(leak => leak.SegmentsId == segmentid && leak.ResolvedStatus == "unresolved").OrderByDescending(lk => lk.LatestTimeStamp).FirstAsync();
+                    SegmentLeaksEntry latestEntry = await _db.SegmentLeaks
+                    .Where(leak => leak.SegmentsId == segmentid && leak.ResolvedStatus == "unresolved")
+                    .OrderByDescending(lk => lk.LatestTimeStamp)
+                    .FirstAsync();
                     //Check in SegmentEntry if latest event related to entry has been resolved.
                     if (latestEntry != null)
                     {
-                        SegmentEventsEntry entry = (await _db.SegmentEvents.Where(leak => leak.SegmentsId == segmentid).OrderByDescending(lks => lks.TimeStamp).FirstAsync());
+                        SegmentEventsEntry entry = (await _db.SegmentEvents
+                        .Where(leak => leak.SegmentsId == segmentid)
+                        .OrderByDescending(lks => lks.TimeStamp)
+                        .FirstAsync());
+
                         if (entry.EventType == "leak")
                         {
                             await updateSegmentLeaksAsync(latestEntry.Id, segmentid, calculateSeverity(segmentid), latestEntry.OriginalTimeStamp, entry.TimeStamp, "unresolved",latestEntry.LastNotificationDate);
@@ -106,8 +120,13 @@ namespace WaterLog_Backend
             entry.ResolvedStatus = resolvedStatus;
             entry.Id = leakId;
             entry.LastNotificationDate = lastEmail;
-            var old = await _db.SegmentLeaks.FindAsync(leakId);
-            _db.Entry(old).CurrentValues.SetValues(entry);
+            var old = await _db.SegmentLeaks
+            .FindAsync(leakId);
+
+            _db.Entry(old)
+            .CurrentValues
+            .SetValues(entry);
+
             await _db.SaveChangesAsync();
             if (toSend)
             {
@@ -125,7 +144,9 @@ namespace WaterLog_Backend
             entry.FlowIn = inv;
             entry.FlowOut = outv;
             entry.EventType = status;
-            await _db.SegmentEvents.AddAsync(entry);
+            await _db.SegmentEvents
+            .AddAsync(entry);
+
             await _db.SaveChangesAsync();
         }
 
@@ -142,7 +163,10 @@ namespace WaterLog_Backend
         public string[] populateEmail(int sectionid)
         {
             var leaks = _db.SegmentLeaks;
-            var leak = leaks.Where(sudo => sudo.SegmentsId == sectionid).Single();
+            var leak = leaks
+            .Where(sudo => sudo.SegmentsId == sectionid)
+            .Single();
+
             string[] template = { "Segment " + leak.SegmentsId, getSegmentStatus(leak.SegmentsId), leak.Severity, getLeakPeriod(leak), calculateTotalCost(leak).ToString(), calculatePerHourCost(leak).ToString(), calculateLitresPerHour(leak).ToString(), buildUrl(leak.SegmentsId) };
             return template;
         }
@@ -162,7 +186,10 @@ namespace WaterLog_Backend
         public double calculateTotalCost(SegmentLeaksEntry leak)
         {
             var list = _db.SegmentEvents;
-            var entry = list.Where(inlist => inlist.SegmentsId == leak.SegmentsId).Last();
+            var entry = list
+            .Where(inlist => inlist.SegmentsId == leak.SegmentsId)
+            .Last();
+
             var timebetween = (leak.LatestTimeStamp - leak.OriginalTimeStamp).TotalHours;
             if (timebetween < 1)
             {
@@ -184,7 +211,10 @@ namespace WaterLog_Backend
         public double calculatePerHourCost(SegmentLeaksEntry leak)
         {
             var list = _db.SegmentEvents;
-            var entry = list.Where(inlist => inlist.SegmentsId == leak.SegmentsId).Last();
+            var entry = list
+            .Where(inlist => inlist.SegmentsId == leak.SegmentsId)
+            .Last();
+
             double currentTariff = 37.5;
             double usageperpoll = (entry.FlowIn - entry.FlowOut);
             return (usageperpoll * currentTariff);
@@ -193,7 +223,10 @@ namespace WaterLog_Backend
         public double calculateLitresPerHour(SegmentLeaksEntry leak)
         {
             var list = _db.SegmentEvents;
-            var entry = list.Where(inlist => inlist.SegmentsId == leak.SegmentsId).Last();
+            var entry = list
+            .Where(inlist => inlist.SegmentsId == leak.SegmentsId)
+            .Last();
+
             double usageperpoll = (entry.FlowIn - entry.FlowOut);
             return (usageperpoll);
         }
@@ -201,7 +234,10 @@ namespace WaterLog_Backend
         public double calculateTotaLitres(SegmentLeaksEntry leak)
         {
             var list = _db.SegmentEvents;
-            var entry = list.Where(inlist => inlist.SegmentsId == leak.SegmentsId).Last();
+            var entry = list
+            .Where(inlist => inlist.SegmentsId == leak.SegmentsId)
+            .Last();
+
             var timebetween = (leak.LatestTimeStamp - leak.OriginalTimeStamp).TotalHours;
             var perhour = calculateLitresPerHour(leak);
             return (timebetween * perhour);
@@ -210,7 +246,10 @@ namespace WaterLog_Backend
         private string getSegmentStatus(int segmentId)
         {
             var list = _db.SegmentEvents;
-            var entry = list.Where(inlist => inlist.SegmentsId == segmentId).Last();
+            var entry = list
+            .Where(inlist => inlist.SegmentsId == segmentId)
+            .Last();
+
             return entry.EventType;
         }
 
@@ -220,14 +259,33 @@ namespace WaterLog_Backend
             switch (timeframe)
             {
                 case Period.Daily:
-                    return CalculateDailyWastage(await _db.SegmentEvents.Where(a => a.EventType == "leak" && a.TimeStamp.Month == DateTime.Now.Month && a.TimeStamp.Day == DateTime.Now.Day && a.TimeStamp.Year == DateTime.Now.Year).GroupBy(b => b.TimeStamp.Hour).ToListAsync());
+                    return CalculateDailyWastage(await _db
+                    .SegmentEvents.Where(a => a.EventType == "leak" && a.TimeStamp.Month == DateTime.Now.Month && a.TimeStamp.Day == DateTime.Now.Day && a.TimeStamp.Year == DateTime.Now.Year)
+                    .GroupBy(b => b.TimeStamp.Hour)
+                    .ToListAsync());
+
                 case Period.Monthly:
-                    return (CalculateMonthlyWastage(await _db.SegmentEvents.Where(a => a.EventType == "leak").GroupBy(b => b.TimeStamp.Month).ToListAsync()));
+                    return (CalculateMonthlyWastage(await _db.SegmentEvents.Where(a => a.EventType == "leak")
+                    .GroupBy(b => b.TimeStamp.Month)
+                    .ToListAsync()));
+
                 case Period.Seasonally:
-                    var summerList = await _db.SegmentEvents.Where(a => a.EventType == "leak" && getSeason(a.TimeStamp, true) == 1).ToListAsync(); ;
-                    var winterList = await _db.SegmentEvents.Where(a => a.EventType == "leak" && getSeason(a.TimeStamp,true) == 3).ToListAsync();
-                    var autumnList = await _db.SegmentEvents.Where(a => a.EventType == "leak" && getSeason(a.TimeStamp,true) == 2).ToListAsync();
-                    var springList = await _db.SegmentEvents.Where(a => a.EventType == "leak" && getSeason(a.TimeStamp,true) == 0).ToListAsync();
+                    var summerList = await _db.SegmentEvents
+                    .Where(a => a.EventType == "leak" && getSeason(a.TimeStamp, true) == 1)
+                    .ToListAsync();
+
+                    var winterList = await _db.SegmentEvents
+                    .Where(a => a.EventType == "leak" && getSeason(a.TimeStamp,true) == 3)
+                    .ToListAsync();
+
+                    var autumnList = await _db.SegmentEvents
+                    .Where(a => a.EventType == "leak" && getSeason(a.TimeStamp,true) == 2)
+                    .ToListAsync();
+
+                    var springList = await _db.SegmentEvents
+                    .Where(a => a.EventType == "leak" && getSeason(a.TimeStamp,true) == 0)
+                    .ToListAsync();
+
                     return CalculateSeasonallyWastage(summerList, winterList, autumnList, springList);
                 default:
                     return null;

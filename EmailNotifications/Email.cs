@@ -92,8 +92,8 @@ namespace EmailNotifications
                     Credentials = new NetworkCredential("nmotsumi@retrorabbit.co.za", _conf.GetSection("Password").Value),
                     EnableSsl = true
                 };
-                MailAddress from = new MailAddress("nmotsumi@retrorabbit.co.za", "Ntokozo Motsumi");
-                MailAddress to = new MailAddress(_conf.GetSection("Recipient").Value,_conf.GetSection("Name").Value);
+                MailAddress from = new MailAddress(_conf.GetSection("Sender").Value,_conf.GetSection("SenderName").Value);
+                MailAddress to = new MailAddress(_conf.GetSection("Recipient").Value,_conf.GetSection("RecipientName").Value);
                 MailMessage message = new MailMessage(from, to);
                 message.Subject = "Send Using Web Mail";
                 // SEND IN HTML FORMAT (comment this line to send plain text).

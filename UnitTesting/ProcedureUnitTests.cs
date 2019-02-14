@@ -12,13 +12,6 @@ namespace Tests
     public class Tests
     {
         [Test]
-        public void FirstIdMonitor()
-        {
-            Results val = new Results();
-            Assert.AreEqual(1, val.getFirstID());
-        }
-
-        [Test]
         public void TestCalculateDailyWastage()
         {
             var build = new ConfigurationBuilder();
@@ -26,7 +19,6 @@ namespace Tests
             var expected = GetTestExpectedDaily();
             var dataset = GetTestDataDaily();
             Procedures proc = new Procedures(new DatabaseContext(),_config);
-
             Assert.IsTrue(expected.Equals((proc.CalculateDailyWastage(dataset))[0]));
         }
 
@@ -76,7 +68,6 @@ namespace Tests
             DataPoints<DateTime, double> list = new DataPoints<DateTime, double>();
             list.AddPoint((Convert.ToDateTime("2/12/2019 12:04:00 PM")), 2.0);
             list.AddPoint((Convert.ToDateTime("1/1/2019 12:10:15 PM")), 20.0);
-
             return list;
         }
 
@@ -96,7 +87,6 @@ namespace Tests
             list.AddPoint((Convert.ToDateTime("2000/10/1")), 0.0);
             list.AddPoint((Convert.ToDateTime("2000/11/1")), 0.0);
             list.AddPoint((Convert.ToDateTime("2000/12/1")), 0.0);
-
             return list;
         }
 
@@ -113,7 +103,6 @@ namespace Tests
             lst.Add(GetSegmentObject("leak", 60, 0, 3, "3/1/2019 14:05:15 PM"));
             lst.Add(GetSegmentObject("leak", 60, 0, 1, "3/1/2019 14:10:15 PM"));
             lst.Add(GetSegmentObject("leak", 120, 0, 1, "3/1/2019 14:55:15 PM"));
-
             return lst.GroupBy(a => a.TimeStamp.Hour).ToList();
         }
 
@@ -141,7 +130,6 @@ namespace Tests
             lst.Add(GetSegmentObject("leak", 60, 0, 3, "1/1/2019 14:05:15 PM"));
             lst.Add(GetSegmentObject("leak", 60, 0, 1, "1/1/2019 14:10:15 PM"));
             lst.Add(GetSegmentObject("leak", 120, 0, 1, "1/1/2019 14:55:15 PM"));
-
             return lst.GroupBy(a => a.TimeStamp.Hour).ToList();    
         }
 
@@ -153,7 +141,6 @@ namespace Tests
             obj.FlowOut = outt;
             obj.SegmentsId = segid;
             obj.TimeStamp = Convert.ToDateTime(time);
-
             return obj;
         }
     }
