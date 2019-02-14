@@ -35,7 +35,6 @@ namespace WaterLog_Backend.Controllers
             return await _db.SegmentLeaks.ToListAsync();
         }
 
-
         [Route("costs/{id}")]
         public async Task<ActionResult<string>> GetCost(int id)
         {
@@ -73,6 +72,7 @@ namespace WaterLog_Backend.Controllers
             await _db.SaveChangesAsync();
             return leaks;
         }
+
         // GET api/values/5
         [HttpGet("{id}")]
         public async Task<ActionResult<SegmentLeaksEntry>> Get(int id)
@@ -86,7 +86,6 @@ namespace WaterLog_Backend.Controllers
             return leaks;
         }
 
-
         // GET api/segment
         [HttpGet("segment/{Id}")]
         public async Task<ActionResult<IEnumerable<SegmentLeaksEntry>>> GetSegmentHistory(int Id)
@@ -94,7 +93,6 @@ namespace WaterLog_Backend.Controllers
             return await _db.SegmentLeaks.Where( row => row.SegmentsId == Id ).ToListAsync();
 
         }
-
 
         // POST api/values
         [HttpPost]
