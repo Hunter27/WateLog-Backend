@@ -17,11 +17,11 @@ namespace UnitTesting
         {
             new TankLevelsEntry
             {
-                Tank_Id = 1, Percentage = 50, Instruction = "Turn off", Level_Status = "Sufficient"
+                TankId = 1, Percentage = 50, Instruction = "Turn off", LevelStatus = "Sufficient"
             },
             new TankLevelsEntry
             {
-                Tank_Id = 2, Percentage = 20, Instruction = "Turn on", Level_Status = "Not Sufficient"
+                TankId = 2, Percentage = 20, Instruction = "Turn on", LevelStatus = "Not Sufficient"
             },
 
         }.AsQueryable();

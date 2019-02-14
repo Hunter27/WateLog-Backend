@@ -10,6 +10,7 @@ namespace WaterLog_Backend.Models
     {
         [Key]
         public int TankId { get; set; }
+        public int PumpId { get; set; }
         public int Percentage { get; set; }
         public string LevelStatus { get; set; }
         public string Instruction { get; set; }

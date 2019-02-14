@@ -12,14 +12,13 @@ using WaterLog_Backend.Models;
 
 namespace WaterLog_Backend.Controllers
 {
-
     [Route("api/[controller]")]
     [ApiController]
-    public class TankLevelsController : ControllerBase
+    public class PumpsController : ControllerBase
     {
         private readonly DatabaseContext _db;
         readonly IConfiguration _config;
-        public TankLevelsController(DatabaseContext context, IConfiguration config)
+        public PumpsController(DatabaseContext context, IConfiguration config)
         {
             _db = context;
             _config = config;
@@ -27,56 +26,67 @@ namespace WaterLog_Backend.Controllers
 
         // GET api/values
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TankLevelsEntry>>> Get()
+        public async Task<ActionResult<IEnumerable<PumpEntry>>> Get()
         {
-            return await _db.TankLevels.ToListAsync();
+            return await _db.Pumps.ToListAsync();
         }
 
-        // GET api/values/5
+        // GET api/values/
         [HttpGet("{id}")]
-        public async Task<ActionResult<TankLevelsEntry>> Get(int id)
+        public async Task<ActionResult<PumpEntry>> Get(int id)
         {
-            return await _db.TankLevels.FindAsync(id);
+            return await _db.Pumps.FindAsync(id);
         }
 
         // POST api/values
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] TankLevelsEntry value)
+        public async Task<IActionResult> Post([FromBody] PumpEntry value)
         {
             if (ModelState.IsValid)
             {
-                await _db.TankLevels.AddAsync(value);
+                await _db.Pumps.AddAsync(value);
                 await _db.SaveChangesAsync();
                 return Ok("Ok");
             }
-            else{
+            else
+            {
                 return new BadRequestObjectResult("Not Found");
             }
-           
-        }
 
-        // PUT api/values/5
+        }
+        // PUT api/values/
         [HttpPut("{id}")]
-        public async Task Put(int id, [FromBody] TankLevelsEntry value)
+        public async Task<PumpEntry> Put(int id)
         {
-            try {
-                var old = await _db.TankLevels.FindAsync(id);
-                _db.Entry(old).CurrentValues.SetValues(value);
+            try
+            {
+                var old = await _db.Pumps.FindAsync(id);
+                if (old.Status == "on")
+                {
+                    old.Status = "off";
+                }
+                else
+                {
+                    old.Status = "on";
+                }
+                _db.Entry(old).CurrentValues.SetValues(old.Status);
                 await _db.SaveChangesAsync();
+                return old;
             }
             catch (Exception error)
             {
                 throw new Exception(error.Message);
             }
         }
-      // DELETE api/values/5
+
+        // DELETE api/values/
         [HttpDelete("{id}")]
         public async Task Delete(int id)
         {
             try
             {
-                var entry = await _db.TankLevels.FindAsync(id);
-                _db.TankLevels.Remove(entry);
+                var entry = await _db.Pumps.FindAsync(id);
+                _db.Pumps.Remove(entry);
                 await _db.SaveChangesAsync();
             }
             catch (Exception error)
@@ -86,3 +96,4 @@ namespace WaterLog_Backend.Controllers
         }
     }
 }
+
