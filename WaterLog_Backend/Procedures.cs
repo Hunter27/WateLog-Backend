@@ -17,6 +17,9 @@ namespace WaterLog_Backend
     {
         DatabaseContext _db;
         IConfiguration _config;
+        public Procedures() {
+
+        }
         public Procedures(DatabaseContext db,IConfiguration cfg)
         {
             _db = db;
@@ -76,14 +79,14 @@ namespace WaterLog_Backend
                         SegmentEventsEntry entry = allEvents.Where(leak => leak.SegmentsId == segmentid).Last();
                         if (entry.EventType == "leak")
                         {
-                            await updateSegmentLeaksAsync(latestEntry.Id, segmentid, calculateSeverity(segmentid), latestEntry.OriginalTimeStamp, entry.TimeStamp, "unresolved");
+                            await updateSegmentLeaksAsync(latestEntry.Id, segmentid, latestEntry.OriginalTimeStamp, entry.TimeStamp, "unresolved");
                         }
                     }
                 }
                 else
                 {
                     //Normal Add
-                    await createSegmentLeaksAsync(segmentid, calculateSeverity(segmentid), "unresolved");
+                    await createSegmentLeaksAsync(segmentid, "unresolved");
                     string[] template = populateEmail(segmentid);
                     Email email = new Email(template,_config);
                     email.sendEmail();
@@ -96,35 +99,53 @@ namespace WaterLog_Backend
             }
         }
 
-        
-
-        private string calculateSeverity(int segmentid)
+        public string calculateSeverity(SegmentLeaksEntry entry)
         {
-            return "severe";
+            
+            return calculateSeverityGivenValue(calculateTotaLitres(entry));
+
+            
         }
 
-        public async Task createSegmentLeaksAsync(int segId, string severity, string resolvedStatus)
+        public string calculateSeverityGivenValue(double value)
+        {
+            if (value >= 100)
+            {
+                return "High";
+            }
+            else if (value < 50)
+            {
+                return "Low";
+            }
+            else
+            {
+                return "Medium";
+            }
+        }
+
+        public async Task createSegmentLeaksAsync(int segId, string resolvedStatus)
         {
             SegmentLeaksEntry entry = new SegmentLeaksEntry();
             entry.SegmentsId = segId;
-            entry.Severity = severity;
             entry.LatestTimeStamp = DateTime.UtcNow;
             entry.OriginalTimeStamp = DateTime.UtcNow;
             entry.ResolvedStatus = resolvedStatus;
+            entry.Severity = calculateSeverity(entry);
             await _db.SegmentLeaks.AddAsync(entry);
             await _db.SaveChangesAsync();
+
         }
 
-        public async Task updateSegmentLeaksAsync(int leakId, int segId, string severity, DateTime original, DateTime updated, string resolvedStatus)
+        public async Task updateSegmentLeaksAsync(int leakId, int segId, DateTime original, DateTime updated, string resolvedStatus)
         {
             //SegmentLeaksController controller = getSegmentLeaksController();
             SegmentLeaksEntry entry = new SegmentLeaksEntry();
             entry.SegmentsId = segId;
-            entry.Severity = severity;
             entry.OriginalTimeStamp = original;
             entry.LatestTimeStamp = updated;
             entry.ResolvedStatus = resolvedStatus;
             entry.Id = leakId;
+            entry.Severity = calculateSeverity(entry);
             await _db.SegmentLeaks.AddAsync(entry);
             await _db.SaveChangesAsync();
         }
