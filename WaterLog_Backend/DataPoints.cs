@@ -9,6 +9,7 @@ namespace WaterLog_Backend
     public class DataPoints<T,Y>
     {
         public List<DataNode<T,Y>> dataPoints;
+   
         public DataPoints()
         {
             dataPoints = new List<DataNode<T, Y>>();
@@ -22,7 +23,7 @@ namespace WaterLog_Backend
             dataPoints.Add(node);
 
         }
-
+        
         public bool Equals(DataPoints<T,Y> obj)
         {
             if (obj.dataPoints.Count != this.dataPoints.Count)
@@ -40,6 +41,16 @@ namespace WaterLog_Backend
                 }
                 return true;
             }
+        }
+         public List<Y> getv()
+        {
+            List<Y> outV = new List<Y>() ; 
+            foreach (DataNode<T, Y> listV in dataPoints)
+            {
+                outV.Add(listV.y);
+                
+            }
+            return outV;
         }
     }
 
