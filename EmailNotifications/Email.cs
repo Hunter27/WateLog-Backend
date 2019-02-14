@@ -93,7 +93,7 @@ namespace EmailNotifications
                     EnableSsl = true
                 };
                 MailAddress from = new MailAddress("nmotsumi@retrorabbit.co.za", "Ntokozo Motsumi");
-                MailAddress to = new MailAddress("ntokozo.motsumi@gmail.com", "Ntokozo Motsumi");
+                MailAddress to = new MailAddress(_conf.GetSection("Recipient").Value,_conf.GetSection("Name").Value);
                 MailMessage message = new MailMessage(from, to);
                 message.Subject = "Send Using Web Mail";
                 // SEND IN HTML FORMAT (comment this line to send plain text).

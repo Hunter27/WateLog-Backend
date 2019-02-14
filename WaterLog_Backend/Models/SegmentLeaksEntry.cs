@@ -13,6 +13,7 @@ namespace WaterLog_Backend.Models
         public string Severity { get; set; }
         public DateTime OriginalTimeStamp { get; set; }
         public DateTime LatestTimeStamp { get; set; }
+        public DateTime LastNotificationDate { get; set; }
         public string ResolvedStatus { get; set; }
     }
 }

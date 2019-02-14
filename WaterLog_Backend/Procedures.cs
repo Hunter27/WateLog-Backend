@@ -45,14 +45,14 @@ namespace WaterLog_Backend
                 //Updateleakagestatus
                 if (await _db.SegmentLeaks.AnyAsync(leak => leak.SegmentsId == segmentid))
                 {
-                    SegmentLeaksEntry latestEntry = await _db.SegmentLeaks.Where(leak => leak.SegmentsId == segmentid).OrderByDescending(lk => lk.LatestTimeStamp).FirstAsync();
+                    SegmentLeaksEntry latestEntry = await _db.SegmentLeaks.Where(leak => leak.SegmentsId == segmentid && leak.ResolvedStatus == "unresolved").OrderByDescending(lk => lk.LatestTimeStamp).FirstAsync();
                     //Check in SegmentEntry if latest event related to entry has been resolved.
                     if (latestEntry != null)
                     {
                         SegmentEventsEntry entry = (await _db.SegmentEvents.Where(leak => leak.SegmentsId == segmentid).OrderByDescending(lks => lks.TimeStamp).FirstAsync());
                         if (entry.EventType == "leak")
                         {
-                            await updateSegmentLeaksAsync(latestEntry.Id, segmentid, calculateSeverity(segmentid), latestEntry.OriginalTimeStamp, entry.TimeStamp, "unresolved");
+                            await updateSegmentLeaksAsync(latestEntry.Id, segmentid, calculateSeverity(segmentid), latestEntry.OriginalTimeStamp, entry.TimeStamp, "unresolved",latestEntry.LastNotificationDate);
                         }
                     }
                 }
@@ -84,13 +84,20 @@ namespace WaterLog_Backend
             entry.Severity = severity;
             entry.LatestTimeStamp = DateTime.Now;
             entry.OriginalTimeStamp = DateTime.Now;
+            entry.LatestTimeStamp = DateTime.Now;
             entry.ResolvedStatus = resolvedStatus;
             await _db.SegmentLeaks.AddAsync(entry);
             await _db.SaveChangesAsync();
         }
         
-        public async Task updateSegmentLeaksAsync(int leakId, int segId, string severity, DateTime original, DateTime updated, string resolvedStatus)
+        public async Task updateSegmentLeaksAsync(int leakId, int segId, string severity, DateTime original, DateTime updated, string resolvedStatus,DateTime lastEmail)
         {
+            bool toSend = false;
+            if((DateTime.Now - lastEmail).Days >= 1)
+            {
+                toSend = true;
+                lastEmail = DateTime.Now;
+            }
             SegmentLeaksEntry entry = new SegmentLeaksEntry();
             entry.SegmentsId = segId;
             entry.Severity = severity;
@@ -98,9 +105,16 @@ namespace WaterLog_Backend
             entry.LatestTimeStamp = updated;
             entry.ResolvedStatus = resolvedStatus;
             entry.Id = leakId;
+            entry.LastNotificationDate = lastEmail;
             var old = await _db.SegmentLeaks.FindAsync(leakId);
             _db.Entry(old).CurrentValues.SetValues(entry);
             await _db.SaveChangesAsync();
+            if (toSend)
+            {
+                string[] template = populateEmail(segId);
+                Email email = new Email(template, _config);
+                email.sendEmail();
+            }
         }
 
         public async Task CreateSegmentsEventAsync(int id, string status, double inv, double outv)

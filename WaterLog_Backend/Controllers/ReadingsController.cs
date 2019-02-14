@@ -48,16 +48,11 @@ namespace WaterLog_Backend.Controllers
         public async Task Post([FromBody] ReadingsEntry value)
         {
             value.TimesStamp = DateTime.Now;
-            {
+            
                 await _db.Readings.AddAsync(value);
                 await _db.SaveChangesAsync();
                 Procedures procedure = new Procedures(_db, _config);
                 await procedure.triggerInsert(value);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("error", e);
-            }
         }
 
         // PUT api/values/5

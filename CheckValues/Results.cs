@@ -27,14 +27,14 @@ namespace CheckValues
 
             var usersecretsconfig = builder.Build();
 
-            if (jsonconfig.GetSection("LocalLiveDBConnectionString").Exists())
+            if (jsonconfig.GetSection("ConnectionString").Exists())
             {
-                connection = jsonconfig.GetSection("LocalLiveDBConnectionString").Value;
+                connection = jsonconfig.GetSection("ConnectionString").Value;
                 chosenconfig = jsonconfig;
             }
             else
             {
-                connection = usersecretsconfig.GetSection("LocalLiveDBConnectionString").Value;
+                connection = usersecretsconfig.GetSection("ConnectionString").Value;
                 chosenconfig = usersecretsconfig;
             }
 
