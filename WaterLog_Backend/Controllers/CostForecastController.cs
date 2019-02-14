@@ -50,6 +50,9 @@ namespace WaterLog_Backend.Controllers
             data.rSquared = rSquared;
             data.yIntercept = yIntercept;
             data.slope = slope;
+            data.start = epochDates.First();
+            data.end = epochDates.Last();
+            data.change = epochDates.Count();
 
             return data;
         }
@@ -84,6 +87,7 @@ namespace WaterLog_Backend.Controllers
             data.rSquared = rSquared;
             data.yIntercept = yIntercept;
             data.slope = slope;
+            data.start = epochDates[0];
 
             return data;
         }

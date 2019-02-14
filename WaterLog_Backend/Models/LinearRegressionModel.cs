@@ -5,5 +5,8 @@
         public double yIntercept { get; set; }
         public double slope { get; set; }
         public double rSquared { get; set; }
+        public double start { get; set; }
+        public double end { get; set; }
+        public double change { get; set; }
     }
 }
