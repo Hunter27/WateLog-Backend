@@ -54,7 +54,7 @@ namespace WaterLog_Backend.Controllers
             await procedure.triggerInsert(value);
         }
 
-        [HttpPost("{value}")]
+        [HttpPost("{id,value}")]
         public async Task Post([FromBody] int value,int MonitorId)
         {
             ReadingsEntry reading = new ReadingsEntry();
