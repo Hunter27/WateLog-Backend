@@ -21,7 +21,6 @@ namespace UnitTesting
 {
     class SpecificLeaksEventsTest
     {
-       
         private IQueryable<SegmentLeaksEntry> mockData = new List<SegmentLeaksEntry>
         {
             new SegmentLeaksEntry
@@ -38,7 +37,7 @@ namespace UnitTesting
         }.AsQueryable();
         
         [TestCase(1)]
-        public async Task getvalue(int id) {
+        public async Task GetValue(int id) {
             var mockSet = new Mock<DbSet<SegmentLeaksEntry>>();
             mockSet.As<IQueryable<SegmentLeaksEntry>>().Setup(m => m.GetEnumerator()).Returns(mockData.GetEnumerator());
             var mockContext = new Mock<DatabaseContext>();
