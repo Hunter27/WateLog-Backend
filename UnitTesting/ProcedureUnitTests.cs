@@ -48,16 +48,16 @@ namespace Tests
         private List<SegmentEventsEntry> GetTestDataSummer()
         {
             var lst = new List<SegmentEventsEntry>();
-            lst.Add(GetSegmentObject("leak", 120, 0, 1, "2/12/2019 12:04:00 PM"));
-            lst.Add(GetSegmentObject("leak", 240, 120, 1, "1 / 1 / 2019 12:10:15 PM"));
-            lst.Add(GetSegmentObject("leak", 120, 0, 2, "1/1/2019 12:20:0 PM"));
-            lst.Add(GetSegmentObject("leak", 240, 120, 2, "1/1/2019 12:50:15 PM"));
-            lst.Add(GetSegmentObject("leak", 600, 300, 1, "1/1/2019 13:10:15 PM"));
-            lst.Add(GetSegmentObject("leak", 120, 60, 3, "1/1/2019 13:20:00 PM"));
-            lst.Add(GetSegmentObject("leak", 240, 0, 1, "1/1/2019 13:40:00 PM"));
-            lst.Add(GetSegmentObject("leak", 60, 0, 3, "1/1/2019 14:05:15 PM"));
-            lst.Add(GetSegmentObject("leak", 60, 0, 1, "1/1/2019 14:10:15 PM"));
-            lst.Add(GetSegmentObject("leak", 120, 0, 1, "1/1/2019 14:55:15 PM"));
+            lst.Add(GetSegmentEventsObject("leak", 120, 0, 1, "2/12/2019 12:04:00 PM"));
+            lst.Add(GetSegmentEventsObject("leak", 240, 120, 1, "1 / 1 / 2019 12:10:15 PM"));
+            lst.Add(GetSegmentEventsObject("leak", 120, 0, 2, "1/1/2019 12:20:0 PM"));
+            lst.Add(GetSegmentEventsObject("leak", 240, 120, 2, "1/1/2019 12:50:15 PM"));
+            lst.Add(GetSegmentEventsObject("leak", 600, 300, 1, "1/1/2019 13:10:15 PM"));
+            lst.Add(GetSegmentEventsObject("leak", 120, 60, 3, "1/1/2019 13:20:00 PM"));
+            lst.Add(GetSegmentEventsObject("leak", 240, 0, 1, "1/1/2019 13:40:00 PM"));
+            lst.Add(GetSegmentEventsObject("leak", 60, 0, 3, "1/1/2019 14:05:15 PM"));
+            lst.Add(GetSegmentEventsObject("leak", 60, 0, 1, "1/1/2019 14:10:15 PM"));
+            lst.Add(GetSegmentEventsObject("leak", 120, 0, 1, "1/1/2019 14:55:15 PM"));
 
             return lst;
         }
@@ -93,16 +93,16 @@ namespace Tests
         public List<IGrouping<int, SegmentEventsEntry>> GetTestDataMonthly()
         {
             var lst = new List<SegmentEventsEntry>();
-            lst.Add(GetSegmentObject("leak", 120, 0, 1, "1/1/2019 12:04:00 PM"));
-            lst.Add(GetSegmentObject("leak", 240, 120, 1, "1 / 1 / 2019 12:10:15 PM"));
-            lst.Add(GetSegmentObject("leak", 120, 0, 2, "1/1/2019 12:20:0 PM"));
-            lst.Add(GetSegmentObject("leak", 240, 120, 2, "1/1/2019 12:50:15 PM"));
-            lst.Add(GetSegmentObject("leak", 600, 300, 1, "2/1/2019 13:10:15 PM"));
-            lst.Add(GetSegmentObject("leak", 120, 60, 3, "2/1/2019 13:20:00 PM"));
-            lst.Add(GetSegmentObject("leak", 240, 0, 1, "2/1/2019 13:40:00 PM"));
-            lst.Add(GetSegmentObject("leak", 60, 0, 3, "3/1/2019 14:05:15 PM"));
-            lst.Add(GetSegmentObject("leak", 60, 0, 1, "3/1/2019 14:10:15 PM"));
-            lst.Add(GetSegmentObject("leak", 120, 0, 1, "3/1/2019 14:55:15 PM"));
+            lst.Add(GetSegmentEventsObject("leak", 120, 0, 1, "1/1/2019 12:04:00 PM"));
+            lst.Add(GetSegmentEventsObject("leak", 240, 120, 1, "1 / 1 / 2019 12:10:15 PM"));
+            lst.Add(GetSegmentEventsObject("leak", 120, 0, 2, "1/1/2019 12:20:0 PM"));
+            lst.Add(GetSegmentEventsObject("leak", 240, 120, 2, "1/1/2019 12:50:15 PM"));
+            lst.Add(GetSegmentEventsObject("leak", 600, 300, 1, "2/1/2019 13:10:15 PM"));
+            lst.Add(GetSegmentEventsObject("leak", 120, 60, 3, "2/1/2019 13:20:00 PM"));
+            lst.Add(GetSegmentEventsObject("leak", 240, 0, 1, "2/1/2019 13:40:00 PM"));
+            lst.Add(GetSegmentEventsObject("leak", 60, 0, 3, "3/1/2019 14:05:15 PM"));
+            lst.Add(GetSegmentEventsObject("leak", 60, 0, 1, "3/1/2019 14:10:15 PM"));
+            lst.Add(GetSegmentEventsObject("leak", 120, 0, 1, "3/1/2019 14:55:15 PM"));
             return lst.GroupBy(a => a.TimeStamp.Hour).ToList();
         }
 
@@ -120,16 +120,16 @@ namespace Tests
         public List<IGrouping<int, SegmentEventsEntry>> GetTestDataDaily()
         {
             var lst = new List<SegmentEventsEntry>();
-            lst.Add(GetSegmentObject("leak", 120, 0, 1, "1/1/2019 12:04:00 PM"));
-            lst.Add(GetSegmentObject("leak", 240, 120, 1, "1 / 1 / 2019 12:10:15 PM"));
-            lst.Add(GetSegmentObject("leak", 120, 0, 2, "1/1/2019 12:20:0 PM"));
-            lst.Add(GetSegmentObject("leak", 240, 120, 2, "1/1/2019 12:50:15 PM"));
-            lst.Add(GetSegmentObject("leak", 600, 300, 1, "1/1/2019 13:10:15 PM"));
-            lst.Add(GetSegmentObject("leak", 120, 60, 3, "1/1/2019 13:20:00 PM"));
-            lst.Add(GetSegmentObject("leak", 240, 0, 1, "1/1/2019 13:40:00 PM"));
-            lst.Add(GetSegmentObject("leak", 60, 0, 3, "1/1/2019 14:05:15 PM"));
-            lst.Add(GetSegmentObject("leak", 60, 0, 1, "1/1/2019 14:10:15 PM"));
-            lst.Add(GetSegmentObject("leak", 120, 0, 1, "1/1/2019 14:55:15 PM"));
+            lst.Add(GetSegmentEventsObject("leak", 120, 0, 1, "1/1/2019 12:04:00 PM"));
+            lst.Add(GetSegmentEventsObject("leak", 240, 120, 1, "1 / 1 / 2019 12:10:15 PM"));
+            lst.Add(GetSegmentEventsObject("leak", 120, 0, 2, "1/1/2019 12:20:0 PM"));
+            lst.Add(GetSegmentEventsObject("leak", 240, 120, 2, "1/1/2019 12:50:15 PM"));
+            lst.Add(GetSegmentEventsObject("leak", 600, 300, 1, "1/1/2019 13:10:15 PM"));
+            lst.Add(GetSegmentEventsObject("leak", 120, 60, 3, "1/1/2019 13:20:00 PM"));
+            lst.Add(GetSegmentEventsObject("leak", 240, 0, 1, "1/1/2019 13:40:00 PM"));
+            lst.Add(GetSegmentEventsObject("leak", 60, 0, 3, "1/1/2019 14:05:15 PM"));
+            lst.Add(GetSegmentEventsObject("leak", 60, 0, 1, "1/1/2019 14:10:15 PM"));
+            lst.Add(GetSegmentEventsObject("leak", 120, 0, 1, "1/1/2019 14:55:15 PM"));
             return lst.GroupBy(a => a.TimeStamp.Hour).ToList();    
         }
 
