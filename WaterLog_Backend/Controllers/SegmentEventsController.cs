@@ -49,17 +49,29 @@ namespace WaterLog_Backend.Controllers
         [HttpPost]
         public async Task Post([FromBody] SegmentEventsEntry value)
         {
+            try { 
             await _db.SegmentEvents.AddAsync(value);
             await _db.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("error", e);
+            }
         }
 
         // PUT api/values/5
         [HttpPut("{id}")]
         public async Task Put(int id, [FromBody] SegmentEventsEntry value)
         {
-            var entry = await _db.SegmentEvents.FindAsync(id);
-            entry = value;
+            try { 
+            var old = await _db.SegmentEvents.FindAsync(id);
+            _db.Entry(old).CurrentValues.SetValues(value);
             await _db.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("error", e);
+            }
         }
 
         // DELETE api/values/5

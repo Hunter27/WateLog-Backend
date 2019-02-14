@@ -10,8 +10,8 @@ using WaterLog_Backend.Models;
 namespace WaterLog_Backend.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20190205085324_migration5")]
-    partial class migration5
+    [Migration("20190212122039_migration3")]
+    partial class migration3
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -84,15 +84,13 @@ namespace WaterLog_Backend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int>("SenseID");
+                    b.Property<int>("MonitorsId");
 
                     b.Property<DateTime>("TimesStamp");
 
                     b.Property<double>("Value");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("SenseID");
 
                     b.ToTable("Readings");
                 });
@@ -105,17 +103,38 @@ namespace WaterLog_Backend.Migrations
 
                     b.Property<string>("EventType");
 
-                    b.Property<int>("SegmentId");
+                    b.Property<double>("FlowIn");
+
+                    b.Property<double>("FlowOut");
+
+                    b.Property<int>("SegmentsId");
 
                     b.Property<DateTime>("TimeStamp");
 
-                    b.Property<double>("Value");
+                    b.HasKey("Id");
+
+                    b.ToTable("SegmentEvents");
+                });
+
+            modelBuilder.Entity("WaterLog_Backend.Models.SegmentLeaksEntry", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("LatestTimeStamp");
+
+                    b.Property<DateTime>("OriginalTimeStamp");
+
+                    b.Property<string>("ResolvedStatus");
+
+                    b.Property<int>("SegmentsId");
+
+                    b.Property<string>("Severity");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("SegmentId");
-
-                    b.ToTable("SegmentEvents");
+                    b.ToTable("SegmentLeaks");
                 });
 
             modelBuilder.Entity("WaterLog_Backend.Models.SegmentsEntry", b =>
@@ -141,22 +160,6 @@ namespace WaterLog_Backend.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("WaterLog_Backend.Models.SegmentsEntry", "segmentsEntry")
-                        .WithMany()
-                        .HasForeignKey("SegmentId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("WaterLog_Backend.Models.ReadingsEntry", b =>
-                {
-                    b.HasOne("WaterLog_Backend.Models.MonitorsEntry", "MonitorsEntry")
-                        .WithMany()
-                        .HasForeignKey("SenseID")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("WaterLog_Backend.Models.SegmentEventsEntry", b =>
-                {
-                    b.HasOne("WaterLog_Backend.Models.SegmentsEntry", "SegmentsEntry")
                         .WithMany()
                         .HasForeignKey("SegmentId")
                         .OnDelete(DeleteBehavior.Cascade);
