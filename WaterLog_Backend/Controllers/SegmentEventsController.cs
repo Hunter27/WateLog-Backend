@@ -59,6 +59,30 @@ namespace WaterLog_Backend.Controllers
             }
         }
 
+        [Route("dailywastage")]
+        public async Task<DataPoints<DateTime,double>> GetDailyWastageGraphData()
+        {
+            Procedures proc = new Procedures(_db, _config);
+            var ret = await proc.CalculatePeriodWastageAsync(Procedures.Period.Daily);
+            return ret.FirstOrDefault();
+        }
+
+        [Route("monthlywastage")]
+        public async Task<DataPoints<DateTime, double>> GetMonthlyWastageGraphData()
+        {
+            Procedures proc = new Procedures(_db, _config);
+            var ret = await proc.CalculatePeriodWastageAsync(Procedures.Period.Monthly);
+            return ret.FirstOrDefault();
+        }
+
+        [Route("seasonallywastage")]
+        public async Task<DataPoints<DateTime, double>[]> GetSeasonallyWastageGraphData()
+        {
+            Procedures proc = new Procedures(_db, _config);
+            return await proc.CalculatePeriodWastageAsync(Procedures.Period.Seasonally);
+        }
+
+
         // PUT api/values/5
         [HttpPut("{id}")]
         public async Task Put(int id, [FromBody] SegmentEventsEntry value)

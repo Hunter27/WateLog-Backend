@@ -120,6 +120,8 @@ namespace WaterLog_Backend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<DateTime>("LastNotificationDate");
+
                     b.Property<DateTime>("LatestTimeStamp");
 
                     b.Property<DateTime>("OriginalTimeStamp");
