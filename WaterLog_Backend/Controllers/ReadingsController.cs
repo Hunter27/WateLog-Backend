@@ -55,12 +55,12 @@ namespace WaterLog_Backend.Controllers
         }
 
         [HttpPost("{value}")]
-        public async Task Post([FromBody] int value,int MonitorId)
+        public async Task Post([FromBody] int value)
         {
             ReadingsEntry reading = new ReadingsEntry();
             reading.TimesStamp = DateTime.UtcNow;
             reading.Value = value;
-            reading.MonitorsId = MonitorId;
+            reading.MonitorsId = 2;
             await _db.Readings.AddAsync(reading);
             await _db.SaveChangesAsync();
         }
