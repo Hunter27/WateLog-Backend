@@ -50,7 +50,7 @@ namespace WaterLog_Backend
             .OrderByDescending(re => re.TimesStamp)
             .FirstAsync();
 
-            if (isLeakage(reading1.Value, reading2.Value))
+            if (IsLeakage(reading1.Value, reading2.Value))
             {
                 //Updateleakagestatus
                 IEnumerable<SegmentLeaksEntry> allLeaks = _db.SegmentLeaks;
@@ -239,12 +239,11 @@ namespace WaterLog_Backend
             entry.EventType = status;
             await _db.SegmentEvents
             .AddAsync(entry);
-
             await _db.SaveChangesAsync();
         }
 
 
-        public Boolean isLeakage(double first, double second)
+        public Boolean IsLeakage(double first, double second)
         {
             double margin = 2;
             if ((first - second) > margin)
