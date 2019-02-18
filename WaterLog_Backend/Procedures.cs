@@ -304,6 +304,45 @@ namespace WaterLog_Backend
             if (value < 9.23) return getReturn(1);  // 1: Summer
             return getReturn(2);    // 2: Autumn
         }
+
+
+        //Calculates the data points of the wastage based on period
+        public async Task<DataPoints<DateTime, double>[]> SummaryPeriodUsageAsync(Period timeframe)
+        {
+            switch (timeframe)
+            {
+                case Period.Daily:
+                    return sumarryDailyUsage(await _db
+                    .SegmentEvents.Where(a => a.TimeStamp.Month == DateTime.Now.Month && a.TimeStamp.Day == DateTime.Now.Day && a.TimeStamp.Year == DateTime.Now.Year)
+                    .GroupBy(b => b.TimeStamp.Hour)
+                    .ToListAsync());
+
+                case Period.Monthly:
+                    return (summaryMonthlyUsage(await _db.SegmentEvents.GroupBy(b => b.TimeStamp.Month)
+                    .ToListAsync()));
+
+                case Period.Seasonally:
+                    var summerList = await _db.SegmentEvents
+                    .Where(a => getSeason(a.TimeStamp, true) == 1)
+                    .ToListAsync();
+
+                    var winterList = await _db.SegmentEvents
+                    .Where(a =>  getSeason(a.TimeStamp, true) == 3)
+                    .ToListAsync();
+
+                    var autumnList = await _db.SegmentEvents
+                    .Where(a =>getSeason(a.TimeStamp, true) == 2)
+                    .ToListAsync();
+
+                    var springList = await _db.SegmentEvents
+                    .Where(a => getSeason(a.TimeStamp, true) == 0)
+                    .ToListAsync();
+
+                    return summarySeasonallyUsage(summerList, winterList, autumnList, springList);
+                default:
+                    return null;
+            }
+        }
         //Returns an array of yearly sorted data
         // 0 - summer
         // 1 - winter
