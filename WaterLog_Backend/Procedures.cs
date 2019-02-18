@@ -405,7 +405,9 @@ namespace WaterLog_Backend
                 }
             }
             monthly.dataPoints = monthly.dataPoints.OrderBy(a => a.x.Month).ToList();
-            DataPoints<DateTime, double>[] ret = new DataPoints<DateTime, double>[1];
+            DataPoints<DateTime, double>[] 
+                
+                ret = new DataPoints<DateTime, double>[1];
             ret[0] = monthly;
             return ret;
         }
@@ -425,14 +427,12 @@ namespace WaterLog_Backend
                     foreach (SegmentEventsEntry lst2 in lst)
                     {
                         totalForMonth += ((lst2.FlowIn) / 60);
-
                     }
                 }
                 yearly.AddPoint(list.ElementAt(i).ElementAt(0).TimeStamp, totalForMonth);
             }
             DataPoints<DateTime, double>[] ret = new DataPoints<DateTime, double>[1];
-
-            ret[0] = yearly;
+               ret[0] = yearly;
             return ret;
         }
 
@@ -500,7 +500,6 @@ namespace WaterLog_Backend
                     foreach (SegmentEventsEntry lst2 in lst)
                     {
                         totalForDay += ((lst2.FlowIn) / 60);
-
                     }
 
                 }
