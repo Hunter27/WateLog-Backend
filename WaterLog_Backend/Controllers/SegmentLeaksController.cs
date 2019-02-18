@@ -98,9 +98,15 @@ namespace WaterLog_Backend.Controllers
         [HttpPut("{id}")]
         public async Task Put(int id, [FromBody] SegmentLeaksEntry value)
         {
+            try { 
             var old = await _db.SegmentLeaks.FindAsync(id);
             _db.Entry(old).CurrentValues.SetValues(value);
             await _db.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("error", e);
+            }
         }
 
         // DELETE api/values/5

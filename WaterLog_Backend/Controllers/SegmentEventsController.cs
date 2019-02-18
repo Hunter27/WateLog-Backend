@@ -49,29 +49,37 @@ namespace WaterLog_Backend.Controllers
         [HttpPost]
         public async Task Post([FromBody] SegmentEventsEntry value)
         {
+            try { 
             await _db.SegmentEvents.AddAsync(value);
             await _db.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("error", e);
+            }
         }
 
         [Route("dailywastage")]
-        public Task<DataPoints<DateTime,double>> GetDailyWastageGraphData()
+        public async Task<DataPoints<DateTime,double>> GetDailyWastageGraphData()
         {
             Procedures proc = new Procedures(_db, _config);
-            return Task.Run(() => proc.CalculatePeriodWastageAsync(Procedures.Period.Daily).Result[0]);
+            var ret = await proc.CalculatePeriodWastageAsync(Procedures.Period.Daily);
+            return ret.FirstOrDefault();
         }
 
         [Route("monthlywastage")]
-        public Task<DataPoints<DateTime, double>> GetMonthlyWastageGraphData()
+        public async Task<DataPoints<DateTime, double>> GetMonthlyWastageGraphData()
         {
             Procedures proc = new Procedures(_db, _config);
-            return Task.Run(() => proc.CalculatePeriodWastageAsync(Procedures.Period.Monthly).Result[0]);
+            var ret = await proc.CalculatePeriodWastageAsync(Procedures.Period.Monthly);
+            return ret.FirstOrDefault();
         }
 
         [Route("seasonallywastage")]
-        public Task<DataPoints<DateTime, double>[]> GetSeasonallyWastageGraphData()
+        public async Task<DataPoints<DateTime, double>[]> GetSeasonallyWastageGraphData()
         {
             Procedures proc = new Procedures(_db, _config);
-            return proc.CalculatePeriodWastageAsync(Procedures.Period.Seasonally);
+            return await proc.CalculatePeriodWastageAsync(Procedures.Period.Seasonally);
         }
 
 
@@ -79,9 +87,15 @@ namespace WaterLog_Backend.Controllers
         [HttpPut("{id}")]
         public async Task Put(int id, [FromBody] SegmentEventsEntry value)
         {
+            try { 
             var old = await _db.SegmentEvents.FindAsync(id);
             _db.Entry(old).CurrentValues.SetValues(value);
             await _db.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("error", e);
+            }
         }
 
         // DELETE api/values/5
