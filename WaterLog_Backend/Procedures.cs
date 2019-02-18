@@ -50,7 +50,7 @@ namespace WaterLog_Backend
             .OrderByDescending(re => re.TimesStamp)
             .FirstAsync();
 
-            if (isLeakage(r1.Value, r2.Value))
+            if (isLeakage(reading1.Value, reading2.Value))
             {
                 //Updateleakagestatus
                 IEnumerable<SegmentLeaksEntry> allLeaks = _db.SegmentLeaks;
@@ -70,7 +70,7 @@ namespace WaterLog_Backend
 
                         if (entry.EventType == "leak")
                         {
-                            await updateSegmentLeaksAsync(latestEntry.Id, segmentid, calculateSeverity(segmentid), latestEntry.OriginalTimeStamp, entry.TimeStamp, "unresolved",latestEntry.LastNotificationDate);
+                            await updateSegmentLeaksAsync(latestEntry.Id, segmentid, calculateSeverity(latestEntry), latestEntry.OriginalTimeStamp, entry.TimeStamp, "unresolved",latestEntry.LastNotificationDate);
                         }
                     }
                 }
@@ -86,7 +86,7 @@ namespace WaterLog_Backend
             else
             {
                 //Updatewithoutleakagestatus
-                await updateSegmentsEventAsync(segmentid, "normal", r1.Value, r2.Value);
+                await updateSegmentsEventAsync(segmentid, "normal", reading1.Value, reading2.Value);
             }
         }
 
@@ -118,7 +118,6 @@ namespace WaterLog_Backend
         {
             SegmentLeaksEntry entry = new SegmentLeaksEntry();
             entry.SegmentsId = segId;
-            entry.Severity = severity;
             entry.LatestTimeStamp = DateTime.Now;
             entry.OriginalTimeStamp = DateTime.Now;
             entry.LatestTimeStamp = DateTime.Now;
