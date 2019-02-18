@@ -15,6 +15,7 @@ namespace WaterLog_Backend
         private SegmentEventsController segmenteventsController;
         private SegmentLeaksController segmentleaksController;
         private SegmentsController segmentsController;
+        private HistoryLogController historylogController;
 
         public ControllerService(DatabaseContext context, IConfiguration config)
         {
@@ -23,6 +24,7 @@ namespace WaterLog_Backend
            segmenteventsController = new SegmentEventsController(context,config);
            segmentleaksController = new  SegmentLeaksController(context,config,this);
            segmentsController = new SegmentsController(context,config);
+           historylogController = new HistoryLogController(context,config);
         }
 
         public MonitorsController GetMonitorsController()
@@ -49,6 +51,11 @@ namespace WaterLog_Backend
         {
             return segmentsController;
         }
+
+        public HistoryLogController GetHistoryLogController()
+        {
+            return historylogController;
+        }
     }
 
     public interface IControllerService
@@ -58,5 +65,6 @@ namespace WaterLog_Backend
         SegmentEventsController GetSegmentEventsController();
         SegmentLeaksController GetSegmentLeaksController();
         SegmentsController GetSegmentsController();
+        HistoryLogController GetHistoryLogController();
     }
 }
