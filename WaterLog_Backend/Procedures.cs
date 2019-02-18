@@ -365,14 +365,10 @@ namespace WaterLog_Backend
                 ret[0] = yearly;
                 return ret;
             }
-            catch(Exception error)
+            catch (Exception error)
             {
                 throw new Exception(error.Message);
             }
-            DataPoints<DateTime, double>[] ret = new DataPoints<DateTime, double>[1];
-
-            ret[0] = yearly;
-            return ret;
         }
 
         public DataPoints<DateTime, double>[] CalculateMonthlyWastage(List<IGrouping<int, SegmentEventsEntry>> list)
@@ -531,9 +527,6 @@ namespace WaterLog_Backend
                 }
             }
             monthly.dataPoints = monthly.dataPoints.OrderBy(a => a.x.Month).ToList();
-            DataPoints<DateTime, double>[] 
-                
-                ret = new DataPoints<DateTime, double>[1];
             DataPoints<DateTime, double>[] ret = new DataPoints<DateTime, double>[1];
             ret[0] = monthly;
             return ret;
