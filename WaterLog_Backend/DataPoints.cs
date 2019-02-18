@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 namespace WaterLog_Backend
 {
     //Class That Holds Datapoints neccessary for graphing
-    public class DataPoints<T,Y>
+    public class DataPoints<T, Y>
     {
-        public List<DataNode<T,Y>> dataPoints;
-   
+        public List<DataNode<T,Y>> dataPoints; 
+
         public DataPoints()
         {
             dataPoints = new List<DataNode<T, Y>>();
@@ -17,7 +17,7 @@ namespace WaterLog_Backend
 
         public void AddPoint(T xVal, Y yVal)
         {
-            DataNode<T,Y> node = new DataNode<T,Y>();
+            DataNode<T, Y> node = new DataNode<T, Y>();
             node.x = xVal;
             node.y = yVal;
             dataPoints.Add(node);
@@ -34,7 +34,7 @@ namespace WaterLog_Backend
             {
                 for (int i = 0; i < this.dataPoints.Count; i++)
                 {
-                    if(!obj.dataPoints.ElementAt(i).Equals(this.dataPoints.ElementAt(i)))
+                    if (!obj.dataPoints.ElementAt(i).Equals(this.dataPoints.ElementAt(i)))
                     {
                         return false;
                     }
@@ -55,7 +55,7 @@ namespace WaterLog_Backend
     }
 
     //Unit of Data that will be plotted
-    public struct DataNode<T,Y>
+    public struct DataNode<T, Y>
     {
         public T x;
         public Y y;

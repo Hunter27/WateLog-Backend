@@ -408,6 +408,7 @@ namespace WaterLog_Backend
             DataPoints<DateTime, double>[] 
                 
                 ret = new DataPoints<DateTime, double>[1];
+            DataPoints<DateTime, double>[] ret = new DataPoints<DateTime, double>[1];
             ret[0] = monthly;
             return ret;
         }
@@ -527,16 +528,14 @@ namespace WaterLog_Backend
             ret[0] = monthly;
             return ret;
         }
-  
         public DataPoints<String, double> summarySeasonsCost(DataPoints<DateTime, double>[] arrayOfSeasons)
         {
             List<double> cost_season = new List<double>();
             //Summer season
-            if (arrayOfSeasons[0].dataPoints.Count !=0 )
+            if (arrayOfSeasons[0].dataPoints.Count != 0)
             {
                 List<double> vals = arrayOfSeasons[0].getv();
                 double sum = 0;
-
                 for (int i = 0; i < vals.Count; i++)
                 {
                     sum += vals[i];
@@ -611,10 +610,7 @@ namespace WaterLog_Backend
         }
 
 
-    }
-    
-    
-
+    } 
 }
-    
+
 
