@@ -74,9 +74,21 @@ namespace WaterLog_Backend
                 {
                     //Normal Add
                     await createSegmentLeaksAsync(segmentid, calculateSeverity(segmentid), "unresolved");
-                    string[] template = populateEmail(segmentid);
-                    Email email = new Email(template, _config);
-                    email.sendEmail();
+                    //Call an initial email
+                    //Get recipients.
+                    var mailing = await _db.MailingList.Where(a => a.ListGroup == "tier2").ToListAsync();
+                    if (mailing.Count > 0)
+                    {
+                        string[] template = populateEmail(segmentid);
+                        Email email = new Email(template, _config);
+                        Recipient[] mailers = new Recipient[(mailing.Count - 1)];
+                        int countForMailers = 0;
+                        foreach(var rec in mailing)
+                        {
+                            mailers[countForMailers] = new Recipient(rec.Address, (rec.Name + " " + rec.Surname));
+                        }
+                        email.SendMail(mailers);
+                    }
                 }
             }
             else
@@ -106,33 +118,90 @@ namespace WaterLog_Backend
         
         public async Task updateSegmentLeaksAsync(int leakId, int segId, string severity, DateTime original, DateTime updated, string resolvedStatus,DateTime lastEmail)
         {
-            bool toSend = false;
-            if((DateTime.Now - lastEmail).Days >= 1)
+            try
             {
-                toSend = true;
-                lastEmail = DateTime.Now;
+                bool toSend = false;
+                if ((DateTime.Now - lastEmail).Days >= 1)
+                {
+                    toSend = true;
+                    lastEmail = DateTime.Now;
+                }
+                SegmentLeaksEntry entry = new SegmentLeaksEntry();
+                entry.SegmentsId = segId;
+                entry.Severity = severity;
+                entry.OriginalTimeStamp = original;
+                entry.LatestTimeStamp = updated;
+                entry.ResolvedStatus = resolvedStatus;
+                entry.Id = leakId;
+                entry.LastNotificationDate = lastEmail;
+                var old = await _db.SegmentLeaks
+                .FindAsync(leakId);
+
+                _db.Entry(old)
+                .CurrentValues
+                .SetValues(entry);
+
+                await _db.SaveChangesAsync();
+                if (toSend)
+                {
+                    //We need to send an email to update that notification is old.
+                    string[] template = populateEmail(segId);
+                    Email email = new Email(template, _config);
+                    if ((DateTime.Now - lastEmail).Days >= 4)
+                    {
+                        //Send to tier 1
+                        email.SendMail(await GetTier1ListAsync());
+                    }
+                    else
+                    {
+                        //Send to tier 2
+                        email.SendMail(await GetTier2ListAsync());
+                    }
+                }
             }
-            SegmentLeaksEntry entry = new SegmentLeaksEntry();
-            entry.SegmentsId = segId;
-            entry.Severity = severity;
-            entry.OriginalTimeStamp = original;
-            entry.LatestTimeStamp = updated;
-            entry.ResolvedStatus = resolvedStatus;
-            entry.Id = leakId;
-            entry.LastNotificationDate = lastEmail;
-            var old = await _db.SegmentLeaks
-            .FindAsync(leakId);
-
-            _db.Entry(old)
-            .CurrentValues
-            .SetValues(entry);
-
-            await _db.SaveChangesAsync();
-            if (toSend)
+            catch(Exception error)
             {
-                string[] template = populateEmail(segId);
-                Email email = new Email(template, _config);
-                email.sendEmail();
+                throw new Exception(error.Message);
+            }
+        }
+
+        //Returns the Addresses that exist for tier 1 recipients
+        public async Task<Recipient[]> GetTier1ListAsync()
+        {
+            var mailing = await _db.MailingList.Where(a => a.ListGroup == "tier1").ToListAsync();
+            if (mailing.Count > 0)
+            {
+                Recipient[] mailers = new Recipient[(mailing.Count - 1)];
+                int countForMailers = 0;
+                foreach (var rec in mailing)
+                {
+                    mailers[countForMailers] = new Recipient(rec.Address, (rec.Name + " " + rec.Surname));
+                }
+                return mailers;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        //Return the addresses that exist for tier 2 recipients
+        public async Task<Recipient[]> GetTier2ListAsync()
+        {
+            var mailing = await _db.MailingList.Where(a => a.ListGroup == "tier2").ToListAsync();
+            if (mailing.Count > 0)
+            {
+                Recipient[] mailers = new Recipient[(mailing.Count - 1)];
+                int countForMailers = 0;
+                foreach (var rec in mailing)
+                {
+                    mailers[countForMailers] = new Recipient(rec.Address, (rec.Name + " " + rec.Surname));
+                }
+                return mailers;
+            }
+            else
+            {
+                return null;
             }
         }
 
@@ -162,25 +231,25 @@ namespace WaterLog_Backend
 
         public string[] populateEmail(int sectionid)
         {
-            var leaks = _db.SegmentLeaks;
-            var leak = leaks
-            .Where(sudo => sudo.SegmentsId == sectionid)
-            .Single();
+            try
+            {
+                var leaks = _db.SegmentLeaks;
+                var leak = leaks
+                .Where(sudo => sudo.SegmentsId == sectionid)
+                .Single();
 
-            string[] template = { "Segment " + leak.SegmentsId, getSegmentStatus(leak.SegmentsId), leak.Severity, getLeakPeriod(leak), calculateTotalCost(leak).ToString(), calculatePerHourCost(leak).ToString(), calculateLitresPerHour(leak).ToString(), buildUrl(leak.SegmentsId) };
-            return template;
+                string[] template = { "Segment " + leak.SegmentsId, getSegmentStatus(leak.SegmentsId), leak.Severity, getLeakPeriod(leak), Math.Round(calculateTotalCost(leak)).ToString(), Math.Round(calculatePerHourCost(leak)).ToString(), Math.Round(calculateLitresPerHour(leak)).ToString(), buildUrl(leak.Id) };
+                return template;
+            }
+            catch(Exception error)
+            {
+                throw error;
+            }  
         }
 
         private string getLeakPeriod(SegmentLeaksEntry leak)
         {
-            if (((leak.LatestTimeStamp - leak.OriginalTimeStamp).TotalHours) < 1)
-            {
-                return "1";
-            }
-            else
-            {
-                return ((leak.LatestTimeStamp - leak.OriginalTimeStamp).TotalDays.ToString());
-            }
+                return ((Math.Round((leak.LatestTimeStamp - leak.OriginalTimeStamp).TotalDays,1)).ToString());
         }
 
         public double calculateTotalCost(SegmentLeaksEntry leak)
@@ -200,7 +269,16 @@ namespace WaterLog_Backend
                 timebetween = (leak.LatestTimeStamp - leak.OriginalTimeStamp).TotalHours;
             }
             var perhour = calculatePerHourCost(leak);
-            return (timebetween * perhour);
+            var total =  (timebetween * perhour);
+
+            if(total < 0)
+            {
+                throw new Exception("ERROR : TotalCost Less Than 0");
+            }
+            else
+            {
+                return total;
+            }
         }
 
         private string buildUrl(int segmentId)
@@ -217,7 +295,15 @@ namespace WaterLog_Backend
 
             double currentTariff = 37.5;
             double usageperpoll = (entry.FlowIn - entry.FlowOut);
-            return (usageperpoll * currentTariff);
+            var totalPH = (usageperpoll * currentTariff);
+            if(totalPH < 0)
+            {
+                throw new Exception("ERROR : Per Hour Cost Less Than 0");
+            }
+            else
+            {
+                return totalPH;
+            }
         }
 
         public double calculateLitresPerHour(SegmentLeaksEntry leak)
@@ -228,7 +314,14 @@ namespace WaterLog_Backend
             .Last();
 
             double usageperpoll = (entry.FlowIn - entry.FlowOut);
-            return (usageperpoll);
+            if (usageperpoll < 0)
+            {
+                throw new Exception("ERROR : Litres Per Hour Less Than 0");
+            }
+            else
+            {
+                return (usageperpoll);
+            }
         }
 
         public double calculateTotaLitres(SegmentLeaksEntry leak)
@@ -240,7 +333,16 @@ namespace WaterLog_Backend
 
             var timebetween = (leak.LatestTimeStamp - leak.OriginalTimeStamp).TotalHours;
             var perhour = calculateLitresPerHour(leak);
-            return (timebetween * perhour);
+            var ltotal = (timebetween * perhour);
+
+            if(ltotal < 0)
+            {
+                throw new Exception("ERROR : Total Litres Less Than 0");
+            }
+            else
+            {
+                return ltotal;
+            }
         }
 
         private string getSegmentStatus(int segmentId)
@@ -249,8 +351,14 @@ namespace WaterLog_Backend
             var entry = list
             .Where(inlist => inlist.SegmentsId == segmentId)
             .Last();
-
-            return entry.EventType;
+            if (entry == null)
+            {
+                throw new Exception("ERROR : Segment Does Not Exist");
+            }
+            else
+            {
+                return entry.EventType;
+            }
         }
 
         //Calculates the data points of the wastage based on period
