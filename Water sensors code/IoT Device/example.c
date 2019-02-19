@@ -8,6 +8,7 @@
 #include <common.h>
 #include <string.h>
 #include <math.h>
+
 #include <platform.h>
 #include <gsm.h>
 #include <pin_mux.h>
@@ -204,7 +205,7 @@ int main(void)
         GPIO_WritePinOutput(GPIOA, 19, i);
         getMessageSend(count);
         cr = Client_publish(client, topic, MQTT_QOS1, false,
-                               (uint8_t*)a, strlen(a), NULL);
+             (uint8_t*)a, strlen(a), NULL);
         ASSERT(cr == CLIENT_SUCCESS);
         count++;
     }
