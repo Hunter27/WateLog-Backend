@@ -2,11 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Cors;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
 using WaterLog_Backend.Models;
 
@@ -82,6 +79,48 @@ namespace WaterLog_Backend.Controllers
             return await proc.CalculatePeriodWastageAsync(Procedures.Period.Seasonally);
         }
 
+        //Routing to get all currently opened events
+        [Route("GetAlerts")]
+        public async Task<List<GetAlerts>> GetAlerts()
+        {
+            try
+            {
+                //Get all leaks first
+                var leaks = await _db.SegmentLeaks.Where(a => a.ResolvedStatus == "unresolved").ToListAsync();
+                List<GetAlerts> alerts = new List<GetAlerts>();
+                var proc = new Procedures(_db, _config);
+                foreach (SegmentLeaksEntry entry in leaks)
+                {
+                    //Find Cost
+                    var cost = proc.calculatePerHourCost(entry);
+                    //Find Litre Usage
+                    //TODO: Call TotalLitres Used(Dependent on Usage/Cost Feature Branch)
+                    var litresUsed = proc.calculateTotaLitres(entry);
+                    alerts.Add(new GetAlerts(entry.OriginalTimeStamp, "Segment", entry.SegmentsId, "leak", cost, entry.Severity, litresUsed, 0.0));
+                }
+
+                //Find All Sensors that are faulty
+                var faultySensors = await _db.Monitors.Where(a => a.Status == "faulty").ToListAsync();
+                foreach (MonitorsEntry entry in faultySensors)
+                {
+                    //Get latest faulty sensor
+                    var sensor = await _db.Readings.Where(a => a.Value == 0)
+                    .OrderByDescending(a => a.TimesStamp)
+                    .FirstOrDefaultAsync();
+
+                    if (entry.Id == sensor.MonitorsId)
+                    {
+                        //Have the correct information
+                        alerts.Add(new GetAlerts(sensor.TimesStamp, "Sensor", sensor.MonitorsId, "faulty", 0.0, "severe", 0.0, 0.0));
+                    }
+                }
+                return alerts;
+            }
+            catch(Exception error)
+            {
+                throw error;
+            }
+        }
 
         // PUT api/values/5
         [HttpPut("{id}")]
