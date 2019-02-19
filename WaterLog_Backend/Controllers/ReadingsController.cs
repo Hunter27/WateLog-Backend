@@ -13,7 +13,6 @@ using WaterLog_Backend.Models;
 
 namespace WaterLog_Backend.Controllers
 {
-
     [Route("api/[controller]")]
     [ApiController]
     public class ReadingsController : ControllerBase
@@ -29,21 +28,21 @@ namespace WaterLog_Backend.Controllers
             _service = service;
         }
 
-        // GET api/values
+        // GET api/readings
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ReadingsEntry>>> Get()
         {
             return await _db.Readings.ToListAsync();
         }
 
-        // GET api/values/5
+        // GET api/readingsById/
         [HttpGet("{id}")]
         public async Task<ActionResult<ReadingsEntry>> Get(int id)
         {
             return await _db.Readings.FindAsync(id);
         }
 
-        // POST api/values
+        // POST api/readings
         [HttpPost]
         public async Task Post([FromBody] ReadingsEntry value)
         {
@@ -72,7 +71,7 @@ namespace WaterLog_Backend.Controllers
             await _db.SaveChangesAsync();
         }
 
-        // PUT api/values/5
+        // PUT api/readings/
         [HttpPut("{id}")]
         public async Task Put(int id, [FromBody] ReadingsEntry value)
         {
@@ -88,7 +87,7 @@ namespace WaterLog_Backend.Controllers
             }
         }
 
-        // DELETE api/values/5
+        // DELETE api/readingsById/
         [HttpDelete("{id}")]
         public async Task Delete(int id)
         {

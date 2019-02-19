@@ -12,7 +12,6 @@ using WaterLog_Backend.Models;
 
 namespace WaterLog_Backend.Controllers
 {
-
     [Route("api/[controller]")]
     [ApiController]
     public class TankLevelsController : ControllerBase
@@ -25,21 +24,21 @@ namespace WaterLog_Backend.Controllers
             _config = config;
         }
 
-        // GET api/values
+        // GET api/levels
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TankLevelsEntry>>> Get()
         {
             return await _db.TankLevels.ToListAsync();
         }
 
-        // GET api/values/5
+        // GET api/levelsById/
         [HttpGet("{id}")]
         public async Task<ActionResult<TankLevelsEntry>> Get(int id)
         {
             return await _db.TankLevels.FindAsync(id);
         }
 
-        // POST api/values
+        // POST api/level
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] TankLevelsEntry value)
         {
@@ -52,10 +51,9 @@ namespace WaterLog_Backend.Controllers
             else{
                 return new BadRequestObjectResult("Not Found");
             }
-           
         }
 
-        // PUT api/values/5
+        // PUT api/levelById/
         [HttpPut("{id}")]
         public async Task Put(int id, [FromBody] TankLevelsEntry value)
         {
@@ -69,7 +67,7 @@ namespace WaterLog_Backend.Controllers
                 throw new Exception(error.Message);
             }
         }
-      // DELETE api/values/5
+      // DELETE api/levelById/
         [HttpDelete("{id}")]
         public async Task Delete(int id)
         {
