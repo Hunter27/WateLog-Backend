@@ -121,7 +121,7 @@ namespace EmailNotifications
                         "<b>R " + values[4] + "</b>",
                         "<b>Has been lost!</b>",
                         "<b>" +values[6]+"L or R "+ values[5] + "</b>",
-                        " is currently being lost", "per hour","<b>Resolve or process the issue</b>"
+                        " is currently being lost", "per hour",""
                         ,values[7],
                         "call third party help: <u>011111929292</u>"
                     };
