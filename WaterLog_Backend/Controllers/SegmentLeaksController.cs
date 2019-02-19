@@ -81,7 +81,7 @@ namespace WaterLog_Backend.Controllers
             return Ok();
         }
 
-        // GET api/values/5
+        // GET api/segmentById/
         [HttpGet("{id}")]
         public async Task<ActionResult<SegmentLeaksEntry>> Get(int id)
         {
@@ -100,7 +100,7 @@ namespace WaterLog_Backend.Controllers
             return await _db.SegmentLeaks.Where( row => row.SegmentsId == Id ).ToListAsync();
         }
 
-        // POST api/values
+        // POST api/segment
         [HttpPost]
         public async Task Post([FromBody] SegmentLeaksEntry value)
         {
@@ -108,7 +108,7 @@ namespace WaterLog_Backend.Controllers
             await _db.SaveChangesAsync();
         }
 
-        // PUT api/values/5
+        // PUT api/segmentLeak
         [HttpPut("{id}")]
         public async Task Put(int id, [FromBody] SegmentLeaksEntry value)
         {
@@ -124,7 +124,7 @@ namespace WaterLog_Backend.Controllers
             }
         }
 
-        // DELETE api/values/5
+        // DELETE api/segmentLeak/
         [HttpDelete("{id}")]
         public async Task Delete(int id)
         {
