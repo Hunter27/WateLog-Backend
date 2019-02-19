@@ -10,8 +10,8 @@ using WaterLog_Backend.Models;
 namespace WaterLog_Backend.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20190214151019_Migration7")]
-    partial class Migration7
+    [Migration("20190218103151_Migration4")]
+    partial class Migration4
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -20,6 +20,23 @@ namespace WaterLog_Backend.Migrations
                 .HasAnnotation("ProductVersion", "2.2.1-servicing-10028")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+            modelBuilder.Entity("WaterLog_Backend.Models.HistoryLogEntry", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("Date");
+
+                    b.Property<int>("EventsId");
+
+                    b.Property<int>("Type");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("HistoryLogs");
+                });
 
             modelBuilder.Entity("WaterLog_Backend.Models.LocationSegmentsEntry", b =>
                 {
@@ -134,6 +151,8 @@ namespace WaterLog_Backend.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("LastNotificationDate");
 
                     b.Property<DateTime>("LatestTimeStamp");
 

@@ -10,8 +10,8 @@ using WaterLog_Backend.Models;
 namespace WaterLog_Backend.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20190212134358_Migration4")]
-    partial class Migration4
+    [Migration("20190218100721_migration2")]
+    partial class migration2
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -20,6 +20,23 @@ namespace WaterLog_Backend.Migrations
                 .HasAnnotation("ProductVersion", "2.2.1-servicing-10028")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+            modelBuilder.Entity("WaterLog_Backend.Models.HistoryLogEntry", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("Date");
+
+                    b.Property<int>("EventsId");
+
+                    b.Property<int>("Type");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("HistoryLogs");
+                });
 
             modelBuilder.Entity("WaterLog_Backend.Models.LocationSegmentsEntry", b =>
                 {
@@ -78,6 +95,19 @@ namespace WaterLog_Backend.Migrations
                     b.ToTable("Monitors");
                 });
 
+            modelBuilder.Entity("WaterLog_Backend.Models.PumpEntry", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Status");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Pumps");
+                });
+
             modelBuilder.Entity("WaterLog_Backend.Models.ReadingsEntry", b =>
                 {
                     b.Property<int>("Id")
@@ -122,6 +152,8 @@ namespace WaterLog_Backend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<DateTime>("LastNotificationDate");
+
                     b.Property<DateTime>("LatestTimeStamp");
 
                     b.Property<DateTime>("OriginalTimeStamp");
@@ -150,6 +182,25 @@ namespace WaterLog_Backend.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Segments");
+                });
+
+            modelBuilder.Entity("WaterLog_Backend.Models.TankLevelsEntry", b =>
+                {
+                    b.Property<int>("TankId")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Instruction");
+
+                    b.Property<string>("LevelStatus");
+
+                    b.Property<int>("Percentage");
+
+                    b.Property<int>("PumpId");
+
+                    b.HasKey("TankId");
+
+                    b.ToTable("TankLevels");
                 });
 
             modelBuilder.Entity("WaterLog_Backend.Models.LocationSegmentsEntry", b =>

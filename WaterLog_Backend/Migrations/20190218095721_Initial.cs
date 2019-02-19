@@ -9,6 +9,21 @@ namespace WaterLog_Backend.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "HistoryLogs",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    Type = table.Column<int>(nullable: false),
+                    Date = table.Column<DateTime>(nullable: false),
+                    EventsId = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_HistoryLogs", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Locations",
                 columns: table => new
                 {
@@ -38,6 +53,19 @@ namespace WaterLog_Backend.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Monitors", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Pumps",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    Status = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Pumps", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -82,6 +110,7 @@ namespace WaterLog_Backend.Migrations
                     Severity = table.Column<string>(nullable: true),
                     OriginalTimeStamp = table.Column<DateTime>(nullable: false),
                     LatestTimeStamp = table.Column<DateTime>(nullable: false),
+                    LastNotificationDate = table.Column<DateTime>(nullable: false),
                     ResolvedStatus = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
@@ -101,6 +130,22 @@ namespace WaterLog_Backend.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Segments", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TankLevels",
+                columns: table => new
+                {
+                    TankId = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    PumpId = table.Column<int>(nullable: false),
+                    Percentage = table.Column<int>(nullable: false),
+                    LevelStatus = table.Column<string>(nullable: true),
+                    Instruction = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TankLevels", x => x.TankId);
                 });
 
             migrationBuilder.CreateTable(
@@ -143,10 +188,16 @@ namespace WaterLog_Backend.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "HistoryLogs");
+
+            migrationBuilder.DropTable(
                 name: "LocationSegments");
 
             migrationBuilder.DropTable(
                 name: "Monitors");
+
+            migrationBuilder.DropTable(
+                name: "Pumps");
 
             migrationBuilder.DropTable(
                 name: "Readings");
@@ -156,6 +207,9 @@ namespace WaterLog_Backend.Migrations
 
             migrationBuilder.DropTable(
                 name: "SegmentLeaks");
+
+            migrationBuilder.DropTable(
+                name: "TankLevels");
 
             migrationBuilder.DropTable(
                 name: "Locations");

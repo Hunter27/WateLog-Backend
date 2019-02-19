@@ -10,8 +10,8 @@ using WaterLog_Backend.Models;
 namespace WaterLog_Backend.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20190214131337_Migration5")]
-    partial class Migration5
+    [Migration("20190213141832_Migration2")]
+    partial class Migration2
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -32,10 +32,6 @@ namespace WaterLog_Backend.Migrations
                     b.Property<int>("SegmentId");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("LocationId");
-
-                    b.HasIndex("SegmentId");
 
                     b.ToTable("LocationSegments");
                 });
@@ -150,36 +146,6 @@ namespace WaterLog_Backend.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Segments");
-                });
-
-            modelBuilder.Entity("WaterLog_Backend.Models.TankLevelsEntry", b =>
-                {
-                    b.Property<int>("TankId")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("Instruction");
-
-                    b.Property<string>("LevelStatus");
-
-                    b.Property<int>("Percentage");
-
-                    b.HasKey("TankId");
-
-                    b.ToTable("TankLevels");
-                });
-
-            modelBuilder.Entity("WaterLog_Backend.Models.LocationSegmentsEntry", b =>
-                {
-                    b.HasOne("WaterLog_Backend.Models.LocationsEntry", "LocationsEntry")
-                        .WithMany()
-                        .HasForeignKey("LocationId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("WaterLog_Backend.Models.SegmentsEntry", "segmentsEntry")
-                        .WithMany()
-                        .HasForeignKey("SegmentId")
-                        .OnDelete(DeleteBehavior.Cascade);
                 });
 #pragma warning restore 612, 618
         }

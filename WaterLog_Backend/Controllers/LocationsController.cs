@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,51 +13,54 @@ namespace WaterLog_Backend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class TankLevelsController : ControllerBase
+    public class LocationsController : ControllerBase
     {
         private readonly DatabaseContext _db;
         readonly IConfiguration _config;
-        public TankLevelsController(DatabaseContext context, IConfiguration config)
+        public LocationsController(DatabaseContext context, IConfiguration config)
         {
             _db = context;
             _config = config;
         }
 
-        // GET api/levels
+        // GET api/values
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TankLevelsEntry>>> Get()
+        public async Task<ActionResult<IEnumerable<LocationsEntry>>> GetLocations()
         {
-            return await _db.TankLevels.ToListAsync();
+            return await _db.Locations.ToListAsync();
         }
 
-        // GET api/levelsById/
+        // GET api/location/
         [HttpGet("{id}")]
-        public async Task<ActionResult<TankLevelsEntry>> Get(int id)
+        public async Task<ActionResult<LocationsEntry>> GetLocationsById(int id)
         {
-            return await _db.TankLevels.FindAsync(id);
+            return await _db.Locations.FindAsync(id);
         }
 
-        // POST api/level
+        // POST api/location
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] TankLevelsEntry value)
+        public async Task<IActionResult> PostLocations([FromBody] LocationsEntry value)
         {
             if (ModelState.IsValid)
             {
-                await _db.TankLevels.AddAsync(value);
+                await _db.Locations.AddAsync(value);
                 await _db.SaveChangesAsync();
                 return Ok("Ok");
             }
-            else{
+            else
+            {
                 return new BadRequestObjectResult("Not Found");
             }
+
         }
 
-        // PUT api/levelById/
+        // PUT api/location/
         [HttpPut("{id}")]
-        public async Task Put(int id, [FromBody] TankLevelsEntry value)
+        public async Task PutLocations(int id, [FromBody] LocationsEntry value)
         {
-            try {
-                var old = await _db.TankLevels.FindAsync(id);
+            try
+            {
+                var old = await _db.Locations.FindAsync(id);
                 _db.Entry(old).CurrentValues.SetValues(value);
                 await _db.SaveChangesAsync();
             }
@@ -67,14 +69,14 @@ namespace WaterLog_Backend.Controllers
                 throw new Exception(error.Message);
             }
         }
-      // DELETE api/levelById/
+        // DELETE api/location/
         [HttpDelete("{id}")]
-        public async Task Delete(int id)
+        public async Task DeleteLocations(int id)
         {
             try
             {
-                var entry = await _db.TankLevels.FindAsync(id);
-                _db.TankLevels.Remove(entry);
+                var entry = await _db.Locations.FindAsync(id);
+                _db.Locations.Remove(entry);
                 await _db.SaveChangesAsync();
             }
             catch (Exception error)

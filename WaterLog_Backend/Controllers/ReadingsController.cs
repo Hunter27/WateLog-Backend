@@ -13,7 +13,6 @@ using WaterLog_Backend.Models;
 
 namespace WaterLog_Backend.Controllers
 {
-
     [Route("api/[controller]")]
     [ApiController]
     public class ReadingsController : ControllerBase
@@ -29,43 +28,50 @@ namespace WaterLog_Backend.Controllers
             _service = service;
         }
 
-        // GET api/values
+        // GET api/readings
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ReadingsEntry>>> Get()
         {
             return await _db.Readings.ToListAsync();
         }
 
-        // GET api/values/5
+        // GET api/readingsById/
         [HttpGet("{id}")]
         public async Task<ActionResult<ReadingsEntry>> Get(int id)
         {
             return await _db.Readings.FindAsync(id);
         }
 
-        // POST api/values
+        // POST api/readings
         [HttpPost]
         public async Task Post([FromBody] ReadingsEntry value)
         {
-                value.TimesStamp = DateTime.Now;
-                await _db.Readings.AddAsync(value);
-                await _db.SaveChangesAsync();
-                Procedures procedure = new Procedures(_db, _config);
-                await procedure.triggerInsert(value);
+            value.TimesStamp = DateTime.Now;
+            await _db.Readings.AddAsync(value);
+            await _db.SaveChangesAsync();
+            Procedures procedure = new Procedures(_db, _config);
+            await procedure.triggerInsert(value);
+        
         }
 
         [HttpPost("{value}")]
-        public async Task Post([FromBody] int value)
+        public async Task Post([FromBody] InputSensor values)
         {
             ReadingsEntry reading = new ReadingsEntry();
+            ReadingsEntry reading2 = new ReadingsEntry();
             reading.TimesStamp = DateTime.UtcNow;
-            reading.Value = value;
-            reading.MonitorsId = 2;
+            reading2.TimesStamp = DateTime.UtcNow;
+            reading.Value = values.valueIn;
+            reading2.Value = values.valueOut;
+            reading.MonitorsId = values.IdIn;
+            reading2.MonitorsId = values.IdOut;
             await _db.Readings.AddAsync(reading);
+            await _db.SaveChangesAsync();
+            await _db.Readings.AddAsync(reading2);
             await _db.SaveChangesAsync();
         }
 
-        // PUT api/values/5
+        // PUT api/readings/
         [HttpPut("{id}")]
         public async Task Put(int id, [FromBody] ReadingsEntry value)
         {
@@ -81,7 +87,7 @@ namespace WaterLog_Backend.Controllers
             }
         }
 
-        // DELETE api/values/5
+        // DELETE api/readingsById/
         [HttpDelete("{id}")]
         public async Task Delete(int id)
         {
