@@ -25,20 +25,19 @@ namespace WaterLog_Backend
 
         public async Task triggerInsert(ReadingsEntry value)
         {
-            IEnumerable<SegmentsEntry> allSegments = _db.Segments;
+            SegmentsEntry segment = await _db.Segments.Where(ins => ins.SenseIDIn == value.MonitorsId).SingleOrDefaultAsync();
+            if (segment == null)
+            {
+                return;
+            }
+
             int segmentInid = -1;
             int segmentOutid = -1;
             int segmentid = -1;
-            foreach (SegmentsEntry seg in allSegments)
-            {
-                if (seg.SenseIDIn == value.MonitorsId)
-                {
-                    segmentInid = seg.SenseIDIn;
-                    segmentOutid = seg.SenseIDOut;
-                    segmentid = seg.Id;
-                    break;
-                }
-            }
+
+            segmentInid = segment.SenseIDIn;
+            segmentOutid = segment.SenseIDOut;
+            segmentid = segment.Id;
 
             ReadingsEntry reading1 = await _db.Readings
             .Where(r => r.MonitorsId == segmentInid)
@@ -447,6 +446,85 @@ namespace WaterLog_Backend
             if (value < 9.23) return getReturn(1);  // 1: Summer
             return getReturn(2);    // 2: Autumn
         }
+
+        //Calculates the data points of the wastage based on period
+        public async Task<DataPoints<DateTime, double>[]> SummaryPeriodUsageAsync(Period timeframe)
+        {
+            switch (timeframe)
+            {
+                case Period.Daily:
+                    return sumarryDailyUsage(await _db
+                    .SegmentEvents.Where(a => a.TimeStamp.Month == DateTime.Now.Month && a.TimeStamp.Day == DateTime.Now.Day && a.TimeStamp.Year == DateTime.Now.Year)
+                    .GroupBy(b => b.TimeStamp.Hour)
+                    .ToListAsync());
+
+                case Period.Monthly:
+                    return (summaryMonthlyUsage(await _db.SegmentEvents.GroupBy(b => b.TimeStamp.Month)
+                    .ToListAsync()));
+
+                case Period.Seasonally:
+                    var summerList = await _db.SegmentEvents
+                    .Where(a => getSeason(a.TimeStamp, true) == 1)
+                    .ToListAsync();
+
+                    var winterList = await _db.SegmentEvents
+                    .Where(a =>  getSeason(a.TimeStamp, true) == 3)
+                    .ToListAsync();
+
+                    var autumnList = await _db.SegmentEvents
+                    .Where(a =>getSeason(a.TimeStamp, true) == 2)
+                    .ToListAsync();
+
+                    var springList = await _db.SegmentEvents
+                    .Where(a => getSeason(a.TimeStamp, true) == 0)
+                    .ToListAsync();
+
+                    return summarySeasonallyUsage(summerList, winterList, autumnList, springList);
+                default:
+                    return null;
+            }
+        }
+
+        public async Task<DataPoints<String,double>> SummaryPeriodCostsSeasonAsync()
+        {
+            var summerList = await _db.SegmentEvents
+                   .Where(a => getSeason(a.TimeStamp, true) == 1)
+                   .ToListAsync();
+
+            var winterList = await _db.SegmentEvents
+            .Where(a => getSeason(a.TimeStamp, true) == 3)
+            .ToListAsync();
+
+            var autumnList = await _db.SegmentEvents
+            .Where(a => getSeason(a.TimeStamp, true) == 2)
+            .ToListAsync();
+
+            var springList = await _db.SegmentEvents
+            .Where(a => getSeason(a.TimeStamp, true) == 0)
+            .ToListAsync();
+
+            var summary = summarySeasonsCost(summerList, winterList, autumnList, springList);
+            return summary;
+        }
+        //Calculates the data points of the cost based on period
+        public async Task<DataPoints<DateTime, double>[]> SummaryPeriodCostsAsync(Period timeframe)
+        {
+            switch (timeframe)
+            {
+                case Period.Daily:
+                    return sumamryDailyCost(await _db
+                    .SegmentEvents.Where(a => a.TimeStamp.Month == DateTime.Now.Month && a.TimeStamp.Day == DateTime.Now.Day && a.TimeStamp.Year == DateTime.Now.Year)
+                    .GroupBy(b => b.TimeStamp.Hour)
+                    .ToListAsync());
+
+                case Period.Monthly:
+                    return (summaryMonthlyCost(await _db.SegmentEvents.GroupBy(b => b.TimeStamp.Month)
+                    .ToListAsync()));
+                default:
+
+                    return null;
+            }
+        }
         //Returns an array of yearly sorted data
         // 0 - summer
         // 1 - winter
@@ -497,9 +575,7 @@ namespace WaterLog_Backend
                         foreach (SegmentEventsEntry lst2 in lst)
                         {
                             totalForMonth += ((lst2.FlowIn - lst2.FlowOut) / 60);
-
                         }
-
                     }
                     yearly.AddPoint(list.ElementAt(i).ElementAt(0).TimeStamp, totalForMonth);
                 }
@@ -508,7 +584,7 @@ namespace WaterLog_Backend
                 ret[0] = yearly;
                 return ret;
             }
-            catch(Exception error)
+            catch (Exception error)
             {
                 throw new Exception(error.Message);
             }
@@ -580,9 +656,7 @@ namespace WaterLog_Backend
                         foreach (SegmentEventsEntry lst2 in lst)
                         {
                             totalForHour += ((lst2.FlowIn - lst2.FlowOut) / 60);
-
                         }
-
                     }
                     daily.AddPoint(list.ElementAt(i).ElementAt(0).TimeStamp, totalForHour);
                 }
@@ -602,5 +676,265 @@ namespace WaterLog_Backend
             Seasonally,
             Monthly
         }
-    }
+
+        public DataPoints<DateTime, double>[] sumarryDailyUsage(List<IGrouping<int, SegmentEventsEntry>> list)
+        {
+            DataPoints<DateTime, double> daily = new DataPoints<DateTime, double>();
+            var totalForHour = 0.0;
+            for (int i = 0; i < list.Count; i++)
+            {
+                //We have a list per hour of current day.
+                //Group these groups by segmentId
+                totalForHour = 0.0;
+                var segments = list.ElementAt(i).GroupBy(a => a.SegmentsId);
+                foreach (IGrouping<int, SegmentEventsEntry> lst in segments)
+                {
+                    foreach (SegmentEventsEntry lst2 in lst)
+                    {
+                        totalForHour += ((lst2.FlowIn) / 60);
+                    }
+                }
+                daily.AddPoint(list.ElementAt(i).ElementAt(0).TimeStamp, totalForHour);
+            }
+            DataPoints<DateTime, double>[] ret = new DataPoints<DateTime, double>[1];
+            ret[0] = daily;
+            return ret;
+        }
+
+        //public double summaryMonthlyUsage(List<IGrouping<int, SegmentEventsEntry>> list)
+        public DataPoints<DateTime, double>[] summaryMonthlyUsage(List<IGrouping<int, SegmentEventsEntry>> list)
+        {
+            DataPoints<DateTime, double> monthly = new DataPoints<DateTime, double>();
+            var totalForDay = 0.0;
+            for (int i = 0; i < list.Count; i++)
+            {
+                //We have a list per hour of current day.
+                //Group these groups by segmentId
+                totalForDay = 0.0;
+                var segments = list.ElementAt(i).GroupBy(a => a.SegmentsId);
+                foreach (IGrouping<int, SegmentEventsEntry> lst in segments)
+                {
+                    foreach (SegmentEventsEntry lst2 in lst)
+                    {
+                        totalForDay += ((lst2.FlowIn) / 60);
+                    }
+                }
+                monthly.AddPoint(list.ElementAt(i).ElementAt(0).TimeStamp, totalForDay);
+            }
+
+            //See what months to add
+            int month = 1;
+            List<int> monthsAlreadyThere = new List<int>();
+            foreach (DataNode<DateTime, double> var in monthly.dataPoints)
+            {
+                monthsAlreadyThere.Add(var.x.Month);
+            }
+
+            for (int i = 1; i <= 12; i++)
+            {
+                if (!(monthsAlreadyThere.Contains(i)))
+                {
+                    monthly.AddPoint(new DateTime(2000, i, 1), 0.0);
+                }
+            }
+            monthly.dataPoints = monthly.dataPoints.OrderBy(a => a.x.Month).ToList();
+            DataPoints<DateTime, double>[] ret = new DataPoints<DateTime, double>[1];
+            ret[0] = monthly;
+            return ret;
+        }
+
+        public DataPoints<DateTime, double>[] YearlyUsage(List<IGrouping<int, SegmentEventsEntry>> list)
+        {
+            DataPoints<DateTime, double> yearly = new DataPoints<DateTime, double>();
+            var totalForMonth = 0.0;
+            for (int i = 0; i < list.Count; i++)
+            {
+                //We have a list per hour of current day.
+                //Group these groups by segmentId
+                totalForMonth = 0.0;
+                var segments = list.ElementAt(i).GroupBy(a => a.SegmentsId);
+                foreach (IGrouping<int, SegmentEventsEntry> lst in segments)
+                {
+                    foreach (SegmentEventsEntry lst2 in lst)
+                    {
+                        totalForMonth += ((lst2.FlowIn) / 60);
+                    }
+                }
+                yearly.AddPoint(list.ElementAt(i).ElementAt(0).TimeStamp, totalForMonth);
+            }
+            DataPoints<DateTime, double>[] ret = new DataPoints<DateTime, double>[1];
+               ret[0] = yearly;
+            return ret;
+        }
+
+        public DataPoints<DateTime, double>[] summarySeasonallyUsage(List<SegmentEventsEntry> summer, List<SegmentEventsEntry> winter, List<SegmentEventsEntry> autumn, List<SegmentEventsEntry> spring)
+        {
+            //Get Summer
+            var sortedSummer = YearlyUsage(summer.GroupBy(a => a.TimeStamp.Month).ToList());
+            //Get Winter
+            var sortedWinter = YearlyUsage(winter.GroupBy(a => a.TimeStamp.Month).ToList());
+            //Get Autumn
+            var sortedAutumn = YearlyUsage(autumn.GroupBy(a => a.TimeStamp.Month).ToList());
+            //Get Spring
+            var sortedSpring = YearlyUsage(spring.GroupBy(a => a.TimeStamp.Month).ToList());
+
+            DataPoints<DateTime, double>[] arrayOfSeasons = new DataPoints<DateTime, double>[4];
+            arrayOfSeasons[0] = sortedSummer[0];
+            arrayOfSeasons[1] = sortedWinter[0];
+            arrayOfSeasons[2] = sortedSpring[0];
+            arrayOfSeasons[3] = sortedAutumn[0];
+            return arrayOfSeasons;
+        }
+
+        public DataPoints<DateTime, double>[] sumamryDailyCost(List<IGrouping<int, SegmentEventsEntry>> list)
+        {
+            DataPoints<DateTime, double> daily = new DataPoints<DateTime, double>();
+            var totalForHour = 0.0;
+            for (int i = 0; i < list.Count; i++)
+            {
+                //We have a list per hour of current day.
+                //Group these groups by segmentId
+                totalForHour = 0.0;
+                var segments = list.ElementAt(i).GroupBy(a => a.SegmentsId);
+                foreach (IGrouping<int, SegmentEventsEntry> lst in segments)
+                {
+                    foreach (SegmentEventsEntry lst2 in lst)
+                    {
+                        totalForHour += ((lst2.FlowIn) / 60);
+                    }
+                 }
+                double cost = (totalForHour) * 37;
+                daily.AddPoint(list.ElementAt(i).ElementAt(0).TimeStamp, cost);
+            }
+            DataPoints<DateTime, double>[] ret = new DataPoints<DateTime, double>[1];
+            ret[0] = daily;
+            return ret;
+        }
+
+        public DataPoints<DateTime, double>[] summaryMonthlyCost(List<IGrouping<int, SegmentEventsEntry>> list)
+        {
+            DataPoints<DateTime, double> monthly = new DataPoints<DateTime, double>();
+            var totalForDay = 0.0;
+            for (int i = 0; i < list.Count; i++)
+            {
+                //We have a list per hour of current day.
+                //Group these groups by segmentId
+                totalForDay = 0.0;
+                var segments = list.ElementAt(i).GroupBy(a => a.SegmentsId);
+                foreach (IGrouping<int, SegmentEventsEntry> lst in segments)
+                {
+                    foreach (SegmentEventsEntry lst2 in lst)
+                    {
+                        totalForDay += ((lst2.FlowIn) / 60);
+                    }
+
+                }
+                double cost = (totalForDay) * 37;
+                monthly.AddPoint(list.ElementAt(i).ElementAt(0).TimeStamp, cost);
+            }
+
+            //See what months to add
+            int month = 1;
+            List<int> monthsAlreadyThere = new List<int>();
+            foreach (DataNode<DateTime, double> var in monthly.dataPoints)
+            {
+                monthsAlreadyThere.Add(var.x.Month);
+            }
+
+            for (int i = 1; i <= 12; i++)
+            {
+                if (!(monthsAlreadyThere.Contains(i)))
+                {
+                    monthly.AddPoint(new DateTime(2000, i, 1), 0.0);
+                }
+            }
+            monthly.dataPoints = monthly.dataPoints.OrderBy(a => a.x.Month).ToList();
+            DataPoints<DateTime, double>[] ret = new DataPoints<DateTime, double>[1];
+            ret[0] = monthly;
+            return ret;
+        }
+        public DataPoints<String, double> summarySeasonsCost(List<SegmentEventsEntry> summer, List<SegmentEventsEntry> winter, List<SegmentEventsEntry> autumn, List<SegmentEventsEntry> spring)
+        {
+            DataPoints<DateTime,double>[] usage = summarySeasonallyUsage(summer, winter, autumn, spring);
+            List<double> cost_season = new List<double>();
+
+            //Summer season
+            if (usage[0].dataPoints.Count != 0)
+            {
+                List<double> vals = usage[0].getv();
+                double sum = 0;
+                for (int i = 0; i < vals.Count; i++)
+                {
+                    sum += vals[i];
+                }
+                double summer_cost = sum * 37;
+                cost_season.Add(summer_cost);
+            }
+            else
+            {
+                cost_season.Add(0);
+            }
+
+            //winter season
+            if (usage[1].dataPoints.Count != 0)
+            {
+                List<double> vals1 = usage[1].getv();
+                double sum1 = 0;
+
+                for (int i = 0; i < vals1.Count; i++)
+                {
+                    sum1 += vals1[i];
+                }
+                double winter_cost = sum1 * 37;
+                cost_season.Add(winter_cost);
+            }
+            else
+            {
+                cost_season.Add(0);
+            }
+            //spring season
+            if (usage[2].dataPoints.Count != 0)
+            {
+                List<double> vals2 = usage[2].getv();
+                double sum2 = 0;
+
+                for (int i = 0; i < vals2.Count; i++)
+                {
+                    sum2 += vals2[i];
+                }
+
+                double spring_cost = sum2 * 37;
+                cost_season.Add(spring_cost);
+            }
+            else
+            {
+                cost_season.Add(0);
+            }
+            //Autum season
+            if (usage[3].dataPoints.Count != 0)
+            {
+                List<double> vals3 = usage[3].getv();
+                double sum3 = 0;
+
+                for (int i = 0; i < vals3.Count; i++)
+                {
+                    sum3 += vals3[i];
+                }
+                double autum_cost = sum3 * 37;
+                cost_season.Add(autum_cost);
+            }
+            else
+            {
+                cost_season.Add(0);
+            }
+            DataPoints<String, double> arrayOfSeasonsCost = new DataPoints<String, double>();
+            arrayOfSeasonsCost.AddPoint("Summer", cost_season[0]);
+            arrayOfSeasonsCost.AddPoint("Winter", cost_season[1]);
+            arrayOfSeasonsCost.AddPoint("Spring", cost_season[2]);
+            arrayOfSeasonsCost.AddPoint("Autum", cost_season[3]);
+            return arrayOfSeasonsCost;
+        }
+    } 
 }
+
+
