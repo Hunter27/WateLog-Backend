@@ -24,14 +24,14 @@ namespace WaterLog_Backend.Controllers
 
         // GET api/values
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<SegmentEventsEntry>>> Get()
+        public async Task<ActionResult<IEnumerable<SegmentEventsEntry>>> GetAllSegmentEvents()
         {
             return await _db.SegmentEvents.ToListAsync();
         }
 
         // GET api/values/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<SegmentEventsEntry>> Get(int id)
+        public async Task<ActionResult<SegmentEventsEntry>> GetSegmentById(int id)
         {
             var segment = await _db.SegmentEvents.FindAsync(id);
 
@@ -44,7 +44,7 @@ namespace WaterLog_Backend.Controllers
 
         // POST api/values
         [HttpPost]
-        public async Task Post([FromBody] SegmentEventsEntry value)
+        public async Task AddSegmentEvent([FromBody] SegmentEventsEntry value)
         {
             try
             {
@@ -158,7 +158,7 @@ namespace WaterLog_Backend.Controllers
 
         // PUT api/values/5
         [HttpPut("{id}")]
-        public async Task Put(int id, [FromBody] SegmentEventsEntry value)
+        public async Task UpdateSegmentEvent(int id, [FromBody] SegmentEventsEntry value)
         {
             try
             {
@@ -174,7 +174,7 @@ namespace WaterLog_Backend.Controllers
 
         // DELETE api/values/5
         [HttpDelete("{id}")]
-        public async Task Delete(int id)
+        public async Task DeleteSegmentEvent(int id)
         {
             var entry = await _db.SegmentEvents.FindAsync(id);
             _db.SegmentEvents.Remove(entry);
