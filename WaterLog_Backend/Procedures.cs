@@ -262,7 +262,17 @@ namespace WaterLog_Backend
                 .Where(sudo => sudo.SegmentsId == sectionid)
                 .Single();
 
-                string[] template = { "Segment " + leak.SegmentsId, getSegmentStatus(leak.SegmentsId), leak.Severity, getLeakPeriod(leak), Math.Round(calculateTotalCost(leak)).ToString(), Math.Round(calculatePerHourCost(leak)).ToString(), Math.Round(calculateLitresPerHour(leak)).ToString(), buildUrl(leak.Id) };
+                string[] template = 
+                {
+                 "Segment " + leak.SegmentsId,
+                  getSegmentStatus(leak.SegmentsId),
+                  leak.Severity,
+                  getLeakPeriod(leak),
+                  Math.Round(calculateTotalCost(leak)).ToString(),
+                  Math.Round(calculatePerHourCost(leak)).ToString(),
+                  Math.Round(calculateLitresPerHour(leak)).ToString(),
+                  buildUrl(leak.Id)
+                };
                 return template;
             }
             catch(Exception error)

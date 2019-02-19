@@ -81,7 +81,7 @@ namespace EmailNotifications
                     }
                     catch (Exception e)
                     {
-                        Console.WriteLine("{0} Exception caught.", e);
+                        throw new Exception("{0} Exception caught.", e);
                     }
                 }
             }
@@ -113,8 +113,18 @@ namespace EmailNotifications
                 {
                     table.StartBody();
                     int count = 0;
-                    string[] items = { "<b>" + values[0] + " has a " + values[1] + "</b>", "<b>("+ values[2]+")</b>","This problem has been <b>unresolved for " + values[3]+" days</b>",
-                                    "<b>R " + values[4] + "</b>", "<b>Has been lost!</b>","<b>"+values[6]+"L or R "+ values[5] + "</b>"," is currently being lost", "per hour","<b>Resolve or process the issue</b>",values[7],"call third party help: <u>011111929292</u>"};
+                    string[] items =
+                    {
+                        "<b>" + values[0] + " has a " + values[1] + "</b>",
+                        "<b>(" + values[2]+")</b>",
+                        "This problem has been <b>unresolved for " + values[3]+" days</b>",
+                        "<b>R " + values[4] + "</b>",
+                        "<b>Has been lost!</b>",
+                        "<b>" +values[6]+"L or R "+ values[5] + "</b>",
+                        " is currently being lost", "per hour","<b>Resolve or process the issue</b>"
+                        ,values[7],
+                        "call third party help: <u>011111929292</u>"
+                    };
                     foreach (var alert in items)
                     {
                         using (var tr = table.AddRow(classAttributes: "someattributes"))
