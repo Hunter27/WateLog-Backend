@@ -26,6 +26,8 @@
 #include <debug_printf.h>
 
 static uint8_t gsm_buffer[290];
+static char a[] = "{\"MonitorId\":\"xx\",\"Value\":\"xx\"}";//14-15; 27-28
+static bool faulty= false;
 
 /* This routine is called after an ASSERT() macro has failed.
  * @param line  the line number of the ASSERT() failure.
@@ -97,38 +99,60 @@ static void modem_callback(void *cookie, const char* response, uint16_t len)
 }
 
 int getFinalValue(int vals[]){
-	double value = (pow(2,4)*vals[0])+(pow(2,3)*vals[1])+(pow(2,2)*vals[2])+(2*vals[3])+(1*vals[4]);
-	return (int)value;
+    double value = (pow(2,5)*vals[0])+(pow(2,4)*vals[1])+(pow(2,3)*vals[2])+(pow(2,2)*vals[3])+(2*vals[4])+(1*vals[5]);
+    return (int)value;
+}
+void getMessageSend(int idMonitor){
+    int values[6];
+    values[0]= GPIO_ReadPinInput(GPIOD, 7);
+    values[1] = GPIO_ReadPinInput(GPIOD, 6);
+    values[2] = GPIO_ReadPinInput(GPIOD, 5);
+    values[3]= GPIO_ReadPinInput(GPIOD, 4);
+    values[4] = GPIO_ReadPinInput(GPIOC, 2);
+    values[5] = GPIO_ReadPinInput(GPIOC, 0);
+    int outV = getFinalValue(values);
+    char msg1[2];
+    char idMonitorArray[2];
+    if (outV<10){
+        sprintf(msg1, "%02u", outV);
+    }else{
+        sprintf(msg1, "%u", outV);
+    }
+    if (idMonitor<10){
+        sprintf(idMonitorArray,"%02u", idMonitor);
+    }else{
+        sprintf(idMonitorArray,"%u", idMonitor);
+    }
+    a[14]= idMonitorArray[0];
+    a[15]= idMonitorArray[1];
+    a[27]= msg1[0];
+    a[28]= msg1[1];
+    if (outV==0){
+        faulty = true;
+    }
+
 }
 
 int main(void)
 {
     Platform_init();
     DEBUGOUT("initialising\n");
-
     Platform_GsmPinInit();
     Platform_GsmEnable();
     gpio_pin_config_t gpioInConfig = { kGPIO_DigitalInput, 0 };
+    //6 bits for value
     GPIO_PinInit(GPIOD, 7, &gpioInConfig);
     GPIO_PinInit(GPIOD, 6, &gpioInConfig);
     GPIO_PinInit(GPIOD, 5, &gpioInConfig);
     GPIO_PinInit(GPIOD, 4, &gpioInConfig);
     GPIO_PinInit(GPIOC, 2, &gpioInConfig);
-    int values[5];
-    values[0]= GPIO_ReadPinInput(GPIOD, 7);
-    values[1] = GPIO_ReadPinInput(GPIOD, 6);
-    values[2] = GPIO_ReadPinInput(GPIOD, 5);
-    values[3]= GPIO_ReadPinInput(GPIOD, 4);
-    values[4] = GPIO_ReadPinInput(GPIOC, 2);
-    DEBUGOUT("Value at pin 18 is");
-    int outV = getFinalValue(values);
-    char msg1[2];
-    sprintf(msg1, "%u", outV);
-    char a[] = "{\"Value\":\"xx\"}";
-    a[10]= msg1[0];
-    a[11]= msg1[1];
+    GPIO_PinInit(GPIOC, 0, &gpioInConfig);
+    //1 bit for Id
+    gpio_pin_config_t gpioInConfig2 = { kGPIO_DigitalOutput,0};
+    GPIO_PinInit(GPIOA, 19, &gpioInConfig2);
+    GPIO_PinInit(GPIOA, 18, &gpioInConfig2);
+    //GPIO_WritePinOutput(GPIOA, 18, 1);
     Led_Background(100, 0, 100); /* magenta = waiting for gsm carrier */
-
     DEBUGOUT("creating Transport layers\n");
     Transport* transport = gsm_uart_transport_create();
     ASSERT(transport != NULL);
@@ -137,7 +161,7 @@ int main(void)
     ASSERT(transport != NULL);
 
 #if (defined(DEBUG_LOG_MODEM) && (DEBUG_LOG_MODEM > 0))
-    transport = log_modem_transport_create(transport, debug_printf,
+    transport = log_mod1111em_transport_create(transport, debug_printf,
                                            TLOG_TRACE | TLOG_TIME);
     ASSERT(transport != NULL);
 #endif /* DEBUG_LOG_MODEM */
@@ -175,6 +199,21 @@ int main(void)
     cr = Client_register(client, topicName1, &topic);
     ASSERT(cr == CLIENT_SUCCESS);
     DEBUGOUT("publishing\n");
+    int count =0;
+    faulty = false;
+    for (int i=0;i<2;i++){
+        GPIO_WritePinOutput(GPIOA, 19, i);
+        getMessageSend(count);
+        cr = Client_publish(client, topic, MQTT_QOS1, false,
+                               (uint8_t*)a, strlen(a), NULL);
+        ASSERT(cr == CLIENT_SUCCESS);
+        count++;
+    }
+    //reset arduino if faulty sensor
+    if (faulty == true){
+        GPIO_WritePinOutput(GPIOA, 18, 1);
+        GPIO_WritePinOutput(GPIOA, 18, 0);
+    }
     cr = Client_publish(client, topic, MQTT_QOS1, false,
                        (uint8_t*)a, strlen(a), NULL);
     ASSERT(cr == CLIENT_SUCCESS);
@@ -185,11 +224,8 @@ int main(void)
     cr = Client_disconnect(client, 0);
     ASSERT(cr == CLIENT_SUCCESS);
     Led_Background(0, 100, 0);  /* green = disconnected */
-
     transport->shutdown(transport);
-
     DEBUGOUT("done\n");
-
     while (1)
     {
         Platform_sleep(60 * 60 * 1000);
