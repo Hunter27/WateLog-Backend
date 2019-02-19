@@ -9,7 +9,6 @@ using WaterLog_Backend.Models;
 
 namespace WaterLog_Backend.Controllers
 {
-
     [Route("api/[controller]")]
     [ApiController]
     public class SegmentEventsController : ControllerBase
@@ -22,14 +21,14 @@ namespace WaterLog_Backend.Controllers
             _config = config;
         }
 
-        // GET api/values
+        // GET api/events
         [HttpGet]
         public async Task<ActionResult<IEnumerable<SegmentEventsEntry>>> GetAllSegmentEvents()
         {
             return await _db.SegmentEvents.ToListAsync();
         }
 
-        // GET api/values/5
+        // GET api/eventsById/
         [HttpGet("{id}")]
         public async Task<ActionResult<SegmentEventsEntry>> GetSegmentById(int id)
         {
@@ -42,7 +41,7 @@ namespace WaterLog_Backend.Controllers
             return segment;
         }
 
-        // POST api/values
+        // POST api/events
         [HttpPost]
         public async Task AddSegmentEvent([FromBody] SegmentEventsEntry value)
         {
