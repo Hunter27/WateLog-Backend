@@ -8,7 +8,6 @@
 #include <common.h>
 #include <string.h>
 #include <math.h>
-
 #include <platform.h>
 #include <gsm.h>
 #include <pin_mux.h>
