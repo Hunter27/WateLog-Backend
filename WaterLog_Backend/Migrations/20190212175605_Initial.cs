@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace WaterLog_Backend.Migrations
 {
-    public partial class Migration1 : Migration
+    public partial class Initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -41,36 +41,66 @@ namespace WaterLog_Backend.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Segments",
-                columns: table => new
-                {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Segments", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Readings",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    SenseID = table.Column<int>(nullable: false),
+                    MonitorsId = table.Column<int>(nullable: false),
                     Value = table.Column<double>(nullable: false),
                     TimesStamp = table.Column<DateTime>(nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Readings", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Readings_Monitors_SenseID",
-                        column: x => x.SenseID,
-                        principalTable: "Monitors",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "SegmentEvents",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    SegmentsId = table.Column<int>(nullable: false),
+                    EventType = table.Column<string>(nullable: true),
+                    TimeStamp = table.Column<DateTime>(nullable: false),
+                    FlowIn = table.Column<double>(nullable: false),
+                    FlowOut = table.Column<double>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SegmentEvents", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "SegmentLeaks",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    SegmentsId = table.Column<int>(nullable: false),
+                    Severity = table.Column<string>(nullable: true),
+                    OriginalTimeStamp = table.Column<DateTime>(nullable: false),
+                    LatestTimeStamp = table.Column<DateTime>(nullable: false),
+                    ResolvedStatus = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SegmentLeaks", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Segments",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    SenseIDOut = table.Column<int>(nullable: false),
+                    SenseIDIn = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Segments", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -99,28 +129,6 @@ namespace WaterLog_Backend.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.CreateTable(
-                name: "SegmentEvents",
-                columns: table => new
-                {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    SegmentId = table.Column<int>(nullable: false),
-                    EventType = table.Column<string>(nullable: true),
-                    TimeStamp = table.Column<DateTime>(nullable: false),
-                    Value = table.Column<double>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_SegmentEvents", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_SegmentEvents_Segments_SegmentId",
-                        column: x => x.SegmentId,
-                        principalTable: "Segments",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
             migrationBuilder.CreateIndex(
                 name: "IX_LocationSegments_LocationId",
                 table: "LocationSegments",
@@ -130,16 +138,6 @@ namespace WaterLog_Backend.Migrations
                 name: "IX_LocationSegments_SegmentId",
                 table: "LocationSegments",
                 column: "SegmentId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Readings_SenseID",
-                table: "Readings",
-                column: "SenseID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_SegmentEvents_SegmentId",
-                table: "SegmentEvents",
-                column: "SegmentId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -148,16 +146,19 @@ namespace WaterLog_Backend.Migrations
                 name: "LocationSegments");
 
             migrationBuilder.DropTable(
+                name: "Monitors");
+
+            migrationBuilder.DropTable(
                 name: "Readings");
 
             migrationBuilder.DropTable(
                 name: "SegmentEvents");
 
             migrationBuilder.DropTable(
-                name: "Locations");
+                name: "SegmentLeaks");
 
             migrationBuilder.DropTable(
-                name: "Monitors");
+                name: "Locations");
 
             migrationBuilder.DropTable(
                 name: "Segments");

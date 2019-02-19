@@ -21,7 +21,7 @@ namespace WebApplication1
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
-            services.AddDbContext<DatabaseContext>(options => options.UseSqlServer(Configuration.GetSection("LocalLiveDBConnectionString").Value));
+            services.AddDbContext<DatabaseContext>(options => options.UseSqlServer(Configuration.GetSection("LiveConnectionString").Value));
             services.AddScoped<IControllerService, ControllerService>();
             services.AddCors(options =>
             {
@@ -31,6 +31,7 @@ namespace WebApplication1
                     .AllowAnyHeader()
                     .AllowCredentials());
             });
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

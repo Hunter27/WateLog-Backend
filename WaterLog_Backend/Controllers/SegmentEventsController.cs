@@ -49,17 +49,53 @@ namespace WaterLog_Backend.Controllers
         [HttpPost]
         public async Task Post([FromBody] SegmentEventsEntry value)
         {
+            try { 
             await _db.SegmentEvents.AddAsync(value);
             await _db.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("error", e);
+            }
         }
+
+        [Route("dailywastage")]
+        public async Task<DataPoints<DateTime,double>> GetDailyWastageGraphData()
+        {
+            Procedures proc = new Procedures(_db, _config);
+            var ret = await proc.CalculatePeriodWastageAsync(Procedures.Period.Daily);
+            return ret.FirstOrDefault();
+        }
+
+        [Route("monthlywastage")]
+        public async Task<DataPoints<DateTime, double>> GetMonthlyWastageGraphData()
+        {
+            Procedures proc = new Procedures(_db, _config);
+            var ret = await proc.CalculatePeriodWastageAsync(Procedures.Period.Monthly);
+            return ret.FirstOrDefault();
+        }
+
+        [Route("seasonallywastage")]
+        public async Task<DataPoints<DateTime, double>[]> GetSeasonallyWastageGraphData()
+        {
+            Procedures proc = new Procedures(_db, _config);
+            return await proc.CalculatePeriodWastageAsync(Procedures.Period.Seasonally);
+        }
+
 
         // PUT api/values/5
         [HttpPut("{id}")]
         public async Task Put(int id, [FromBody] SegmentEventsEntry value)
         {
+            try { 
             var old = await _db.SegmentEvents.FindAsync(id);
             _db.Entry(old).CurrentValues.SetValues(value);
             await _db.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("error", e);
+            }
         }
 
         // DELETE api/values/5

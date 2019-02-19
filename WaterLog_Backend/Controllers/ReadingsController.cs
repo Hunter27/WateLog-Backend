@@ -47,20 +47,20 @@ namespace WaterLog_Backend.Controllers
         [HttpPost]
         public async Task Post([FromBody] ReadingsEntry value)
         {
-            value.TimesStamp = DateTime.UtcNow;
-            await _db.Readings.AddAsync(value);
-            await _db.SaveChangesAsync();
-            Procedures procedure = new Procedures(_db, _config);
-            await procedure.triggerInsert(value);
+                value.TimesStamp = DateTime.Now;
+                await _db.Readings.AddAsync(value);
+                await _db.SaveChangesAsync();
+                Procedures procedure = new Procedures(_db, _config);
+                await procedure.triggerInsert(value);
         }
 
-        [HttpPost("{id,value}")]
-        public async Task Post([FromBody] int value,int MonitorId)
+        [HttpPost("{value}")]
+        public async Task Post([FromBody] int value)
         {
             ReadingsEntry reading = new ReadingsEntry();
             reading.TimesStamp = DateTime.UtcNow;
             reading.Value = value;
-            reading.MonitorsId = MonitorId;
+            reading.MonitorsId = 2;
             await _db.Readings.AddAsync(reading);
             await _db.SaveChangesAsync();
         }
@@ -69,9 +69,16 @@ namespace WaterLog_Backend.Controllers
         [HttpPut("{id}")]
         public async Task Put(int id, [FromBody] ReadingsEntry value)
         {
-            var old = await _db.Readings.FindAsync(id);
+            try
+            {
+                var old = await _db.Readings.FindAsync(id);
             _db.Entry(old).CurrentValues.SetValues(value);
             await _db.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("error", e);
+            }
         }
 
         // DELETE api/values/5

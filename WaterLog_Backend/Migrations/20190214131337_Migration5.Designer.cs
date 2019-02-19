@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WaterLog_Backend.Models;
 
 namespace WaterLog_Backend.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20190214131337_Migration5")]
+    partial class Migration5
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -76,19 +78,6 @@ namespace WaterLog_Backend.Migrations
                     b.ToTable("Monitors");
                 });
 
-            modelBuilder.Entity("WaterLog_Backend.Models.PumpEntry", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("Status");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Pumps");
-                });
-
             modelBuilder.Entity("WaterLog_Backend.Models.ReadingsEntry", b =>
                 {
                     b.Property<int>("Id")
@@ -133,8 +122,6 @@ namespace WaterLog_Backend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<DateTime>("LastNotificationDate");
-
                     b.Property<DateTime>("LatestTimeStamp");
 
                     b.Property<DateTime>("OriginalTimeStamp");
@@ -176,8 +163,6 @@ namespace WaterLog_Backend.Migrations
                     b.Property<string>("LevelStatus");
 
                     b.Property<int>("Percentage");
-
-                    b.Property<int>("PumpId");
 
                     b.HasKey("TankId");
 
