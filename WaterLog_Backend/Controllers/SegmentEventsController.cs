@@ -154,6 +154,46 @@ namespace WaterLog_Backend.Controllers
             {
                 throw error;
             }
+        [Route("dailyUsage")]
+        public async Task<DataPoints<DateTime, double>> GetDailyUsgaeGraphData()
+        {
+            Procedures proc = new Procedures(_db, _config);
+            var ret = await proc.SummaryPeriodUsageAsync(Procedures.Period.Daily);
+            return ret.FirstOrDefault();
+        }
+        [Route("monthlyUsage")]
+        public async Task<DataPoints<DateTime, double>> GetMonthlyUsageGraphData()
+        {
+            Procedures proc = new Procedures(_db, _config);
+            var ret = await proc.SummaryPeriodUsageAsync(Procedures.Period.Monthly);
+            return ret.FirstOrDefault();
+        }
+        [Route("seasonallyUsage")]
+        public async Task<DataPoints<DateTime, double>[]> GetSeasonallyUsgaeGraphData()
+        {
+            Procedures proc = new Procedures(_db, _config);
+            return await proc.SummaryPeriodUsageAsync(Procedures.Period.Seasonally);
+        }
+        [Route("dailyCost")]
+        public async Task<DataPoints<DateTime, double>> GetDailyCostGraphData()
+        {
+            Procedures proc = new Procedures(_db, _config);
+            var ret = await proc.SummaryPeriodCostsAsync(Procedures.Period.Daily);
+            return ret.FirstOrDefault();
+        }
+        [Route("monthlyCost")]
+        public async Task<DataPoints<DateTime, double>> GetMonthlyCostGraphData()
+        {
+            Procedures proc = new Procedures(_db, _config);
+            var ret = await proc.SummaryPeriodCostsAsync(Procedures.Period.Monthly);
+            return ret.FirstOrDefault();
+        }
+        [Route("seasonallyCost")]
+        public async Task<DataPoints<String, double>> GetSeasonallyUsageGraphData()
+        {
+            Procedures proc = new Procedures(_db, _config);
+            var ret = await proc.SummaryPeriodCostsSeasonAsync();
+            return ret;
         }
 
         // PUT api/values/5
