@@ -211,10 +211,6 @@ namespace Tests
             var empty = new List<SegmentEventsEntry>();
             var seasons = proc.summarySeasonallyUsage(dataset, empty, empty, empty);
             DataPoints<DateTime, double> list = new DataPoints<DateTime, double>();
-
-
-            //var i = proc.summarySeasonsCost(seasons);
-            //Assert.IsTrue(expected.Equals(proc.summarySeasonsCost(seasons)));
         }
         private List<SegmentEventsEntry> GetTestDataSummarySummer()
         {
