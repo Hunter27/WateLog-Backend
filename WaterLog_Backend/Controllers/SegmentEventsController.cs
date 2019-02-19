@@ -154,6 +154,8 @@ namespace WaterLog_Backend.Controllers
             {
                 throw error;
             }
+        }
+
         [Route("dailyUsage")]
         public async Task<DataPoints<DateTime, double>> GetDailyUsgaeGraphData()
         {
