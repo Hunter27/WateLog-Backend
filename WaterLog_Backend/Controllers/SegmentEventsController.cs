@@ -46,9 +46,10 @@ namespace WaterLog_Backend.Controllers
         [HttpPost]
         public async Task Post([FromBody] SegmentEventsEntry value)
         {
-            try { 
-            await _db.SegmentEvents.AddAsync(value);
-            await _db.SaveChangesAsync();
+            try
+            {
+                await _db.SegmentEvents.AddAsync(value);
+                await _db.SaveChangesAsync();
             }
             catch (Exception e)
             {
@@ -57,7 +58,7 @@ namespace WaterLog_Backend.Controllers
         }
 
         [Route("dailywastage")]
-        public async Task<DataPoints<DateTime,double>> GetDailyWastageGraphData()
+        public async Task<DataPoints<DateTime, double>> GetDailyWastageGraphData()
         {
             Procedures proc = new Procedures(_db, _config);
             var ret = await proc.CalculatePeriodWastageAsync(Procedures.Period.Daily);
@@ -87,36 +88,69 @@ namespace WaterLog_Backend.Controllers
             {
                 //Get all leaks first
                 var leaks = await _db.SegmentLeaks.Where(a => a.ResolvedStatus == "unresolved").ToListAsync();
-                List<GetAlerts> alerts = new List<GetAlerts>();
-                var proc = new Procedures(_db, _config);
-                foreach (SegmentLeaksEntry entry in leaks)
+                if (leaks != null)
                 {
-                    //Find Cost
-                    var cost = proc.calculatePerHourCost(entry);
-                    //Find Litre Usage
-                    //TODO: Call TotalLitres Used(Dependent on Usage/Cost Feature Branch)
-                    var litresUsed = proc.calculateTotaLitres(entry);
-                    alerts.Add(new GetAlerts(entry.OriginalTimeStamp, "Segment", entry.SegmentsId, "leak", cost, entry.Severity, litresUsed, 0.0));
-                }
-
-                //Find All Sensors that are faulty
-                var faultySensors = await _db.Monitors.Where(a => a.Status == "faulty").ToListAsync();
-                foreach (MonitorsEntry entry in faultySensors)
-                {
-                    //Get latest faulty sensor
-                    var sensor = await _db.Readings.Where(a => a.Value == 0)
-                    .OrderByDescending(a => a.TimesStamp)
-                    .FirstOrDefaultAsync();
-
-                    if (entry.Id == sensor.MonitorsId)
+                    List<GetAlerts> alerts = new List<GetAlerts>();
+                    var proc = new Procedures(_db, _config);
+                    foreach (SegmentLeaksEntry entry in leaks)
                     {
-                        //Have the correct information
-                        alerts.Add(new GetAlerts(sensor.TimesStamp, "Sensor", sensor.MonitorsId, "faulty", 0.0, "severe", 0.0, 0.0));
+                        //Find Cost
+                        var cost = proc.calculatePerHourCost(entry);
+                        //Find Litre Usage
+                        //TODO: Call TotalLitres Used(Dependent on Usage/Cost Feature Branch)
+                        var litresUsed = proc.calculateTotaLitres(entry);
+                        alerts.Add
+                        (
+                            new GetAlerts
+                            (
+                                entry.OriginalTimeStamp,
+                                "Segment",
+                                entry.SegmentsId,
+                                "leak",
+                                cost,
+                                entry.Severity,
+                                litresUsed,
+                                0.0
+                             )
+                        );
                     }
+
+                    //Find All Sensors that are faulty
+                    var faultySensors = await _db.Monitors.Where(a => a.Status == "faulty").ToListAsync();
+                    if (faultySensors != null)
+                    {
+                        foreach (MonitorsEntry entry in faultySensors)
+                        {
+                            //Get latest faulty sensor
+                            var sensor = await _db.Readings.Where(a => a.Value == 0)
+                                        .OrderByDescending(a => a.TimesStamp)
+                                        .FirstOrDefaultAsync();
+
+                            if (entry.Id == sensor.MonitorsId)
+                            {
+                                //Have the correct information
+                                alerts.Add
+                                (
+                                    new GetAlerts
+                                    (
+                                        sensor.TimesStamp,
+                                        "Sensor",
+                                        sensor.MonitorsId,
+                                        "faulty",
+                                        0.0,
+                                        "severe",
+                                        0.0,
+                                        0.0
+                                     )
+                                 );
+                            }
+                        }
+                    }
+                    return alerts;
                 }
-                return alerts;
+                throw new Exception("ERROR : Null SegmentLeaks");
             }
-            catch(Exception error)
+            catch (Exception error)
             {
                 throw error;
             }
@@ -126,10 +160,11 @@ namespace WaterLog_Backend.Controllers
         [HttpPut("{id}")]
         public async Task Put(int id, [FromBody] SegmentEventsEntry value)
         {
-            try { 
-            var old = await _db.SegmentEvents.FindAsync(id);
-            _db.Entry(old).CurrentValues.SetValues(value);
-            await _db.SaveChangesAsync();
+            try
+            {
+                var old = await _db.SegmentEvents.FindAsync(id);
+                _db.Entry(old).CurrentValues.SetValues(value);
+                await _db.SaveChangesAsync();
             }
             catch (Exception e)
             {
