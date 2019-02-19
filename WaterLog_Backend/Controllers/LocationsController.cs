@@ -25,21 +25,21 @@ namespace WaterLog_Backend.Controllers
 
         // GET api/values
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<LocationsEntry>>> Get()
+        public async Task<ActionResult<IEnumerable<LocationsEntry>>> GetLocations()
         {
             return await _db.Locations.ToListAsync();
         }
 
         // GET api/values/
         [HttpGet("{id}")]
-        public async Task<ActionResult<LocationsEntry>> Get(int id)
+        public async Task<ActionResult<LocationsEntry>> GetLocationsById(int id)
         {
             return await _db.Locations.FindAsync(id);
         }
 
         // POST api/values
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] LocationsEntry value)
+        public async Task<IActionResult> PostLocations([FromBody] LocationsEntry value)
         {
             if (ModelState.IsValid)
             {
@@ -54,9 +54,9 @@ namespace WaterLog_Backend.Controllers
 
         }
 
-        // PUT api/values/5
+        // PUT api/values/
         [HttpPut("{id}")]
-        public async Task Put(int id, [FromBody] LocationsEntry value)
+        public async Task PutLocations(int id, [FromBody] LocationsEntry value)
         {
             try
             {
@@ -71,7 +71,7 @@ namespace WaterLog_Backend.Controllers
         }
         // DELETE api/values/
         [HttpDelete("{id}")]
-        public async Task Delete(int id)
+        public async Task DeleteLocations(int id)
         {
             try
             {
