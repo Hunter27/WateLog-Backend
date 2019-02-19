@@ -28,7 +28,7 @@ namespace WaterLog_Backend.Controllers
             _service = service;
         }
 
-        // GET api/values
+        // GET api/segmentleaks
         [HttpGet]
         public async Task<ActionResult<IEnumerable<SegmentLeaksEntry>>> Get()
         {

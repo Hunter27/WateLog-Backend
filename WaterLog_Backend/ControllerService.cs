@@ -12,19 +12,19 @@ namespace WaterLog_Backend
     {
         private MonitorsController monitorController;
         private ReadingsController readingsController;
-        private SegmentEventsController segmenteventsController;
-        private SegmentLeaksController segmentleaksController;
+        private SegmentEventsController segmentEventsController;
+        private SegmentLeaksController segmentLeaksController;
         private SegmentsController segmentsController;
-        private HistoryLogController historylogController;
+        private HistoryLogController historyLogController;
 
         public ControllerService(DatabaseContext context, IConfiguration config)
         {
            monitorController = new MonitorsController(context,config);
            readingsController = new ReadingsController(context, config,this);
-           segmenteventsController = new SegmentEventsController(context,config);
-           segmentleaksController = new  SegmentLeaksController(context,config,this);
+           segmentEventsController = new SegmentEventsController(context,config);
+           segmentLeaksController = new  SegmentLeaksController(context,config,this);
            segmentsController = new SegmentsController(context,config);
-           historylogController = new HistoryLogController(context,config);
+           historyLogController = new HistoryLogController(context,config);
         }
 
         public MonitorsController GetMonitorsController()
@@ -39,12 +39,12 @@ namespace WaterLog_Backend
 
         public SegmentEventsController GetSegmentEventsController()
         {
-            return segmenteventsController;
+            return segmentEventsController;
         }
 
         public SegmentLeaksController GetSegmentLeaksController()
         {
-            return segmentleaksController;
+            return segmentLeaksController;
         }
 
         public SegmentsController GetSegmentsController()
@@ -54,7 +54,7 @@ namespace WaterLog_Backend
 
         public HistoryLogController GetHistoryLogController()
         {
-            return historylogController;
+            return historyLogController;
         }
     }
 

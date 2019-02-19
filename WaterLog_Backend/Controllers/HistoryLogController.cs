@@ -14,7 +14,6 @@ namespace WaterLog_Backend.Controllers
     [ApiController]
     public class HistoryLogController : ControllerBase
     {
-
         private readonly DatabaseContext _db;
         readonly IConfiguration _config;
         public HistoryLogController(DatabaseContext context, IConfiguration config)
@@ -23,12 +22,11 @@ namespace WaterLog_Backend.Controllers
             _config = config;
         }
 
-        // GET api/values
+        // GET api/eventhistory
         [HttpGet]
         public async Task<ActionResult<IEnumerable<HistoryLogEntry>>> Get()
         {
             return await _db.HistoryLogs.ToListAsync();
         }
-
     }
 }
