@@ -343,6 +343,47 @@ namespace WaterLog_Backend
                     return null;
             }
         }
+
+        public async Task<DataPoints<String,double>> SummaryPeriodCostsSeasonAsync()
+        {
+            var summerList = await _db.SegmentEvents
+                   .Where(a => getSeason(a.TimeStamp, true) == 1)
+                   .ToListAsync();
+
+            var winterList = await _db.SegmentEvents
+            .Where(a => getSeason(a.TimeStamp, true) == 3)
+            .ToListAsync();
+
+            var autumnList = await _db.SegmentEvents
+            .Where(a => getSeason(a.TimeStamp, true) == 2)
+            .ToListAsync();
+
+            var springList = await _db.SegmentEvents
+            .Where(a => getSeason(a.TimeStamp, true) == 0)
+            .ToListAsync();
+
+            var summary = summarySeasonsCost(summerList, winterList, autumnList, springList);
+            return summary;
+        }
+        //Calculates the data points of the cost based on period
+        public async Task<DataPoints<DateTime, double>[]> SummaryPeriodCostsAsync(Period timeframe)
+        {
+            switch (timeframe)
+            {
+                case Period.Daily:
+                    return sumamryDailyCost(await _db
+                    .SegmentEvents.Where(a => a.TimeStamp.Month == DateTime.Now.Month && a.TimeStamp.Day == DateTime.Now.Day && a.TimeStamp.Year == DateTime.Now.Year)
+                    .GroupBy(b => b.TimeStamp.Hour)
+                    .ToListAsync());
+
+                case Period.Monthly:
+                    return (summaryMonthlyCost(await _db.SegmentEvents.GroupBy(b => b.TimeStamp.Month)
+                    .ToListAsync()));
+                default:
+
+                    return null;
+            }
+        }
         //Returns an array of yearly sorted data
         // 0 - summer
         // 1 - winter
@@ -686,13 +727,15 @@ namespace WaterLog_Backend
             ret[0] = monthly;
             return ret;
         }
-        public DataPoints<String, double> summarySeasonsCost(DataPoints<DateTime, double>[] arrayOfSeasons)
+        public DataPoints<String, double> summarySeasonsCost(List<SegmentEventsEntry> summer, List<SegmentEventsEntry> winter, List<SegmentEventsEntry> autumn, List<SegmentEventsEntry> spring)
         {
+            DataPoints<DateTime,double>[] usage = summarySeasonallyUsage(summer, winter, autumn, spring);
+
             List<double> cost_season = new List<double>();
             //Summer season
-            if (arrayOfSeasons[0].dataPoints.Count != 0)
+            if (usage[0].dataPoints.Count != 0)
             {
-                List<double> vals = arrayOfSeasons[0].getv();
+                List<double> vals = usage[0].getv();
                 double sum = 0;
                 for (int i = 0; i < vals.Count; i++)
                 {
@@ -707,9 +750,9 @@ namespace WaterLog_Backend
             }
 
             //winter season
-            if (arrayOfSeasons[1].dataPoints.Count != 0)
+            if (usage[1].dataPoints.Count != 0)
             {
-                List<double> vals1 = arrayOfSeasons[1].getv();
+                List<double> vals1 = usage[1].getv();
                 double sum1 = 0;
 
                 for (int i = 0; i < vals1.Count; i++)
@@ -724,9 +767,9 @@ namespace WaterLog_Backend
                 cost_season.Add(0);
             }
             //spring season
-            if (arrayOfSeasons[2].dataPoints.Count != 0)
+            if (usage[2].dataPoints.Count != 0)
             {
-                List<double> vals2 = arrayOfSeasons[2].getv();
+                List<double> vals2 = usage[2].getv();
                 double sum2 = 0;
 
                 for (int i = 0; i < vals2.Count; i++)
@@ -742,9 +785,9 @@ namespace WaterLog_Backend
                 cost_season.Add(0);
             }
             //Autum season
-            if (arrayOfSeasons[3].dataPoints.Count != 0)
+            if (usage[3].dataPoints.Count != 0)
             {
-                List<double> vals3 = arrayOfSeasons[3].getv();
+                List<double> vals3 = usage[3].getv();
                 double sum3 = 0;
 
                 for (int i = 0; i < vals3.Count; i++)
