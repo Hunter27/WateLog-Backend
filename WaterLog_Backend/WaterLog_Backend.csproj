@@ -31,4 +31,8 @@
     <ProjectReference Include="..\EmailNotifications\EmailNotifications.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Migrations\" />
+  </ItemGroup>
+
 </Project>
