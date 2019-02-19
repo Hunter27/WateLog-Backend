@@ -15,10 +15,10 @@ namespace Tests
         public void TestCalculateDailyWastage()
         {
             var build = new ConfigurationBuilder();
-            IConfiguration _config = build.Build();
+            var _config = build.Build();
+            var proc = new Procedures(new DatabaseContext(), _config);
             var expected = GetTestExpectedDaily();
             var dataset = GetTestDataDaily();
-            Procedures proc = new Procedures(new DatabaseContext(),_config);
             Assert.IsTrue(expected.Equals((proc.CalculateDailyWastage(dataset))[0]));
         }
 
@@ -26,10 +26,10 @@ namespace Tests
         public void TestCalculateMonthlyWastage()
         {
             var build = new ConfigurationBuilder();
-            IConfiguration _config = build.Build();
+            var _config = build.Build();
+            var proc = new Procedures(new DatabaseContext(), _config);
             var expected = GetTestExpectedMonthly();
             var dataset = GetTestDataMonthly();
-            Procedures proc = new Procedures(new DatabaseContext(), _config);
             Assert.IsTrue(expected.Equals((proc.CalculateMonthlyWastage(dataset))[0]));
         }
 
@@ -144,72 +144,71 @@ namespace Tests
             return obj;
         }
 
-
         [Test]
         public void TestsummaryUsageDaily()
         {
             var build = new ConfigurationBuilder();
-            IConfiguration _config = build.Build();
+            var _config = build.Build();
+            var proc = new Procedures(new DatabaseContext(), _config);
             var expected = GetTestExpectedSummaryDaily();
             var dataset = GetTestDataSummaryDaily();
-            Procedures proc = new Procedures(new DatabaseContext(), _config);
-            var i = proc.sumarryDailyUsage(dataset);
             Assert.IsTrue(expected.Equals((proc.sumarryDailyUsage(dataset))[0]));
         }
+
         [Test]
         public void TestsummaryUsageMonthly()
         {
             var build = new ConfigurationBuilder();
-            IConfiguration _config = build.Build();
+            var _config = build.Build();
+            var proc = new Procedures(new DatabaseContext(), _config);
             var expected = GetTestExpectedSummaryMonthly();
             var dataset = GetTestDataSummaryMonthly();
-            Procedures proc = new Procedures(new DatabaseContext(), _config);
-            var i = proc.summaryMonthlyUsage(dataset);
             Assert.IsTrue(expected.Equals((proc.summaryMonthlyUsage(dataset))[0]));
         }
+
         [Test]
         public void TestSummarySeasonallyUsage()
         {
             var build = new ConfigurationBuilder();
-            IConfiguration _config = build.Build();
+            var _config = build.Build();
+            var proc = new Procedures(new DatabaseContext(), _config);
             var expected = GetTestExpectedSummarySummer();
             var dataset = GetTestDataSummarySummer();
             var empty = new List<SegmentEventsEntry>();
-            Procedures proc = new Procedures(new DatabaseContext(), _config);
-            var i = proc.summarySeasonallyUsage(dataset, empty, empty, empty)[0];
             Assert.IsTrue(expected.Equals((proc.summarySeasonallyUsage(dataset, empty, empty, empty))[0]));
         }
+
         [Test]
         public void TestsummaryUsageCost()
         {
             var build = new ConfigurationBuilder();
-            IConfiguration _config = build.Build();
+            var _config = build.Build();
+            var proc = new Procedures(new DatabaseContext(), _config);
             var expected = GetTestExpectedSummaryDailyCost();
             var dataset = GetTestDataSummaryDailyCost();
-            Procedures proc = new Procedures(new DatabaseContext(), _config);
-            var i = proc.sumamryDailyCost(dataset);
             Assert.IsTrue(expected.Equals((proc.sumamryDailyCost(dataset))[0]));
         }
+
         [Test]
         public void TestsummaryMonthlyCost()
         {
             var build = new ConfigurationBuilder();
-            IConfiguration _config = build.Build();
+            var _config = build.Build();
+            var proc = new Procedures(new DatabaseContext(), _config);
             var expected = GetTestExpectedSummaryMonthlyCost();
             var dataset = GetTestDataSummaryMonthly();
-            Procedures proc = new Procedures(new DatabaseContext(), _config);
-            var i = proc.summaryMonthlyCost(dataset);
             Assert.IsTrue(expected.Equals((proc.summaryMonthlyCost(dataset))[0]));
         }
+
         [Test]
         public void TestSummarySeasonallyCost()
         {
             var build = new ConfigurationBuilder();
-            IConfiguration _config = build.Build();
+            var _config = build.Build();
+            var proc = new Procedures(new DatabaseContext(), _config);
             var expected = GetTestExpectedSummarySummerCost();
             var dataset = GetTestDataSummarySummer();
             var empty = new List<SegmentEventsEntry>();
-            Procedures proc = new Procedures(new DatabaseContext(), _config);
             var seasons = proc.summarySeasonallyUsage(dataset, empty, empty, empty);
             DataPoints<DateTime, double> list = new DataPoints<DateTime, double>();
 
@@ -237,7 +236,6 @@ namespace Tests
         private DataPoints<DateTime, double> GetTestExpectedSummarySummer()
         {
             //Build data
-
             DataPoints<DateTime, double> list = new DataPoints<DateTime, double>();
             list.AddPoint((Convert.ToDateTime("2/12/2019 12:04:00 PM")), 2.0);
             list.AddPoint((Convert.ToDateTime("1/1/2019 12:10:15 PM")), 30.0);
