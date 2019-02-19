@@ -305,7 +305,6 @@ namespace WaterLog_Backend
             return getReturn(2);    // 2: Autumn
         }
 
-
         //Calculates the data points of the wastage based on period
         public async Task<DataPoints<DateTime, double>[]> SummaryPeriodUsageAsync(Period timeframe)
         {
@@ -434,9 +433,7 @@ namespace WaterLog_Backend
                         foreach (SegmentEventsEntry lst2 in lst)
                         {
                             totalForMonth += ((lst2.FlowIn - lst2.FlowOut) / 60);
-
                         }
-
                     }
                     yearly.AddPoint(list.ElementAt(i).ElementAt(0).TimeStamp, totalForMonth);
                 }
@@ -517,9 +514,7 @@ namespace WaterLog_Backend
                         foreach (SegmentEventsEntry lst2 in lst)
                         {
                             totalForHour += ((lst2.FlowIn - lst2.FlowOut) / 60);
-
                         }
-
                     }
                     daily.AddPoint(list.ElementAt(i).ElementAt(0).TimeStamp, totalForHour);
                 }
@@ -540,7 +535,6 @@ namespace WaterLog_Backend
             Monthly
         }
 
-
         public DataPoints<DateTime, double>[] sumarryDailyUsage(List<IGrouping<int, SegmentEventsEntry>> list)
         {
             DataPoints<DateTime, double> daily = new DataPoints<DateTime, double>();
@@ -556,9 +550,7 @@ namespace WaterLog_Backend
                     foreach (SegmentEventsEntry lst2 in lst)
                     {
                         totalForHour += ((lst2.FlowIn) / 60);
-
                     }
-
                 }
                 daily.AddPoint(list.ElementAt(i).ElementAt(0).TimeStamp, totalForHour);
             }
@@ -566,7 +558,6 @@ namespace WaterLog_Backend
             ret[0] = daily;
             return ret;
         }
-
 
         //public double summaryMonthlyUsage(List<IGrouping<int, SegmentEventsEntry>> list)
         public DataPoints<DateTime, double>[] summaryMonthlyUsage(List<IGrouping<int, SegmentEventsEntry>> list)
@@ -584,9 +575,7 @@ namespace WaterLog_Backend
                     foreach (SegmentEventsEntry lst2 in lst)
                     {
                         totalForDay += ((lst2.FlowIn) / 60);
-
                     }
-
                 }
                 monthly.AddPoint(list.ElementAt(i).ElementAt(0).TimeStamp, totalForDay);
             }
@@ -648,12 +637,10 @@ namespace WaterLog_Backend
             var sortedSpring = YearlyUsage(spring.GroupBy(a => a.TimeStamp.Month).ToList());
 
             DataPoints<DateTime, double>[] arrayOfSeasons = new DataPoints<DateTime, double>[4];
-
             arrayOfSeasons[0] = sortedSummer[0];
             arrayOfSeasons[1] = sortedWinter[0];
             arrayOfSeasons[2] = sortedSpring[0];
             arrayOfSeasons[3] = sortedAutumn[0];
-
             return arrayOfSeasons;
         }
 
@@ -672,11 +659,8 @@ namespace WaterLog_Backend
                     foreach (SegmentEventsEntry lst2 in lst)
                     {
                         totalForHour += ((lst2.FlowIn) / 60);
-
                     }
-
-                }
-
+                 }
                 double cost = (totalForHour) * 37;
                 daily.AddPoint(list.ElementAt(i).ElementAt(0).TimeStamp, cost);
             }
@@ -730,8 +714,8 @@ namespace WaterLog_Backend
         public DataPoints<String, double> summarySeasonsCost(List<SegmentEventsEntry> summer, List<SegmentEventsEntry> winter, List<SegmentEventsEntry> autumn, List<SegmentEventsEntry> spring)
         {
             DataPoints<DateTime,double>[] usage = summarySeasonallyUsage(summer, winter, autumn, spring);
-
             List<double> cost_season = new List<double>();
+
             //Summer season
             if (usage[0].dataPoints.Count != 0)
             {
@@ -743,9 +727,9 @@ namespace WaterLog_Backend
                 }
                 double summer_cost = sum * 37;
                 cost_season.Add(summer_cost);
-
             }
-            else {
+            else
+            {
                 cost_season.Add(0);
             }
 
@@ -802,15 +786,12 @@ namespace WaterLog_Backend
                 cost_season.Add(0);
             }
             DataPoints<String, double> arrayOfSeasonsCost = new DataPoints<String, double>();
-
             arrayOfSeasonsCost.AddPoint("Summer", cost_season[0]);
             arrayOfSeasonsCost.AddPoint("Winter", cost_season[1]);
             arrayOfSeasonsCost.AddPoint("Spring", cost_season[2]);
             arrayOfSeasonsCost.AddPoint("Autum", cost_season[3]);
             return arrayOfSeasonsCost;
         }
-
-
     } 
 }
 
