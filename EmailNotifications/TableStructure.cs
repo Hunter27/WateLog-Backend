@@ -83,7 +83,7 @@ namespace EmailNotifications
                 }
                 else
                 {
-                    Append("<a href=" + innerText + ">");
+                    Append("<a style='color:red;' href=" + innerText + ">");
                     Append("<font");
                     AppendOptionFont(classAttributes, id, fontSize, align);
                     Append("Here");
