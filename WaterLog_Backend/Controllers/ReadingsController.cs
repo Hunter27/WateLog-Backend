@@ -47,21 +47,28 @@ namespace WaterLog_Backend.Controllers
         [HttpPost]
         public async Task Post([FromBody] ReadingsEntry value)
         {
-                value.TimesStamp = DateTime.Now;
-                await _db.Readings.AddAsync(value);
-                await _db.SaveChangesAsync();
-                Procedures procedure = new Procedures(_db, _config);
-                await procedure.triggerInsert(value);
+            value.TimesStamp = DateTime.Now;
+            await _db.Readings.AddAsync(value);
+            await _db.SaveChangesAsync();
+            Procedures procedure = new Procedures(_db, _config);
+            await procedure.triggerInsert(value);
+        
         }
 
         [HttpPost("{value}")]
-        public async Task Post([FromBody] int value)
+        public async Task Post([FromBody] InputSensor values)
         {
             ReadingsEntry reading = new ReadingsEntry();
+            ReadingsEntry reading2 = new ReadingsEntry();
             reading.TimesStamp = DateTime.UtcNow;
-            reading.Value = value;
-            reading.MonitorsId = 2;
+            reading2.TimesStamp = DateTime.UtcNow;
+            reading.Value = values.valueIn;
+            reading2.Value = values.valueOut;
+            reading.MonitorsId = values.IdIn;
+            reading2.MonitorsId = values.IdOut;
             await _db.Readings.AddAsync(reading);
+            await _db.SaveChangesAsync();
+            await _db.Readings.AddAsync(reading2);
             await _db.SaveChangesAsync();
         }
 
