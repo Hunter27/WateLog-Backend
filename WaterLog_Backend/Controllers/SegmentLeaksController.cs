@@ -60,7 +60,7 @@ namespace WaterLog_Backend.Controllers
         }
 
         //Resolve Leakage
-        [HttpPut("resolve/{id}")]
+        [HttpPut("resolveLeak/{id}")]
         public async Task<ActionResult<IEnumerable<SegmentLeaksEntry>>> Resolve(int id)
         {
             var leaks = await _db.SegmentLeaks.Where(s => s.SegmentsId == id).FirstOrDefaultAsync();
@@ -98,7 +98,7 @@ namespace WaterLog_Backend.Controllers
         }
 
         // GET api/segment
-        [HttpGet("segmentLeak/{Id}")]
+        [HttpGet("segment/{Id}")]
         public async Task<ActionResult<IEnumerable<SegmentLeaksEntry>>> GetSegmentHistory(int Id)
         {
             return await _db.SegmentLeaks.Where( row => row.SegmentsId == Id ).ToListAsync();
