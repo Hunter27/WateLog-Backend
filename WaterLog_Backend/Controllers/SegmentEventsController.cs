@@ -94,10 +94,10 @@ namespace WaterLog_Backend.Controllers
                     foreach (SegmentLeaksEntry entry in leaks)
                     {
                         //Find Cost
-                        var cost = proc.calculatePerHourCost(entry);
+                        var cost = proc.CalculatePerHourWastageCost(entry);
                         //Find Litre Usage
-                        //TODO: Call TotalLitres Used(Dependent on Usage/Cost Feature Branch)
-                        var litresUsed = proc.calculateTotaLitres(entry);
+                        var totalSystemLitres = await proc.CalculateTotalUsageLitres(entry);
+                        var litresUsed = await proc.CalculateTotalWastageLitres(entry);
                         alerts.Add
                         (
                             new GetAlerts
@@ -109,7 +109,7 @@ namespace WaterLog_Backend.Controllers
                                 cost,
                                 entry.Severity,
                                 litresUsed,
-                                0.0
+                                totalSystemLitres
                              )
                         );
                     }
@@ -137,7 +137,7 @@ namespace WaterLog_Backend.Controllers
                                         sensor.MonitorsId,
                                         "faulty",
                                         0.0,
-                                        "severe",
+                                        "High",
                                         0.0,
                                         0.0
                                      )
