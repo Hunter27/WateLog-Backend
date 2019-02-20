@@ -25,21 +25,21 @@ namespace WaterLog_Backend.Controllers
             _config = config;
         }
 
-        // GET api/values
+        // GET api/monitors
         [HttpGet]
         public async Task<ActionResult<IEnumerable<MonitorsEntry>>> Get()
         {         
             return await _db.Monitors.ToListAsync();
         }
 
-        // GET api/values/5
+        // GET api/monitors/
         [HttpGet("{id}")]
         public async Task<ActionResult<MonitorsEntry>> Get(int id)
         {
             return await _db.Monitors.FindAsync(id);
         }
 
-        // POST api/values
+        // POST api/monitors
         [HttpPost]
         public async Task Post([FromBody] MonitorsEntry value)
         {
@@ -47,7 +47,7 @@ namespace WaterLog_Backend.Controllers
             await _db.SaveChangesAsync();
         }
 
-        // PUT api/values/5
+        // PUT api/monitors/
         [HttpPut("{id}")]
         public async Task Put(int id, [FromBody] MonitorsEntry value)
         {
@@ -56,7 +56,7 @@ namespace WaterLog_Backend.Controllers
             await _db.SaveChangesAsync();
         }
 
-        // DELETE api/values/5
+        // DELETE api/monitors/
         [HttpDelete("{id}")]
         public async Task Delete(int id)
         {

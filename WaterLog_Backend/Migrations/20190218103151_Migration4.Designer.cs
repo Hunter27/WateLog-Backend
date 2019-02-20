@@ -3,19 +3,21 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WaterLog_Backend.Models;
 
 namespace WaterLog_Backend.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20190218103151_Migration4")]
+    partial class Migration4
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.2.2-servicing-10034")
+                .HasAnnotation("ProductVersion", "2.2.1-servicing-10028")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
@@ -48,6 +50,10 @@ namespace WaterLog_Backend.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("LocationId");
+
+                    b.HasIndex("SegmentId");
+
                     b.ToTable("LocationSegments");
                 });
 
@@ -66,25 +72,6 @@ namespace WaterLog_Backend.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Locations");
-                });
-
-            modelBuilder.Entity("WaterLog_Backend.Models.MailingListEntry", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("Address");
-
-                    b.Property<string>("ListGroup");
-
-                    b.Property<string>("Name");
-
-                    b.Property<string>("Surname");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("MailingList");
                 });
 
             modelBuilder.Entity("WaterLog_Backend.Models.MonitorsEntry", b =>
@@ -214,6 +201,19 @@ namespace WaterLog_Backend.Migrations
                     b.HasKey("TankId");
 
                     b.ToTable("TankLevels");
+                });
+
+            modelBuilder.Entity("WaterLog_Backend.Models.LocationSegmentsEntry", b =>
+                {
+                    b.HasOne("WaterLog_Backend.Models.LocationsEntry", "LocationsEntry")
+                        .WithMany()
+                        .HasForeignKey("LocationId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("WaterLog_Backend.Models.SegmentsEntry", "segmentsEntry")
+                        .WithMany()
+                        .HasForeignKey("SegmentId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 #pragma warning restore 612, 618
         }

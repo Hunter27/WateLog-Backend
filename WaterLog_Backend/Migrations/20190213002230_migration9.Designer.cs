@@ -10,8 +10,8 @@ using WaterLog_Backend.Models;
 namespace WaterLog_Backend.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20190129115111_Migration1")]
-    partial class Migration1
+    [Migration("20190213002230_migration9")]
+    partial class migration9
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -84,15 +84,13 @@ namespace WaterLog_Backend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int>("SenseID");
+                    b.Property<int>("MonitorsId");
 
                     b.Property<DateTime>("TimesStamp");
 
                     b.Property<double>("Value");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("SenseID");
 
                     b.ToTable("Readings");
                 });
@@ -105,17 +103,42 @@ namespace WaterLog_Backend.Migrations
 
                     b.Property<string>("EventType");
 
-                    b.Property<int>("SegmentId");
+                    b.Property<double>("FlowIn");
+
+                    b.Property<double>("FlowOut");
+
+                    b.Property<int>("SegmentsId");
 
                     b.Property<DateTime>("TimeStamp");
 
-                    b.Property<double>("Value");
+                    b.HasKey("Id");
+
+                    b.ToTable("SegmentEvents");
+                });
+
+            modelBuilder.Entity("WaterLog_Backend.Models.SegmentLeaksEntry", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("LatestTimeStamp");
+
+                    b.Property<DateTime>("OriginalTimeStamp");
+
+                    b.Property<string>("ResolvedStatus");
+
+                    b.Property<int?>("SegmentEventsId");
+
+                    b.Property<int>("SegmentsId");
+
+                    b.Property<string>("Severity");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("SegmentId");
+                    b.HasIndex("SegmentEventsId");
 
-                    b.ToTable("SegmentEvents");
+                    b.ToTable("SegmentLeaks");
                 });
 
             modelBuilder.Entity("WaterLog_Backend.Models.SegmentsEntry", b =>
@@ -123,6 +146,10 @@ namespace WaterLog_Backend.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("SenseIDIn");
+
+                    b.Property<int>("SenseIDOut");
 
                     b.HasKey("Id");
 
@@ -142,20 +169,11 @@ namespace WaterLog_Backend.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("WaterLog_Backend.Models.ReadingsEntry", b =>
+            modelBuilder.Entity("WaterLog_Backend.Models.SegmentLeaksEntry", b =>
                 {
-                    b.HasOne("WaterLog_Backend.Models.MonitorsEntry", "MonitorsEntry")
+                    b.HasOne("WaterLog_Backend.Models.SegmentEventsEntry", "SegmentEvents")
                         .WithMany()
-                        .HasForeignKey("SenseID")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("WaterLog_Backend.Models.SegmentEventsEntry", b =>
-                {
-                    b.HasOne("WaterLog_Backend.Models.SegmentsEntry", "SegmentsEntry")
-                        .WithMany()
-                        .HasForeignKey("SegmentId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("SegmentEventsId");
                 });
 #pragma warning restore 612, 618
         }

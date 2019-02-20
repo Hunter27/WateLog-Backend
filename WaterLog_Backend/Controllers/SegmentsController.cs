@@ -25,25 +25,24 @@ namespace WaterLog_Backend.Controllers
             _config = config;
         }
 
-        // GET api/values
+        // GET api/segments
         [HttpGet]
         public async Task<ActionResult<IEnumerable<SegmentsEntry>>> Get()
         {         
             return await _db.Segments.ToListAsync();
         }
 
-        // GET api/values/5
+        // GET api/segmentById/
         [HttpGet("{id}")]
         public async Task<ActionResult<SegmentsEntry>> Get(int id)
         {
             return await _db.Segments.FindAsync(id);
         }
 
-        // POST api/values
+        // POST api/segment
         [HttpPost]
         public async Task Post([FromBody] SegmentsEntry value)
         {
-
             try { 
             await _db.Segments.AddAsync(value);
             await _db.SaveChangesAsync();
@@ -54,7 +53,7 @@ namespace WaterLog_Backend.Controllers
             }
         }
 
-        // PUT api/values/5
+        // PUT api/segmentById/
         [HttpPut("{id}")]
         public async Task Put(int id, [FromBody] SegmentsEntry value)
         {
@@ -69,7 +68,7 @@ namespace WaterLog_Backend.Controllers
             }
         }
 
-        // DELETE api/values/5
+        // DELETE api/segmentById/
         [HttpDelete("{id}")]
         public async Task Delete(int id)
         {

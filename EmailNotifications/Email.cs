@@ -6,6 +6,7 @@ using System.Net;
 using Microsoft.Extensions.Configuration;
 using System.Threading.Tasks;
 using System.IO;
+using WaterLog_Backend.Models;
 
 namespace EmailNotifications
 {
@@ -38,14 +39,67 @@ namespace EmailNotifications
             mailSent = true;
         }
 
-
-        public void sendEmail()
+        public void SendMail(Recipient[] recipient)
         {
-            string[] styleProperties = {
-                "color:red;padding-top: 40px;font-weight: bold",
-                "color:red;font-weight:bold",
+            if (recipient != null)
+            {
+                string email = ConstructEmail();
+                if (email == "ERROR")
+                {
+                    throw new Exception("Error : No Values Given");
+                }
+                else if (recipient.Length < 1)
+                {
+                    throw new Exception("Error : No Address Given");
+                }
+                else
+                {
+                    try
+                    {
+                        var client = new SmtpClient("smtp.gmail.com", 587)
+                        {
+                            //TODO: Move email address to config file
+                            Credentials = new NetworkCredential("nmotsumi@retrorabbit.co.za", _conf.GetSection("Password").Value),
+                            EnableSsl = true
+                        };
+
+                        //Set From
+                        MailAddress from = new MailAddress(_conf.GetSection("Sender").Value, _conf.GetSection("SenderName").Value);
+
+                        //Set To
+                        MailAddress to = new MailAddress(recipient[0].Address, recipient[0].Name);
+                        MailMessage message = new MailMessage(from, to);
+                        for (int i = 1; i < recipient.Length; i++)
+                        {
+                            message.CC.Add(new MailAddress(recipient[i].Address, recipient[i].Name));
+                        }
+
+                        message.Subject = "WaterLog Notification";
+                        message.IsBodyHtml = true;
+                        message.Body = email;
+                        client.Send(message);
+                    }
+                    catch (Exception e)
+                    {
+                        throw new Exception("{0} Exception caught.", e);
+                    }
+                }
+            }
+            else
+            {
+                throw new Exception("ERROR : Recipients Cannot Be Null");
+            }
+        }
+
+        public string ConstructEmail()
+        {
+            if (values.Length > 0)
+            {
+                string[] styleProperties = {
+                "color:red;padding-top: 40px;",
+                "color:red;",
                 "color:black;padding-top: 11px",
-                "color:red;padding-top: 35px;font-weight: bold",
+                "color:red;padding-top: 35px;",
                 "color:black",
                 "color:black;padding-top: 20px",
                 "color:grey" ,
@@ -53,57 +107,53 @@ namespace EmailNotifications
                 "color:red;padding-top: 24px",
                 "color:red;",
                 "color:grey;padding-top: 9px" };
-            string[] fontSizeProperties = { "6", "3", "3", "6", "4", "6", "4", "4", "2", "1", "3" };
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
-            using (TableStructure.Table table = new TableStructure.Table(sb, id: "some-id", align: "center"))
-            {
-                table.StartBody();
-                int count = 0;
-                string[] items = { values[0] + " has a " + values[1], "("+ values[2]+")","This problem has been unresolved for " + values[3]+" days",
-                                    "R " + values[4], "Has been lost",values[6]+"L or R "+ values[5]," is being lost!", "per hour","Resolve issue or precess",values[7],"call third party help: 011111929292"};
-                foreach (var alert in items)
+                string[] fontSizeProperties = { "6", "3", "3", "6", "4", "6", "4", "4", "4", "4", "2" };
+                System.Text.StringBuilder sb = new System.Text.StringBuilder();
+                using (TableStructure.Table table = new TableStructure.Table(sb, id: "some-id", align: "center"))
                 {
-                    using (var tr = table.AddRow(classAttributes: "someattributes"))
+                    table.StartBody();
+                    int count = 0;
+                    string[] items =
                     {
-                        if (count == 9)
+                        "<b>" + values[0] + " has a " + values[1] + "</b>",
+                        "<b>(" + values[2]+")</b>",
+                        "This problem has been <b>unresolved for " + values[3]+" days</b>",
+                        "<b>R " + values[4] + "</b>",
+                        "<b>Has been lost!</b>",
+                        "<b>" +values[6]+"L or R "+ values[5] + "</b>",
+                        " is currently being lost", "per hour",""
+                        ,values[7],
+                        "call third party help: <u>011111929292</u>"
+                    };
+                    foreach (var alert in items)
+                    {
+                        using (var tr = table.AddRow(classAttributes: "someattributes"))
                         {
-                            tr.AddCell(alert, align: "center", style: styleProperties[count], fontSize: fontSizeProperties[count], url: true);
+                            if (count == 9)
+                            {
+                                tr.AddCell(alert, align: "center", style: styleProperties[count], fontSize: fontSizeProperties[count], url: true);
+                            }
+                            else
+                            {
+                                tr.AddCell(alert, align: "center", style: styleProperties[count], fontSize: fontSizeProperties[count]);
+                            }
+                            count++;
                         }
-                        else
-                        {
-                            tr.AddCell(alert, align: "center", style: styleProperties[count], fontSize: fontSizeProperties[count]);
-                        }
-                        count++;
                     }
-                }
-                using (var tr = table.AddRow(classAttributes: "someattributes2"))
-                {
-                    tr.AddImage("https://res.cloudinary.com/retro-rabbit/image/upload/v1549634899/logo.png", align: "center", style: "padding-left: 130px", sizeX: "100", sizeY: "100");
+                    using (var tr = table.AddRow(classAttributes: "someattributes2"))
+                    {
+                        tr.AddImage("https://res.cloudinary.com/retro-rabbit/image/upload/v1549634899/logo.png", align: "center", style: "padding-left: 130px", sizeX: "100", sizeY: "100");
 
+                    }
+                    table.EndBody();
                 }
-                table.EndBody();
-            }
-            string outS = sb.ToString();
 
-            try
-            {
-                var client = new SmtpClient("smtp.gmail.com", 587)
-                {
-                    Credentials = new NetworkCredential("nmotsumi@retrorabbit.co.za", _conf.GetSection("Password").Value),
-                    EnableSsl = true
-                };
-                MailAddress from = new MailAddress("nmotsumi@retrorabbit.co.za", "Ntokozo Motsumi");
-                MailAddress to = new MailAddress("ntokozo.motsumi@gmail.com", "Ntokozo Motsumi");
-                MailMessage message = new MailMessage(from, to);
-                message.Subject = "Send Using Web Mail";
-                // SEND IN HTML FORMAT (comment this line to send plain text).
-                message.IsBodyHtml = true;
-                message.Body = outS;
-                client.Send(message);
+                return sb.ToString();
             }
-            catch (Exception e)
+            else
             {
-                Console.WriteLine("{0} Exception caught.", e);
+                //Something went wrong
+                return "ERROR";
             }
         }
     }
