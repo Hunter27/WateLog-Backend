@@ -50,7 +50,7 @@ namespace WaterLog_Backend.Controllers
             await _db.Readings.AddAsync(value);
             await _db.SaveChangesAsync();
             Procedures procedure = new Procedures(_db, _config);
-            await procedure.triggerInsert(value);
+            await procedure.TriggerInsert(value);
         
         }
 

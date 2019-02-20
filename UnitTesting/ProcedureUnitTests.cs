@@ -152,7 +152,7 @@ namespace Tests
             var proc = new Procedures(new DatabaseContext(), _config);
             var expected = GetTestExpectedSummaryDaily();
             var dataset = GetTestDataSummaryDaily();
-            Assert.IsTrue(expected.Equals((proc.sumarryDailyUsage(dataset))[0]));
+            Assert.IsTrue(expected.Equals((proc.SummaryDailyUsage(dataset))[0]));
         }
 
         [Test]
@@ -163,7 +163,7 @@ namespace Tests
             var proc = new Procedures(new DatabaseContext(), _config);
             var expected = GetTestExpectedSummaryMonthly();
             var dataset = GetTestDataSummaryMonthly();
-            Assert.IsTrue(expected.Equals((proc.summaryMonthlyUsage(dataset))[0]));
+            Assert.IsTrue(expected.Equals((proc.SummaryMonthlyUsage(dataset))[0]));
         }
 
         [Test]
@@ -175,7 +175,7 @@ namespace Tests
             var expected = GetTestExpectedSummarySummer();
             var dataset = GetTestDataSummarySummer();
             var empty = new List<SegmentEventsEntry>();
-            Assert.IsTrue(expected.Equals((proc.summarySeasonallyUsage(dataset, empty, empty, empty))[0]));
+            Assert.IsTrue(expected.Equals((proc.SummarySeasonallyUsage(dataset, empty, empty, empty))[0]));
         }
 
         [Test]
@@ -186,7 +186,7 @@ namespace Tests
             var proc = new Procedures(new DatabaseContext(), _config);
             var expected = GetTestExpectedSummaryDailyCost();
             var dataset = GetTestDataSummaryDailyCost();
-            Assert.IsTrue(expected.Equals((proc.sumamryDailyCost(dataset))[0]));
+            Assert.IsTrue(expected.Equals((proc.SummaryDailyCost(dataset))[0]));
         }
 
         [Test]
@@ -197,7 +197,7 @@ namespace Tests
             var proc = new Procedures(new DatabaseContext(), _config);
             var expected = GetTestExpectedSummaryMonthlyCost();
             var dataset = GetTestDataSummaryMonthly();
-            Assert.IsTrue(expected.Equals((proc.summaryMonthlyCost(dataset))[0]));
+            Assert.IsTrue(expected.Equals((proc.SummaryMonthlyCost(dataset))[0]));
         }
 
         [Test]
@@ -209,7 +209,7 @@ namespace Tests
             var expected = GetTestExpectedSummarySummerCost();
             var dataset = GetTestDataSummarySummer();
             var empty = new List<SegmentEventsEntry>();
-            var seasons = proc.summarySeasonallyUsage(dataset, empty, empty, empty);
+            var seasons = proc.SummarySeasonallyUsage(dataset, empty, empty, empty);
             DataPoints<DateTime, double> list = new DataPoints<DateTime, double>();
         }
         private List<SegmentEventsEntry> GetTestDataSummarySummer()

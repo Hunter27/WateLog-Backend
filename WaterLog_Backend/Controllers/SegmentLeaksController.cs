@@ -44,7 +44,7 @@ namespace WaterLog_Backend.Controllers
                 return NotFound();
             }
             Procedures procedures = new Procedures(_db, _config);
-            return (JsonConvert.SerializeObject((procedures.calculateTotalCost(leaks), procedures.calculatePerHourCost(leaks))));
+            return (JsonConvert.SerializeObject((procedures.CalculateTotalCost(leaks), procedures.CalculatePerHourWastageCost(leaks))));
         }
 
         [Route("litres/{id}")]
@@ -56,7 +56,7 @@ namespace WaterLog_Backend.Controllers
                 return NotFound();
             }
             Procedures procedures = new Procedures(_db, _config);
-            return (JsonConvert.SerializeObject((procedures.calculateTotaLitres(leaks), procedures.calculateLitresPerHour(leaks))));
+            return (JsonConvert.SerializeObject((procedures.CalculateTotalWastageLitres(leaks), procedures.CalculatePerHourWastageLitre(leaks))));
         }
 
         //Resolve Leakage
