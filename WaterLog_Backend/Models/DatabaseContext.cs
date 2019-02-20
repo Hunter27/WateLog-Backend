@@ -9,7 +9,7 @@ namespace WaterLog_Backend.Models
     public class DatabaseContext : DbContext
 
     {
-        public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options)
+        public DatabaseContext(DbContextOptions options) : base(options)
         {
 
         }
@@ -23,8 +23,8 @@ namespace WaterLog_Backend.Models
         public DbSet<SegmentEventsEntry> SegmentEvents { get; set; }
         public virtual DbSet<SegmentLeaksEntry> SegmentLeaks { get; set; } 
         public DbSet<PumpEntry> Pumps { get; set; }
-        public DbSet<HistoryLogEntry> HistoryLogs { get; set; }
         public virtual DbSet<TankLevelsEntry> TankLevels { get; set; }
         public DbSet<MailingListEntry> MailingList { get; set; }
+        public DbSet<HistoryLogEntry> HistoryLogs { get; set; }
     }
 }
