@@ -98,7 +98,7 @@ namespace WaterLog_Backend.Controllers
         }
 
         // GET api/segment
-        [HttpGet("segment/{Id}")]
+        [HttpGet("segmentLeak/{Id}")]
         public async Task<ActionResult<IEnumerable<SegmentLeaksEntry>>> GetSegmentHistory(int Id)
         {
             return await _db.SegmentLeaks.Where( row => row.SegmentsId == Id ).ToListAsync();
