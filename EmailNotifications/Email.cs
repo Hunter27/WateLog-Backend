@@ -98,15 +98,15 @@ namespace EmailNotifications
                 string[] styleProperties = {
                 "color:red;padding-top: 40px;",
                 "color:red;",
-                "color:black;padding-top: 11px",
+                "color:black;padding-top: 11px;",
                 "color:red;padding-top: 35px;",
-                "color:black",
-                "color:black;padding-top: 20px",
-                "color:grey" ,
-                "color:grey",
-                "color:red;padding-top: 24px",
+                "color:black;",
+                "color:black;padding-top: 20px;",
+                "color:grey;" ,
+                "color:grey;",
+                "color:red;padding-top: 24px;",
                 "color:red;",
-                "color:grey;padding-top: 9px" };
+                "color:grey;padding-top: 9px;" };
                 string[] fontSizeProperties = { "6", "3", "3", "6", "4", "6", "4", "4", "4", "4", "2" };
                 System.Text.StringBuilder sb = new System.Text.StringBuilder();
                 using (TableStructure.Table table = new TableStructure.Table(sb, id: "some-id", align: "center"))
@@ -123,7 +123,7 @@ namespace EmailNotifications
                         "<b>" +values[6]+"L or R "+ values[5] + "</b>",
                         " is currently being lost", "per hour",""
                         ,values[7],
-                        "call third party help: <u>011111929292</u>"
+                        "call third party help: <u>&zwj;011111929292</u>"
                     };
                     foreach (var alert in items)
                     {
