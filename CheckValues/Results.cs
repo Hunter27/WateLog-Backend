@@ -38,7 +38,7 @@ namespace CheckValues
                 chosenconfig = usersecretsconfig;
             }
 
-            var optionsBuilder = new DbContextOptionsBuilder<DatabaseContext>();
+            var optionsBuilder = new DbContextOptionsBuilder();
             optionsBuilder.UseSqlServer(connection);
             DatabaseContext _context = new DatabaseContext(optionsBuilder.Options);
             MonitorsController _controller = new MonitorsController(_context, chosenconfig);
