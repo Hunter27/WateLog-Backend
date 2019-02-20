@@ -12,21 +12,21 @@ namespace UnitTesting
         [TestCase]
         public void HighSeverity() {
             Procedures p = new Procedures();
-            var s = p.calculateSeverityGivenValue(120);
+            var s = p.CalculateSeverityGivenValue(120);
             Assert.AreEqual("High", s);
         }
         [TestCase]
         public void MediumSeverity()
         {
             Procedures p = new Procedures();
-            var s = p.calculateSeverityGivenValue(70);
+            var s = p.CalculateSeverityGivenValue(70);
             Assert.AreEqual("Medium", s);
         }
         [TestCase]
         public void LowSeverity()
         {
             Procedures p = new Procedures();
-            var s = p.calculateSeverityGivenValue(20);
+            var s = p.CalculateSeverityGivenValue(20);
             Assert.AreEqual("Low", s);
         }
     }
