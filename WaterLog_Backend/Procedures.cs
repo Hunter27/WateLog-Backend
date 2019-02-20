@@ -368,8 +368,8 @@ namespace WaterLog_Backend
                 {
                     totalUsageForPeriod += (item.FlowIn / 60);
                 }
-
-                return totalUsageForPeriod;
+                var hours = Math.Max(((leak.LatestTimeStamp - leak.OriginalTimeStamp).TotalHours),0);
+                return (totalUsageForPeriod * hours);
             }
             else
             {
