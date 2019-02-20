@@ -14,6 +14,6 @@ namespace WaterLog_Backend.Models
         public DateTime OriginalTimeStamp { get; set; }
         public DateTime LatestTimeStamp { get; set; }
         public DateTime LastNotificationDate { get; set; }
-        public string ResolvedStatus { get; set; }
+        public EnumResolveStatus ResolvedStatus { get; set; }
     }
 }

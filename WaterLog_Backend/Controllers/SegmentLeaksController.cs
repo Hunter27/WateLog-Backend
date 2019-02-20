@@ -68,9 +68,9 @@ namespace WaterLog_Backend.Controllers
             {
                 return NotFound();
             }
-            if (leaks.ResolvedStatus == "unresolved")
+            if (leaks.ResolvedStatus == EnumResolveStatus.UNRESOLVED)
             {
-                leaks.ResolvedStatus = "resolved";
+                leaks.ResolvedStatus = EnumResolveStatus.RESOLVED;
 
                 var hist = new HistoryLogEntry();
                 hist.Date = DateTime.Now;

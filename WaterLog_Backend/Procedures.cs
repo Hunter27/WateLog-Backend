@@ -55,7 +55,7 @@ namespace WaterLog_Backend
                 if (allLeaks.Any(leak => leak.SegmentsId == segmentid))
                 {
                     SegmentLeaksEntry latestEntry = await _db.SegmentLeaks
-                    .Where(leak => leak.SegmentsId == segmentid && leak.ResolvedStatus == "unresolved")
+                    .Where(leak => leak.SegmentsId == segmentid && leak.ResolvedStatus == EnumResolveStatus.UNRESOLVED)
                     .OrderByDescending(lk => lk.LatestTimeStamp)
                     .FirstAsync();
                     //Check in SegmentEntry if latest event related to entry has been resolved.
@@ -68,14 +68,14 @@ namespace WaterLog_Backend
 
                         if (entry.EventType == "leak")
                         {
-                            await UpdateSegmentLeaksAsync(latestEntry.Id, segmentid, await CalculateSeverity(latestEntry), latestEntry.OriginalTimeStamp, entry.TimeStamp, "unresolved",latestEntry.LastNotificationDate);
+                            await UpdateSegmentLeaksAsync(latestEntry.Id, segmentid, await CalculateSeverity(latestEntry), latestEntry.OriginalTimeStamp, entry.TimeStamp,EnumResolveStatus.UNRESOLVED,latestEntry.LastNotificationDate);
                         }
                     }
                 }
                 else
                 {
                     //Normal Add
-                    await CreateSegmentLeaksAsync(segmentid, "unresolved");
+                    await CreateSegmentLeaksAsync(segmentid, EnumResolveStatus.UNRESOLVED);
                     //Call an initial email
                     //Get recipients.
                     var mailing = await _db.MailingList.Where(a => a.ListGroup == "tier2").ToListAsync();
@@ -124,7 +124,7 @@ namespace WaterLog_Backend
             }
         }
 
-        public async Task CreateSegmentLeaksAsync(int segId, string resolvedStatus)
+        public async Task CreateSegmentLeaksAsync(int segId, EnumResolveStatus resolvedStatus)
         {
             SegmentLeaksEntry entry = new SegmentLeaksEntry();
             entry.SegmentsId = segId;
@@ -138,7 +138,7 @@ namespace WaterLog_Backend
 
         }
         
-        public async Task UpdateSegmentLeaksAsync(int leakId, int segId, string severity, DateTime original, DateTime updated, string resolvedStatus,DateTime lastEmail)
+        public async Task UpdateSegmentLeaksAsync(int leakId, int segId, string severity, DateTime original, DateTime updated, EnumResolveStatus resolvedStatus,DateTime lastEmail)
         {
             try
             {
