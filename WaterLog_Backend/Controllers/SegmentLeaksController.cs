@@ -61,24 +61,28 @@ namespace WaterLog_Backend.Controllers
 
         //Resolve Leakage
         [HttpPut("resolve/{id}")]
-        public async Task<IActionResult> Resolve(int id)
+        public async Task<ActionResult<IEnumerable<SegmentLeaksEntry>>> Resolve(int id)
         {
-            var leaks = await _db.SegmentLeaks.FindAsync(id);
+            var leaks = await _db.SegmentLeaks.Where(s => s.SegmentsId == id).FirstOrDefaultAsync();
             if (leaks == null)
             {
                 return NotFound();
             }
-            leaks.ResolvedStatus = "resolved";
-            _db.SegmentLeaks.Update(leaks);
+            if (leaks.ResolvedStatus == "unresolved")
+            {
+                leaks.ResolvedStatus = "resolved";
 
-            // post to Historylogs
-            var hist = new HistoryLogEntry();
-            hist.Date = leaks.LatestTimeStamp;
-            hist.EventsId = leaks.Id;
-            hist.Type = EnumTypeOfEvent.LEAK;
-            await _db.HistoryLogs.AddAsync(hist);
-            await _db.SaveChangesAsync();
-            return Ok();
+                var hist = new HistoryLogEntry();
+                hist.Date = DateTime.Now;
+                hist.EventsId = leaks.SegmentsId;
+                hist.Type = EnumTypeOfEvent.LEAK;
+
+                _db.SegmentLeaks.Update(leaks);
+                await _db.HistoryLogs.AddAsync(hist);
+                await _db.SaveChangesAsync();
+                return Ok("Resolved");
+            }
+                return Ok("Already resolved");
         }
 
         // GET api/segmentById/
