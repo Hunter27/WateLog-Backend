@@ -121,7 +121,7 @@ namespace WaterLog_Backend.Controllers
                         foreach (MonitorsEntry entry in faultySensors)
                         {
                             //Get latest faulty sensor
-                            var sensor = await _db.Readings.Where(a => a.Value == 0)
+                            var sensor = await _db.Readings.Where(a => a.MonitorsId == entry.Id)
                                         .OrderByDescending(a => a.TimesStamp)
                                         .FirstOrDefaultAsync();
 
@@ -138,8 +138,8 @@ namespace WaterLog_Backend.Controllers
                                         "faulty",
                                         0.0,
                                         "High",
-                                        0.0,
-                                        0.0
+                                        sensor.Value,
+                                        entry.Max_flow
                                      )
                                  );
                             }
