@@ -107,6 +107,7 @@ namespace WaterLog_Backend.Controllers
                                 entry.SegmentsId,
                                 "leak",
                                 cost,
+                                proc.CalculatePerHourWastageLitre(entry),
                                 entry.Severity,
                                 litresUsed,
                                 totalSystemLitres
@@ -136,6 +137,7 @@ namespace WaterLog_Backend.Controllers
                                         "Sensor",
                                         sensor.MonitorsId,
                                         "faulty",
+                                        0.0,
                                         0.0,
                                         "High",
                                         sensor.Value,
