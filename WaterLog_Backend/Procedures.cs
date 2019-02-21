@@ -117,8 +117,8 @@ namespace WaterLog_Backend
 
         public async Task<string> CalculateSeverity(SegmentLeaksEntry entry)
         {
-            
-            return CalculateSeverityGivenValue(await CalculateTotalWastageLitres(entry));
+            var wastageLitres = await CalculateTotalWastageLitres(entry);
+            return CalculateSeverityGivenValue(wastageLitres);
 
             
         }
