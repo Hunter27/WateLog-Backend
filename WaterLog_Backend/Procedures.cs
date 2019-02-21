@@ -353,7 +353,7 @@ namespace WaterLog_Backend
             .Where(inlist => inlist.SegmentsId == leak.SegmentsId)
             .Last();
 
-            double currentTariff = 37.5;
+            double currentTariff = Globals.RandPerLitre;
             double usageperpoll = (entry.FlowIn - entry.FlowOut);
             var totalPH = (usageperpoll * currentTariff);
             return Math.Max(totalPH, 0);
@@ -844,7 +844,7 @@ namespace WaterLog_Backend
                         totalForHour += ((lst2.FlowIn) / 60);
                     }
                  }
-                double cost = (totalForHour) * 37;
+                double cost = (totalForHour) * Globals.RandPerLitre;
                 daily.AddPoint(list.ElementAt(i).ElementAt(0).TimeStamp, cost);
             }
             DataPoints<DateTime, double>[] ret = new DataPoints<DateTime, double>[1];
@@ -870,7 +870,7 @@ namespace WaterLog_Backend
                     }
 
                 }
-                double cost = (totalForDay) * 37;
+                double cost = (totalForDay) * Globals.RandPerLitre;
                 monthly.AddPoint(list.ElementAt(i).ElementAt(0).TimeStamp, cost);
             }
 
@@ -908,7 +908,7 @@ namespace WaterLog_Backend
                 {
                     sum += vals[i];
                 }
-                double summer_cost = sum * 37;
+                double summer_cost = sum * Globals.RandPerLitre;
                 cost_season.Add(summer_cost);
             }
             else
@@ -926,7 +926,7 @@ namespace WaterLog_Backend
                 {
                     sum1 += vals1[i];
                 }
-                double winter_cost = sum1 * 37;
+                double winter_cost = sum1 * Globals.RandPerLitre;
                 cost_season.Add(winter_cost);
             }
             else
@@ -944,7 +944,7 @@ namespace WaterLog_Backend
                     sum2 += vals2[i];
                 }
 
-                double spring_cost = sum2 * 37;
+                double spring_cost = sum2 * Globals.RandPerLitre;
                 cost_season.Add(spring_cost);
             }
             else
@@ -961,7 +961,7 @@ namespace WaterLog_Backend
                 {
                     sum3 += vals3[i];
                 }
-                double autum_cost = sum3 * 37;
+                double autum_cost = sum3 * Globals.RandPerLitre;
                 cost_season.Add(autum_cost);
             }
             else
