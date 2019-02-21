@@ -37,7 +37,7 @@
 
   <ItemGroup>
     <Content Update="web.config">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
 
