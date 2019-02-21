@@ -21,7 +21,17 @@ namespace WaterLog_Backend.Models
         //Total Litres used throughout the system during the event timeline
         public double TotalLitres;
 
-        public GetAlerts(DateTime date, string entityname, int entityid, string entitytype, double cost, double litresperhour,string severity, double totalperlitre,double totallitre)
+        public GetAlerts(
+            DateTime date, 
+            string entityname, 
+            int entityid, 
+            string entitytype, 
+            double cost, 
+            double litresperhour,
+            string severity, 
+            double totalperlitre,
+            double totallitre
+        )
         {
             Date = date;
             EntityName = entityname;
