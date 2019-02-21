@@ -23,7 +23,7 @@ namespace WaterLog_Backend.Controllers
 
         [Route("daily")]
         [HttpGet]
-        public async Task<ActionResult<LinearRegressionModel>> GenerateLinearCostForecast()
+        public async Task<ActionResult<IEnumerable<LinearRegressionModel>>> GenerateLinearCostForecast()
         {
             Forecast forecast = new Forecast();
             //get the cost data and dates
@@ -42,7 +42,7 @@ namespace WaterLog_Backend.Controllers
                 data.end = new DateTimeOffset(_date).ToUnixTimeSeconds();
                 data.numOfElements = 0;
 
-                return data;
+                return new List<LinearRegressionModel> { data };
             }
             if (results.dataPoints.Count == 1)
             {
@@ -55,7 +55,7 @@ namespace WaterLog_Backend.Controllers
                 data.end = new DateTimeOffset(_date).ToUnixTimeSeconds();
                 data.numOfElements = 1;
 
-                return data;
+                return new List<LinearRegressionModel> { data };
             }
             var x = results.dataPoints.Select(row => row.x); //datetime data
             var y = results.dataPoints.Select(row => row.y); //cost data <double>
@@ -77,7 +77,7 @@ namespace WaterLog_Backend.Controllers
             data.end = epochDates.Last();
             data.numOfElements = epochDates.Count();
 
-            return data;
+            return new List<LinearRegressionModel>{ data };
         }
 
         [Route("monthly/{id}")]
@@ -85,7 +85,7 @@ namespace WaterLog_Backend.Controllers
         public async Task<ActionResult<double>> GetMonthCostForecast(int id)
         {
             Procedures P = new Procedures();
-            var thisMonthsEvents = P.sumamryDailyCost( await _db
+            var thisMonthsEvents = P.SummaryDailyCost( await _db
                     .SegmentEvents.Where(a => a.TimeStamp.Month == id && a.TimeStamp.Year == DateTime.Now.Year)
                     .GroupBy(b => b.TimeStamp.Hour)
                     .ToListAsync()).FirstOrDefault();
@@ -127,21 +127,5 @@ namespace WaterLog_Backend.Controllers
             return slope*(new DateTimeOffset(date).ToUnixTimeSeconds()) + yIntercept;
         }
 
-        [Route("seasonal")]
-        [HttpGet]
-        public async Task<ActionResult<LinearRegressionModel>> GenerateLinearSeasonallyCostForecast()
-        {
-            Forecast forecast = new Forecast();
-            //get the cost data and dates
-            Procedures proc = new Procedures(_db, _config);
-            var results = proc.CalculatePeriodWastageAsync(Procedures.Period.Seasonally);
-
-            LinearRegressionModel data = new LinearRegressionModel();
-            data.rSquared = 5;
-            data.yIntercept = 1;
-            data.slope = 3;
-
-            return data;
-        }
     }
 }
