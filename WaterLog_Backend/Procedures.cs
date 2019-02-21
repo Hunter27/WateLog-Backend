@@ -423,11 +423,17 @@ namespace WaterLog_Backend
             {
                 case Period.Daily:
                     var debug = await _db
-                    .SegmentEvents.Where(a => a.EventType == "leak" && a.TimeStamp.Month == DateTime.Now.Month && a.TimeStamp.Day == DateTime.Now.Day && a.TimeStamp.Year == DateTime.Now.Year)
+                    .SegmentEvents.Where(
+                        a => a.EventType == "leak" && a.TimeStamp.Month == DateTime.Now.Month && 
+                        a.TimeStamp.Day == DateTime.Now.Day && a.TimeStamp.Year == DateTime.Now.Year
+                     )
                     .GroupBy(b => b.TimeStamp.Hour)
                     .ToListAsync();
                     return CalculateDailyWastage(await _db
-                    .SegmentEvents.Where(a => a.EventType == "leak" && a.TimeStamp.Month == DateTime.Now.Month && a.TimeStamp.Day == DateTime.Now.Day && a.TimeStamp.Year == DateTime.Now.Year)
+                    .SegmentEvents.Where(
+                        a => a.EventType == "leak" && a.TimeStamp.Month == DateTime.Now.Month && 
+                        a.TimeStamp.Day == DateTime.Now.Day && a.TimeStamp.Year == DateTime.Now.Year
+                     )
                     .GroupBy(b => b.TimeStamp.Hour)
                     .ToListAsync());
 
