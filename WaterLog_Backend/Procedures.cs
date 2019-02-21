@@ -51,16 +51,14 @@ namespace WaterLog_Backend
             if (IsLeakage(reading1.Value, reading2.Value))
             {
                 await CreateSegmentsEventAsync(segmentid, "leak", reading1.Value, reading2.Value);
-                //Updateleakagestatus
-                if (await _db.SegmentLeaks.AnyAsync(leak => leak.SegmentsId == segmentid && leak.ResolvedStatus == EnumResolveStatus.UNRESOLVED))
-                {
-                    SegmentLeaksEntry latestEntry = await _db.SegmentLeaks
+                var leakExists = await _db.SegmentLeaks
                     .Where(leak => leak.SegmentsId == segmentid && leak.ResolvedStatus == EnumResolveStatus.UNRESOLVED)
                     .OrderByDescending(lk => lk.LatestTimeStamp)
                     .FirstAsync();
-                    //Check in SegmentEntry if latest event related to entry has been resolved.
-                    if (latestEntry != null)
-                    {
+                //Updateleakagestatus
+                if (leakExists != null)
+                {
+                    //Check in SegmentEntry if latest event related to entry has been resolved
                         SegmentEventsEntry entry = (await _db.SegmentEvents
                         .Where(leak => leak.SegmentsId == segmentid)
                         .OrderByDescending(lks => lks.TimeStamp)
@@ -68,9 +66,8 @@ namespace WaterLog_Backend
 
                         if (entry.EventType == "leak")
                         {
-                            await UpdateSegmentLeaksAsync(latestEntry.Id, segmentid, await CalculateSeverity(latestEntry), latestEntry.OriginalTimeStamp, entry.TimeStamp,EnumResolveStatus.UNRESOLVED,latestEntry.LastNotificationDate);
+                            await UpdateSegmentLeaksAsync(leakExists.Id, segmentid, await CalculateSeverity(leakExists), leakExists.OriginalTimeStamp, entry.TimeStamp,EnumResolveStatus.UNRESOLVED,leakExists.LastNotificationDate);
                         }
-                    }
                 }
                 else
                 {
@@ -81,15 +78,19 @@ namespace WaterLog_Backend
                     var mailing = await _db.MailingList.Where(a => a.ListGroup == "tier2").ToListAsync();
                     if (mailing.Count > 0)
                     {
-                        string[] template = populateEmail(await _db.SegmentLeaks.LastAsync());
-                        Email email = new Email(template, _config);
-                        Recipient[] mailers = new Recipient[(mailing.Count - 1)];
-                        int countForMailers = 0;
-                        foreach(var rec in mailing)
+                        var lastInsert = await _db.SegmentLeaks.LastAsync();
+                        if (lastInsert != null)
                         {
-                            mailers[countForMailers] = new Recipient(rec.Address, (rec.Name + " " + rec.Surname));
+                            string[] template = populateEmail(lastInsert);
+                            Email email = new Email(template, _config);
+                            Recipient[] mailers = new Recipient[(mailing.Count - 1)];
+                            int countForMailers = 0;
+                            foreach (var rec in mailing)
+                            {
+                                mailers[countForMailers] = new Recipient(rec.Address, (rec.Name + " " + rec.Surname));
+                            }
+                            email.SendMail(mailers);
                         }
-                        email.SendMail(mailers);
                     }
                 }
             }
@@ -108,8 +109,7 @@ namespace WaterLog_Backend
             entry.FlowIn = inv;
             entry.FlowOut = outv;
             entry.EventType = status;
-            await _db.SegmentEvents
-            .AddAsync(entry);
+            await _db.SegmentEvents.AddAsync(entry);
             await _db.SaveChangesAsync();
         }
 
@@ -217,7 +217,12 @@ namespace WaterLog_Backend
             else if (mailing.Count == 1)
             {
                 Recipient[] mailers = new Recipient[1];
-                mailers[0] = new Recipient(mailing.ElementAtOrDefault(0).Address, (mailing.ElementAtOrDefault(0).Name + " " + mailing.ElementAtOrDefault(0).Surname));
+
+                mailers[0] = new Recipient(
+                    mailing.ElementAtOrDefault(0).Address,
+                    mailing.ElementAtOrDefault(0).Name + " " + mailing.ElementAtOrDefault(0).Surname
+                );
+
                 return mailers;
             }
             else
@@ -243,7 +248,12 @@ namespace WaterLog_Backend
             else if(mailing.Count == 1)
             {
                 Recipient[] mailers = new Recipient[1];
-                mailers[0] = new Recipient(mailing.ElementAtOrDefault(0).Address, (mailing.ElementAtOrDefault(0).Name + " " + mailing.ElementAtOrDefault(0).Surname));
+
+                mailers[0] = new Recipient(
+                    mailing.ElementAtOrDefault(0).Address,
+                    mailing.ElementAtOrDefault(0).Name + " " + mailing.ElementAtOrDefault(0).Surname
+                );
+
                 return mailers;
             }
             else
