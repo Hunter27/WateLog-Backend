@@ -86,7 +86,7 @@ namespace WaterLog_Backend.Controllers
             try
             {
                 //Get all leaks first
-                var leaks = await _db.SegmentLeaks.Where(a => a.ResolvedStatus == "unresolved").ToListAsync();
+                var leaks = await _db.SegmentLeaks.Where(a => a.ResolvedStatus == EnumResolveStatus.UNRESOLVED).ToListAsync();
                 if (leaks != null)
                 {
                     List<GetAlerts> alerts = new List<GetAlerts>();

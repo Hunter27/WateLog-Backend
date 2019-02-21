@@ -10,16 +10,33 @@ using WaterLog_Backend.Models;
 namespace WaterLog_Backend.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20190218101008_MailingList")]
-    partial class MailingList
+    [Migration("20190220130936_UpdatedLeakEntry")]
+    partial class UpdatedLeakEntry
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.2.1-servicing-10028")
+                .HasAnnotation("ProductVersion", "2.2.2-servicing-10034")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+            modelBuilder.Entity("WaterLog_Backend.Models.HistoryLogEntry", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("Date");
+
+                    b.Property<int>("EventsId");
+
+                    b.Property<int>("Type");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("HistoryLogs");
+                });
 
             modelBuilder.Entity("WaterLog_Backend.Models.LocationSegmentsEntry", b =>
                 {
@@ -32,10 +49,6 @@ namespace WaterLog_Backend.Migrations
                     b.Property<int>("SegmentId");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("LocationId");
-
-                    b.HasIndex("SegmentId");
 
                     b.ToTable("LocationSegments");
                 });
@@ -160,7 +173,7 @@ namespace WaterLog_Backend.Migrations
 
                     b.Property<DateTime>("OriginalTimeStamp");
 
-                    b.Property<string>("ResolvedStatus");
+                    b.Property<int>("ResolvedStatus");
 
                     b.Property<int>("SegmentsId");
 
@@ -203,19 +216,6 @@ namespace WaterLog_Backend.Migrations
                     b.HasKey("TankId");
 
                     b.ToTable("TankLevels");
-                });
-
-            modelBuilder.Entity("WaterLog_Backend.Models.LocationSegmentsEntry", b =>
-                {
-                    b.HasOne("WaterLog_Backend.Models.LocationsEntry", "LocationsEntry")
-                        .WithMany()
-                        .HasForeignKey("LocationId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("WaterLog_Backend.Models.SegmentsEntry", "segmentsEntry")
-                        .WithMany()
-                        .HasForeignKey("SegmentId")
-                        .OnDelete(DeleteBehavior.Cascade);
                 });
 #pragma warning restore 612, 618
         }
