@@ -50,9 +50,9 @@ namespace WaterLog_Backend
 
             if (IsLeakage(reading1.Value, reading2.Value))
             {
+                await CreateSegmentsEventAsync(segmentid, "leak", reading1.Value, reading2.Value);
                 //Updateleakagestatus
-                IEnumerable<SegmentLeaksEntry> allLeaks = _db.SegmentLeaks;
-                if (allLeaks.Any(leak => leak.SegmentsId == segmentid))
+                if (await _db.SegmentLeaks.AnyAsync(leak => leak.SegmentsId == segmentid && leak.ResolvedStatus == EnumResolveStatus.UNRESOLVED))
                 {
                     SegmentLeaksEntry latestEntry = await _db.SegmentLeaks
                     .Where(leak => leak.SegmentsId == segmentid && leak.ResolvedStatus == EnumResolveStatus.UNRESOLVED)
@@ -81,7 +81,7 @@ namespace WaterLog_Backend
                     var mailing = await _db.MailingList.Where(a => a.ListGroup == "tier2").ToListAsync();
                     if (mailing.Count > 0)
                     {
-                        string[] template = populateEmail(segmentid);
+                        string[] template = populateEmail(await _db.SegmentLeaks.LastAsync());
                         Email email = new Email(template, _config);
                         Recipient[] mailers = new Recipient[(mailing.Count - 1)];
                         int countForMailers = 0;
@@ -98,6 +98,19 @@ namespace WaterLog_Backend
                 //Updatewithoutleakagestatus
                 await UpdateSegmentsEventAsync(segmentid, "normal", reading1.Value, reading2.Value);
             }
+        }
+
+        private async Task CreateSegmentsEventAsync(int id, string status, double inv, double outv)
+        {
+            SegmentEventsEntry entry = new SegmentEventsEntry();
+            entry.TimeStamp = DateTime.Now;
+            entry.SegmentsId = id;
+            entry.FlowIn = inv;
+            entry.FlowOut = outv;
+            entry.EventType = status;
+            await _db.SegmentEvents
+            .AddAsync(entry);
+            await _db.SaveChangesAsync();
         }
 
         public async Task<string> CalculateSeverity(SegmentLeaksEntry entry)
@@ -130,7 +143,7 @@ namespace WaterLog_Backend
             entry.SegmentsId = segId;
             entry.LatestTimeStamp = DateTime.Now;
             entry.OriginalTimeStamp = DateTime.Now;
-            entry.LatestTimeStamp = DateTime.Now;
+            entry.LastNotificationDate = DateTime.Now;
             entry.ResolvedStatus = resolvedStatus;
             entry.Severity = await CalculateSeverity(entry);
             await _db.SegmentLeaks.AddAsync(entry);
@@ -167,7 +180,7 @@ namespace WaterLog_Backend
                 if (toSend)
                 {
                     //We need to send an email to update that notification is old.
-                    string[] template = populateEmail(segId);
+                    string[] template = populateEmail(entry);
                     Email email = new Email(template, _config);
                     if ((DateTime.Now - lastEmail).Days >= 4)
                     {
@@ -201,6 +214,12 @@ namespace WaterLog_Backend
                 }
                 return mailers;
             }
+            else if (mailing.Count == 1)
+            {
+                Recipient[] mailers = new Recipient[1];
+                mailers[0] = new Recipient(mailing.ElementAtOrDefault(0).Address, (mailing.ElementAtOrDefault(0).Name + " " + mailing.ElementAtOrDefault(0).Surname));
+                return mailers;
+            }
             else
             {
                 return null;
@@ -211,7 +230,7 @@ namespace WaterLog_Backend
         public async Task<Recipient[]> GetTier2ListAsync()
         {
             var mailing = await _db.MailingList.Where(a => a.ListGroup == "tier2").ToListAsync();
-            if (mailing.Count > 0)
+            if (mailing.Count > 1)
             {
                 Recipient[] mailers = new Recipient[(mailing.Count - 1)];
                 int countForMailers = 0;
@@ -219,6 +238,12 @@ namespace WaterLog_Backend
                 {
                     mailers[countForMailers] = new Recipient(rec.Address, (rec.Name + " " + rec.Surname));
                 }
+                return mailers;
+            }
+            else if(mailing.Count == 1)
+            {
+                Recipient[] mailers = new Recipient[1];
+                mailers[0] = new Recipient(mailing.ElementAtOrDefault(0).Address, (mailing.ElementAtOrDefault(0).Name + " " + mailing.ElementAtOrDefault(0).Surname));
                 return mailers;
             }
             else
@@ -251,25 +276,20 @@ namespace WaterLog_Backend
             return false;
         }
 
-        public string[] populateEmail(int sectionid)
+        public string[] populateEmail(SegmentLeaksEntry section)
         {
             try
             {
-                var leaks = _db.SegmentLeaks;
-                var leak = leaks
-                .Where(sudo => sudo.SegmentsId == sectionid)
-                .Single();
-
                 string[] template = 
                 {
-                 "Segment " + leak.SegmentsId,
-                  GetSegmentStatus(leak.SegmentsId),
-                  leak.Severity,
-                  GetLeakPeriod(leak),
-                  Math.Round(CalculateTotalCost(leak)).ToString(),
-                  Math.Round(CalculatePerHourWastageCost(leak)).ToString(),
-                  Math.Round(CalculatePerHourWastageLitre(leak)).ToString(),
-                  BuildUrl(leak.Id)
+                 "Segment " + section.SegmentsId,
+                  GetSegmentStatus(section.SegmentsId),
+                  section.Severity,
+                  GetLeakPeriod(section),
+                  Math.Round(CalculateTotalCost(section)).ToString(),
+                  Math.Round(CalculatePerHourWastageCost(section)).ToString(),
+                  Math.Round(CalculatePerHourWastageLitre(section)).ToString(),
+                  BuildUrl(section.SegmentsId)
                 };
                 return template;
             }
@@ -304,14 +324,7 @@ namespace WaterLog_Backend
             var perhour = CalculatePerHourWastageCost(leak);
             var total =  (timebetween * perhour);
 
-            if(total < 0)
-            {
-                throw new Exception("ERROR : TotalCost Less Than 0");
-            }
-            else
-            {
-                return total;
-            }
+            return Math.Max(total, 0);
         }
 
         private string BuildUrl(int segmentId)
@@ -329,14 +342,7 @@ namespace WaterLog_Backend
             double currentTariff = 37.5;
             double usageperpoll = (entry.FlowIn - entry.FlowOut);
             var totalPH = (usageperpoll * currentTariff);
-            if(totalPH < 0)
-            {
-                throw new Exception("ERROR : Per Hour Cost Less Than 0");
-            }
-            else
-            {
-                return totalPH;
-            }
+            return Math.Max(totalPH, 0);
         }
 
         public double CalculatePerHourWastageLitre(SegmentLeaksEntry leak)
@@ -347,14 +353,7 @@ namespace WaterLog_Backend
             .Last();
 
             double usageperpoll = (entry.FlowIn - entry.FlowOut);
-            if (usageperpoll < 0)
-            {
-                throw new Exception("ERROR : Litres Per Hour Less Than 0");
-            }
-            else
-            {
-                return (usageperpoll);
-            }
+            return Math.Max(usageperpoll, 0);
         }
 
         public async Task<double> CalculateTotalUsageLitres(SegmentLeaksEntry leak)
@@ -388,15 +387,7 @@ namespace WaterLog_Backend
             var timebetween = (leak.LatestTimeStamp - leak.OriginalTimeStamp).TotalHours;
             var perhour = CalculatePerHourWastageLitre(leak);
             var ltotal = (timebetween * perhour);
-
-            if(ltotal < 0)
-            {
-                throw new Exception("ERROR : Total Litres Less Than 0");
-            }
-            else
-            {
-                return ltotal;
-            }
+            return Math.Max(ltotal, 0);
         }
 
         private string GetSegmentStatus(int segmentId)
@@ -421,6 +412,10 @@ namespace WaterLog_Backend
             switch (timeframe)
             {
                 case Period.Daily:
+                    var debug = await _db
+                    .SegmentEvents.Where(a => a.EventType == "leak" && a.TimeStamp.Month == DateTime.Now.Month && a.TimeStamp.Day == DateTime.Now.Day && a.TimeStamp.Year == DateTime.Now.Year)
+                    .GroupBy(b => b.TimeStamp.Hour)
+                    .ToListAsync();
                     return CalculateDailyWastage(await _db
                     .SegmentEvents.Where(a => a.EventType == "leak" && a.TimeStamp.Month == DateTime.Now.Month && a.TimeStamp.Day == DateTime.Now.Day && a.TimeStamp.Year == DateTime.Now.Year)
                     .GroupBy(b => b.TimeStamp.Hour)
