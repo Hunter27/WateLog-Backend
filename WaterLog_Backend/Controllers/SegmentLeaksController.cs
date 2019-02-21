@@ -63,7 +63,7 @@ namespace WaterLog_Backend.Controllers
         [HttpPost("resolveleaks")]
         public async Task<ActionResult<SegmentLeaksEntry>> Resolve([FromForm] int id)
         {
-            var leaks = await _db.SegmentLeaks.FindAsync(id);
+            var leaks = await _db.SegmentLeaks.Where(a => a.SegmentsId == id).OrderByDescending(b => b.LatestTimeStamp).FirstOrDefaultAsync();
             if (leaks == null)
             {
                 return NotFound();
