@@ -44,7 +44,7 @@ namespace WaterLog_Backend.Controllers
                 return NotFound();
             }
             Procedures procedures = new Procedures(_db, _config);
-            return (JsonConvert.SerializeObject((procedures.calculateTotalCost(leaks), procedures.calculatePerHourCost(leaks))));
+            return (JsonConvert.SerializeObject((procedures.CalculateTotalCost(leaks), procedures.CalculatePerHourWastageCost(leaks))));
         }
 
         [Route("litres/{id}")]
@@ -56,29 +56,33 @@ namespace WaterLog_Backend.Controllers
                 return NotFound();
             }
             Procedures procedures = new Procedures(_db, _config);
-            return (JsonConvert.SerializeObject((procedures.calculateTotaLitres(leaks), procedures.calculateLitresPerHour(leaks))));
+            return (JsonConvert.SerializeObject((procedures.CalculateTotalWastageLitres(leaks), procedures.CalculatePerHourWastageLitre(leaks))));
         }
 
         //Resolve Leakage
-        [HttpPut("resolve/{id}")]
-        public async Task<IActionResult> Resolve(int id)
+        [HttpPut("resolveLeak/{id}")]
+        public async Task<ActionResult<IEnumerable<SegmentLeaksEntry>>> Resolve(int id)
         {
-            var leaks = await _db.SegmentLeaks.FindAsync(id);
+            var leaks = await _db.SegmentLeaks.Where(s => s.SegmentsId == id).FirstOrDefaultAsync();
             if (leaks == null)
             {
                 return NotFound();
             }
-            leaks.ResolvedStatus = "resolved";
-            _db.SegmentLeaks.Update(leaks);
+            if (leaks.ResolvedStatus == EnumResolveStatus.UNRESOLVED)
+            {
+                leaks.ResolvedStatus = EnumResolveStatus.RESOLVED;
 
-            // post to Historylogs
-            var hist = new HistoryLogEntry();
-            hist.Date = leaks.LatestTimeStamp;
-            hist.EventsId = leaks.Id;
-            hist.Type = EnumTypeOfEvent.LEAK;
-            await _db.HistoryLogs.AddAsync(hist);
-            await _db.SaveChangesAsync();
-            return Ok();
+                var hist = new HistoryLogEntry();
+                hist.Date = DateTime.Now;
+                hist.EventsId = leaks.SegmentsId;
+                hist.Type = EnumTypeOfEvent.LEAK;
+
+                _db.SegmentLeaks.Update(leaks);
+                await _db.HistoryLogs.AddAsync(hist);
+                await _db.SaveChangesAsync();
+                return Ok("Resolved");
+            }
+                return Ok("Already resolved");
         }
 
         // GET api/segmentById/

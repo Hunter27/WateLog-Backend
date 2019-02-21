@@ -171,7 +171,7 @@ namespace WaterLog_Backend.Migrations
 
                     b.Property<DateTime>("OriginalTimeStamp");
 
-                    b.Property<string>("ResolvedStatus");
+                    b.Property<int>("ResolvedStatus");
 
                     b.Property<int>("SegmentsId");
 

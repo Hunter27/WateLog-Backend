@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace WaterLog_Backend.Migrations
 {
-    public partial class Initial : Migration
+    public partial class UpdatedLeakEntry : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -36,6 +36,36 @@ namespace WaterLog_Backend.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Locations", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "LocationSegments",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    LocationId = table.Column<int>(nullable: false),
+                    SegmentId = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_LocationSegments", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "MailingList",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    Address = table.Column<string>(nullable: true),
+                    Name = table.Column<string>(nullable: true),
+                    Surname = table.Column<string>(nullable: true),
+                    ListGroup = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MailingList", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -111,7 +141,7 @@ namespace WaterLog_Backend.Migrations
                     OriginalTimeStamp = table.Column<DateTime>(nullable: false),
                     LatestTimeStamp = table.Column<DateTime>(nullable: false),
                     LastNotificationDate = table.Column<DateTime>(nullable: false),
-                    ResolvedStatus = table.Column<string>(nullable: true)
+                    ResolvedStatus = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -147,42 +177,6 @@ namespace WaterLog_Backend.Migrations
                 {
                     table.PrimaryKey("PK_TankLevels", x => x.TankId);
                 });
-
-            migrationBuilder.CreateTable(
-                name: "LocationSegments",
-                columns: table => new
-                {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    LocationId = table.Column<int>(nullable: false),
-                    SegmentId = table.Column<int>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_LocationSegments", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_LocationSegments_Locations_LocationId",
-                        column: x => x.LocationId,
-                        principalTable: "Locations",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_LocationSegments_Segments_SegmentId",
-                        column: x => x.SegmentId,
-                        principalTable: "Segments",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_LocationSegments_LocationId",
-                table: "LocationSegments",
-                column: "LocationId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_LocationSegments_SegmentId",
-                table: "LocationSegments",
-                column: "SegmentId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -191,7 +185,13 @@ namespace WaterLog_Backend.Migrations
                 name: "HistoryLogs");
 
             migrationBuilder.DropTable(
+                name: "Locations");
+
+            migrationBuilder.DropTable(
                 name: "LocationSegments");
+
+            migrationBuilder.DropTable(
+                name: "MailingList");
 
             migrationBuilder.DropTable(
                 name: "Monitors");
@@ -209,13 +209,10 @@ namespace WaterLog_Backend.Migrations
                 name: "SegmentLeaks");
 
             migrationBuilder.DropTable(
-                name: "TankLevels");
-
-            migrationBuilder.DropTable(
-                name: "Locations");
-
-            migrationBuilder.DropTable(
                 name: "Segments");
+
+            migrationBuilder.DropTable(
+                name: "TankLevels");
         }
     }
 }

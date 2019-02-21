@@ -25,13 +25,13 @@ namespace UnitTesting
         {
             new SegmentLeaksEntry
             {
-                Id = 1, SegmentsId = 1, Severity = "High", ResolvedStatus = "Unresolved",
+                Id = 1, SegmentsId = 1, Severity = "High", ResolvedStatus = EnumResolveStatus.UNRESOLVED,
                 LatestTimeStamp = DateTime.Now, OriginalTimeStamp = DateTime.Today.Date
             },
 
             new SegmentLeaksEntry
             {
-                Id = 2, SegmentsId = 1, Severity = "Low", ResolvedStatus = "Resolved",
+                Id = 2, SegmentsId = 1, Severity = "Low", ResolvedStatus = EnumResolveStatus.RESOLVED,
                 LatestTimeStamp = DateTime.Now, OriginalTimeStamp = DateTime.Today.Date
             }
         }.AsQueryable();
