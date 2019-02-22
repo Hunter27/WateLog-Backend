@@ -83,7 +83,7 @@ namespace WaterLog_Backend.Controllers
                 return leaks;
 
             }
-                return Ok("Already Resolve");
+                return Ok("Already Resolved");
         }
 
         // GET api/segmentById/
