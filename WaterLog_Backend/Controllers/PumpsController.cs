@@ -55,8 +55,8 @@ namespace WaterLog_Backend.Controllers
         }
 
         // PUT api/pumps/
-        [HttpPut("{id}")]
-        public async Task<PumpEntry> Put(int id)
+        [HttpPost("{id}")]
+        public async Task<PumpEntry> TogglePump(int id)
         {
             try
             {
