@@ -51,7 +51,7 @@ namespace WaterLog_Backend
             if (IsLeakage(reading1.Value, reading2.Value))
             {
                 await CreateSegmentsEventAsync(segmentid, "leak", reading1.Value, reading2.Value);
-                var leakExists = await _db.SegmentLeaks
+               /* var leakExists = await _db.SegmentLeaks
                     .Where(leak => leak.SegmentsId == segmentid && leak.ResolvedStatus == EnumResolveStatus.UNRESOLVED)
                     .OrderByDescending(lk => lk.LatestTimeStamp)
                     .FirstAsync();
@@ -70,9 +70,9 @@ namespace WaterLog_Backend
                             await UpdateSegmentLeaksAsync(leakExists.Id, segmentid,severity,leakExists.OriginalTimeStamp, 
                             entry.TimeStamp,EnumResolveStatus.UNRESOLVED,leakExists.LastNotificationDate);
                         }
-                }
-                else
-                {
+                }*/
+               // else
+                //{
                     //Normal Add
                     await CreateSegmentLeaksAsync(segmentid, EnumResolveStatus.UNRESOLVED);
                     //Call an initial email
@@ -94,7 +94,7 @@ namespace WaterLog_Backend
                             email.SendMail(mailers);
                         }
                     }
-                }
+               // }
             }
             else
             {
