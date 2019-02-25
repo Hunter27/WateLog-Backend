@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WaterLog_Backend.Models;
 
 namespace WaterLog_Backend.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20190220130936_UpdatedLeakEntry")]
+    partial class UpdatedLeakEntry
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -197,32 +199,9 @@ namespace WaterLog_Backend.Migrations
                     b.ToTable("Segments");
                 });
 
-            modelBuilder.Entity("WaterLog_Backend.Models.SensorHistoryEntry", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<DateTime>("AttendedDate");
-
-                    b.Property<DateTime>("EmailSentDate");
-
-                    b.Property<DateTime>("FaultDate");
-
-                    b.Property<int>("SensorId");
-
-                    b.Property<int>("SensorResolved");
-
-                    b.Property<int>("SensorType");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("SensorHistory");
-                });
-
             modelBuilder.Entity("WaterLog_Backend.Models.TankLevelsEntry", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("TankId")
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
@@ -234,7 +213,7 @@ namespace WaterLog_Backend.Migrations
 
                     b.Property<int>("PumpId");
 
-                    b.HasKey("Id");
+                    b.HasKey("TankId");
 
                     b.ToTable("TankLevels");
                 });
