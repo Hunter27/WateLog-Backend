@@ -199,7 +199,7 @@ namespace WaterLog_Backend.Migrations
 
             modelBuilder.Entity("WaterLog_Backend.Models.TankLevelsEntry", b =>
                 {
-                    b.Property<int>("TankId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
@@ -211,7 +211,7 @@ namespace WaterLog_Backend.Migrations
 
                     b.Property<int>("PumpId");
 
-                    b.HasKey("TankId");
+                    b.HasKey("Id");
 
                     b.ToTable("TankLevels");
                 });

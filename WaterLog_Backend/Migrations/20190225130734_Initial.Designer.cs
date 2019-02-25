@@ -10,8 +10,8 @@ using WaterLog_Backend.Models;
 namespace WaterLog_Backend.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20190220130936_UpdatedLeakEntry")]
-    partial class UpdatedLeakEntry
+    [Migration("20190225130734_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -201,7 +201,7 @@ namespace WaterLog_Backend.Migrations
 
             modelBuilder.Entity("WaterLog_Backend.Models.TankLevelsEntry", b =>
                 {
-                    b.Property<int>("TankId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
@@ -213,7 +213,7 @@ namespace WaterLog_Backend.Migrations
 
                     b.Property<int>("PumpId");
 
-                    b.HasKey("TankId");
+                    b.HasKey("Id");
 
                     b.ToTable("TankLevels");
                 });

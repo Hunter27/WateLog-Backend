@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace WaterLog_Backend.Migrations
 {
-    public partial class UpdatedLeakEntry : Migration
+    public partial class Initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -166,7 +166,7 @@ namespace WaterLog_Backend.Migrations
                 name: "TankLevels",
                 columns: table => new
                 {
-                    TankId = table.Column<int>(nullable: false)
+                    Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     PumpId = table.Column<int>(nullable: false),
                     Percentage = table.Column<int>(nullable: false),
@@ -175,7 +175,7 @@ namespace WaterLog_Backend.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_TankLevels", x => x.TankId);
+                    table.PrimaryKey("PK_TankLevels", x => x.Id);
                 });
         }
 
