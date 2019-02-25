@@ -369,7 +369,9 @@ namespace WaterLog_Backend
 
         public async Task<double> CalculatePerHourWastageCost(SegmentLeaksEntry leak)
         {
-            var list = await _db.SegmentEvents.Where(inlist => inlist.SegmentsId == leak.SegmentsId && inlist.EventType == "leak" && inlist.TimeStamp >= leak.OriginalTimeStamp && inlist.TimeStamp <= leak.LatestTimeStamp).ToListAsync();
+            var list = await _db.SegmentEvents.Where(inlist => inlist.SegmentsId == leak.SegmentsId &&
+                inlist.EventType == "leak" && inlist.TimeStamp >= leak.OriginalTimeStamp && 
+                inlist.TimeStamp <= leak.LatestTimeStamp).ToListAsync();
 
             double usageperpoll = 0.0;
             foreach(var item in list)
@@ -387,7 +389,9 @@ namespace WaterLog_Backend
 
         public async Task<double> CalculateTotalUsageLitres(SegmentLeaksEntry leak)
         {
-           var events = await _db.SegmentEvents.Where(a => a.TimeStamp >= leak.OriginalTimeStamp || a.TimeStamp <= leak.LatestTimeStamp).ToListAsync();
+           var events = await _db.SegmentEvents.Where(a => a.TimeStamp >= leak.OriginalTimeStamp || a.TimeStamp <= leak.LatestTimeStamp)
+                .ToListAsync();
+
            var totalUsageForPeriod = 0.0;
 
             if (events != null || events.Count > 0)
