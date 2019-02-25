@@ -83,7 +83,7 @@ namespace WaterLog_Backend
                         var lastInsert = await _db.SegmentLeaks.LastAsync();
                         if (lastInsert != null)
                         {
-                            string[] template = populateEmail(lastInsert);
+                            string[] template = await populateEmailAsync(lastInsert);
                             Email email = new Email(template, _config);
                             Recipient[] mailers = new Recipient[(mailing.Count - 1)];
                             int countForMailers = 0;
@@ -182,7 +182,7 @@ namespace WaterLog_Backend
                 if (toSend)
                 {
                     //We need to send an email to update that notification is old.
-                    string[] template = populateEmail(entry);
+                    string[] template = await populateEmailAsync(entry);
                     Email email = new Email(template, _config);
                     if ((DateTime.Now - lastEmail).Days >= 4)
                     {
@@ -282,7 +282,7 @@ namespace WaterLog_Backend
 
         public Boolean IsLeakage(double first, double second)
         {
-            double margin = 2;
+            double margin = 4;
             if ((first - second) > margin)
             {
                 return true;
@@ -290,19 +290,22 @@ namespace WaterLog_Backend
             return false;
         }
 
-        public string[] populateEmail(SegmentLeaksEntry section)
+        public async Task<string[]> populateEmailAsync(SegmentLeaksEntry section)
         {
             try
             {
+                var totalCost = await CalculateTotalCostAsync(section);
+                var perHourWastageCost = await CalculatePerHourWastageCost(section);
+                var perHourWastageLitre = await CalculatePerHourWastageLitre(section);
                 string[] template = 
                 {
                  "Segment " + section.SegmentsId,
                   GetSegmentStatus(section.SegmentsId),
                   section.Severity,
                   GetLeakPeriod(section),
-                  Math.Round(CalculateTotalCost(section)).ToString(),
-                  Math.Round(CalculatePerHourWastageCost(section)).ToString(),
-                  Math.Round(CalculatePerHourWastageLitre(section)).ToString(),
+                  Math.Round(totalCost).ToString(),
+                  Math.Round(perHourWastageCost).ToString(),
+                  Math.Round(perHourWastageLitre).ToString(),
                   BuildUrl(section.SegmentsId)
                 };
                 return template;
@@ -319,7 +322,7 @@ namespace WaterLog_Backend
                 return ((Math.Round((leak.LatestTimeStamp - leak.OriginalTimeStamp).TotalDays,1)).ToString());
         }
 
-        public double CalculateTotalCost(SegmentLeaksEntry leak)
+        public async Task<double> CalculateTotalCostAsync(SegmentLeaksEntry leak)
         {
             var list = _db.SegmentEvents;
             var entry = list
@@ -329,13 +332,13 @@ namespace WaterLog_Backend
             var timebetween = (leak.LatestTimeStamp - leak.OriginalTimeStamp).TotalHours;
             if (timebetween < 1)
             {
-                return CalculatePerHourWastageCost(leak)/60;
+                return await CalculatePerHourWastageCost(leak)/60;
             }
             else
             {
                 timebetween = (leak.LatestTimeStamp - leak.OriginalTimeStamp).TotalHours;
             }
-            var perhour = CalculatePerHourWastageCost(leak);
+            var perhour = await CalculatePerHourWastageCost(leak);
             var total =  (timebetween * perhour);
 
             return Math.Max(total, 0);
@@ -346,43 +349,67 @@ namespace WaterLog_Backend
             return "https://iot.retrotest.co.za/alert/segment/" + segmentId;
         }
 
-        public double CalculatePerHourWastageCost(SegmentLeaksEntry leak)
+        public async Task<double> CalculatePerHourWastageLitre(SegmentLeaksEntry leak)
         {
-            var list = _db.SegmentEvents;
-            var entry = list
-            .Where(inlist => inlist.SegmentsId == leak.SegmentsId)
-            .Last();
+            var list = await _db.SegmentEvents.Where(inlist => inlist.SegmentsId == leak.SegmentsId && 
+                inlist.EventType == "leak" && inlist.TimeStamp >= leak.OriginalTimeStamp && 
+                inlist.TimeStamp <= leak.LatestTimeStamp).ToListAsync();
 
-            double currentTariff = Globals.RandPerLitre;
-            double usageperpoll = (entry.FlowIn - entry.FlowOut);
-            var totalPH = (usageperpoll * currentTariff);
-            return Math.Max(totalPH, 0);
+            double usageperpoll = 0.0;
+            foreach (var item in list)
+            {
+                usageperpoll += (item.FlowIn - item.FlowOut);
+            }
+            usageperpoll *= 0.0167;
+            var minutes = (leak.LatestTimeStamp - leak.OriginalTimeStamp).TotalMinutes;
+            usageperpoll /= minutes;
+            usageperpoll *= Globals.MinuteToHour;
+            return Math.Max(usageperpoll,0);
         }
 
-        public double CalculatePerHourWastageLitre(SegmentLeaksEntry leak)
+        public async Task<double> CalculatePerHourWastageCost(SegmentLeaksEntry leak)
         {
-            var list = _db.SegmentEvents;
-            var entry = list
-            .Where(inlist => inlist.SegmentsId == leak.SegmentsId)
-            .Last();
+            var list = await _db.SegmentEvents.Where(inlist => inlist.SegmentsId == leak.SegmentsId &&
+                inlist.EventType == "leak" && inlist.TimeStamp >= leak.OriginalTimeStamp && 
+                inlist.TimeStamp <= leak.LatestTimeStamp).ToListAsync();
 
-            double usageperpoll = (entry.FlowIn - entry.FlowOut);
-            return Math.Max(usageperpoll, 0);
+            double usageperpoll = 0.0;
+            foreach(var item in list)
+            {
+                usageperpoll += (item.FlowIn - item.FlowOut);
+            }
+            //Convert Poll Into Minutes
+            usageperpoll *= 0.0167;
+            var minutes = (leak.LatestTimeStamp - leak.OriginalTimeStamp).TotalMinutes;
+            usageperpoll /= minutes;
+            usageperpoll *= Globals.MinuteToHour;
+            return Math.Max(((usageperpoll) * Globals.RandPerLitre),0);
+
         }
 
         public async Task<double> CalculateTotalUsageLitres(SegmentLeaksEntry leak)
         {
-           var events = await _db.SegmentEvents.Where(a => a.TimeStamp >= leak.OriginalTimeStamp || a.TimeStamp <= leak.LatestTimeStamp).ToListAsync();
+           var events = await _db.SegmentEvents.Where(a => a.TimeStamp >= leak.OriginalTimeStamp || a.TimeStamp <= leak.LatestTimeStamp)
+                .ToListAsync();
+
            var totalUsageForPeriod = 0.0;
 
             if (events != null || events.Count > 0)
             {
                 foreach (var item in events)
                 {
-                    totalUsageForPeriod += (item.FlowIn / 60);
+                    totalUsageForPeriod += (item.FlowIn);
                 }
-                var hours = Math.Max(((leak.LatestTimeStamp - leak.OriginalTimeStamp).TotalHours),0);
-                return (totalUsageForPeriod * hours);
+
+                //Perhour
+                var perhour = (totalUsageForPeriod *0.0167);
+                var minutes = (leak.LatestTimeStamp - leak.OriginalTimeStamp).TotalMinutes;
+                perhour /= minutes;
+                perhour *= Globals.MinuteToHour;
+
+                //
+                var timebetween = minutes / Globals.MinuteToHour;
+                return (Math.Max((perhour * timebetween),0));
             }
             else
             {
@@ -398,8 +425,9 @@ namespace WaterLog_Backend
             .Where(inlist => inlist.SegmentsId == leak.SegmentsId)
             .Last();
 
-            var timebetween = (leak.LatestTimeStamp - leak.OriginalTimeStamp).TotalHours;
-            var perhour = CalculatePerHourWastageLitre(leak);
+            var timebetween = (leak.LatestTimeStamp - leak.OriginalTimeStamp).TotalMinutes;
+            timebetween /= Globals.MinuteToHour;
+            var perhour = await CalculatePerHourWastageLitre(leak);
             var ltotal = (timebetween * perhour);
             return Math.Max(ltotal, 0);
         }
