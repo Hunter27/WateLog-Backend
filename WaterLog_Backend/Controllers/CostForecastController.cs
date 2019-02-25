@@ -121,10 +121,18 @@ namespace WaterLog_Backend.Controllers
             double rSquared, yIntercept, slope;
 
             forecast.LinearRegression(epochDates.ToArray(), y.ToArray(), out rSquared, out yIntercept, out slope);
+            double sum = 0;
             var day = DateTime.DaysInMonth(DateTime.Now.Year, id);
-            var date = new DateTime(DateTime.Now.Year, id, day);
-            
-            return slope*(new DateTimeOffset(date).ToUnixTimeSeconds()) + yIntercept;
+
+            for (int i = 1; i <= day; i++)
+            {
+                var date = new DateTime(DateTime.Now.Year, id, i);
+                var toAdd = slope * (new DateTimeOffset(date).ToUnixTimeSeconds()) + yIntercept;
+
+                sum += toAdd >= 0 ? toAdd:0;
+            }
+
+            return sum;
         }
 
     }
