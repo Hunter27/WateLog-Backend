@@ -17,11 +17,11 @@ namespace UnitTesting
         {
             new TankLevelsEntry
             {
-                TankId = 1, Percentage = 50, Instruction = "Turn off", LevelStatus = "Sufficient"
+                Id = 1, Percentage = 50, Instruction = "Turn off", LevelStatus = "Sufficient"
             },
             new TankLevelsEntry
             {
-                TankId = 2, Percentage = 20, Instruction = "Turn on", LevelStatus = "Not Sufficient"
+                Id = 2, Percentage = 20, Instruction = "Turn on", LevelStatus = "Not Sufficient"
             },
 
         }.AsQueryable();
@@ -36,10 +36,10 @@ namespace UnitTesting
             mockContext.Setup(dbc => dbc.TankLevels).Returns(mockSet.Object);
             var tankLevelsController = new TankLevelsController(mockContext.Object, null);
             mockContext.Setup(x => x.TankLevels.FindAsync(id))
-                .Returns(Task.FromResult(mockData.Where(x => x.TankId == id).First()));
+                .Returns(Task.FromResult(mockData.Where(x => x.Id == id).First()));
             var levels = tankLevelsController.Get(id).Result;
             Assert.IsNotNull(levels);
-            Assert.AreEqual(levels.Value.TankId, id);
+            Assert.AreEqual(levels.Value.Id, id);
             Assert.AreEqual(levels.Value.Instruction, "Turn off");
         }
     }

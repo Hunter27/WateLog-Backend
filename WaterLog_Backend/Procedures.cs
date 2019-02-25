@@ -7,10 +7,12 @@ using System.Threading.Tasks;
 using EmailNotifications;
 using WaterLog_Backend.Models;
 
+
 namespace WaterLog_Backend
 {
     public class Procedures
     {
+        enum FaultHeat : int { High = 5, Medium = 3, Low = 1 };
         DatabaseContext _db;
         IConfiguration _config;
         public Procedures() {
@@ -1004,11 +1006,40 @@ namespace WaterLog_Backend
             return arrayOfSeasonsCost;
         }
 
-        public async Task<double> getTankLevel(int Id)
+        public List<MonitorHeat> getMonitorsFaultLevels()
         {
+            List<MonitorHeat> HeatValues = new List<MonitorHeat>();
+            IEnumerable<MonitorsEntry> all = _db.Monitors.ToArray();
+            foreach (MonitorsEntry entry in all)
+            {
+                MonitorHeat heat = new MonitorHeat();
+                heat.Long = entry.Long;
+                heat.Lat = entry.Lat;
+                string level = "";
+                if (entry.FaultCount >= 5)
+                {
+                    level = "High";
+                }else if(entry.FaultCount >= 3)
+                {
+                    level = "Medium";
+                }
+                else if (entry.FaultCount > 0)
+                {
+                    level = "Low";
+                }
+                else
+                {
+                    level = "Clear";
+                }
+                heat.FaultLevel = level;
+                HeatValues.Add(heat);
+            }
+
+            return HeatValues;
 
 
-            return 0.0;
+
+          
         }
     } 
 }

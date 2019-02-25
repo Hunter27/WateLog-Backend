@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
 using WaterLog_Backend.Models;
+using WaterLog_Backend;
 
 namespace WaterLog_Backend.Controllers
 {
@@ -37,6 +38,15 @@ namespace WaterLog_Backend.Controllers
         public async Task<ActionResult<MonitorsEntry>> Get(int id)
         {
             return await _db.Monitors.FindAsync(id);
+        }
+
+        [HttpGet("{heat}")]
+        public  MonitorHeat[] getHeat()
+        {
+            Procedures procedure = new Procedures(_db, _config);
+            List<MonitorHeat> results =  procedure.getMonitorsFaultLevels();
+            return results.ToArray();
+            
         }
 
         // POST api/monitors
