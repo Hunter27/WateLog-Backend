@@ -86,7 +86,7 @@ namespace EmailNotifications
                     Append("<a style='color:red;' href=" + innerText + ">");
                     Append("<font");
                     AppendOptionFont(classAttributes, id, fontSize, align);
-                    Append("Here");
+                    Append("<b>Resolve or process the issue <br/> Here</b>");
                     Append("</font>");
                     Append("</a>");
                 }

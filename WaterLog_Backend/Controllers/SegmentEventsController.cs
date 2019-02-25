@@ -9,7 +9,6 @@ using WaterLog_Backend.Models;
 
 namespace WaterLog_Backend.Controllers
 {
-
     [Route("api/[controller]")]
     [ApiController]
     public class SegmentEventsController : ControllerBase
@@ -22,14 +21,14 @@ namespace WaterLog_Backend.Controllers
             _config = config;
         }
 
-        // GET api/values
+        // GET api/events
         [HttpGet]
         public async Task<ActionResult<IEnumerable<SegmentEventsEntry>>> GetAllSegmentEvents()
         {
             return await _db.SegmentEvents.ToListAsync();
         }
 
-        // GET api/values/5
+        // GET api/eventsById/
         [HttpGet("{id}")]
         public async Task<ActionResult<SegmentEventsEntry>> GetSegmentById(int id)
         {
@@ -42,7 +41,7 @@ namespace WaterLog_Backend.Controllers
             return segment;
         }
 
-        // POST api/values
+        // POST api/events
         [HttpPost]
         public async Task AddSegmentEvent([FromBody] SegmentEventsEntry value)
         {
@@ -83,22 +82,31 @@ namespace WaterLog_Backend.Controllers
         //Routing to get all currently opened events
         [Route("GetAlerts")]
         public async Task<List<GetAlerts>> GetAlerts()
+
         {
             try
             {
                 //Get all leaks first
-                var leaks = await _db.SegmentLeaks.Where(a => a.ResolvedStatus == "unresolved").ToListAsync();
+                var leaks = await _db.SegmentLeaks.ToListAsync();
+                leaks = leaks.OrderByDescending(a => a.OriginalTimeStamp).OrderByDescending(a => a.ResolvedStatus).ToList();
                 if (leaks != null)
                 {
                     List<GetAlerts> alerts = new List<GetAlerts>();
                     var proc = new Procedures(_db, _config);
                     foreach (SegmentLeaksEntry entry in leaks)
                     {
+                        double totalSystemLitres = -1.0, litresUsed = -1.0, 
+                            perhourwastagelitre = await proc.CalculatePerHourWastageLitre(entry),
+                            cost = await proc.CalculatePerHourWastageCost(entry);
+
                         //Find Cost
-                        var cost = proc.calculatePerHourCost(entry);
+                        if (entry.ResolvedStatus == EnumResolveStatus.UNRESOLVED) {
+
+                            totalSystemLitres = await proc.CalculateTotalUsageLitres(entry);
+                            litresUsed = await proc.CalculateTotalWastageLitres(entry);
+                        }
+                       
                         //Find Litre Usage
-                        //TODO: Call TotalLitres Used(Dependent on Usage/Cost Feature Branch)
-                        var litresUsed = proc.calculateTotaLitres(entry);
                         alerts.Add
                         (
                             new GetAlerts
@@ -108,9 +116,11 @@ namespace WaterLog_Backend.Controllers
                                 entry.SegmentsId,
                                 "leak",
                                 cost,
+                                perhourwastagelitre,
                                 entry.Severity,
                                 litresUsed,
-                                0.0
+                                totalSystemLitres,
+                                entry.ResolvedStatus
                              )
                         );
                     }
@@ -122,7 +132,7 @@ namespace WaterLog_Backend.Controllers
                         foreach (MonitorsEntry entry in faultySensors)
                         {
                             //Get latest faulty sensor
-                            var sensor = await _db.Readings.Where(a => a.Value == 0)
+                            var sensor = await _db.Readings.Where(a => a.MonitorsId == entry.Id)
                                         .OrderByDescending(a => a.TimesStamp)
                                         .FirstOrDefaultAsync();
 
@@ -138,15 +148,17 @@ namespace WaterLog_Backend.Controllers
                                         sensor.MonitorsId,
                                         "faulty",
                                         0.0,
-                                        "severe",
                                         0.0,
-                                        0.0
+                                        "High",
+                                        sensor.Value,
+                                        entry.Max_flow,
+                                        EnumResolveStatus.UNRESOLVED
                                      )
                                  );
                             }
                         }
                     }
-                    return alerts;
+                    return (alerts.OrderByDescending(a => a.Date).ToList());
                 }
                 throw new Exception("ERROR : Null SegmentLeaks");
             }
@@ -155,6 +167,7 @@ namespace WaterLog_Backend.Controllers
                 throw error;
             }
         }
+
         [Route("dailyUsage")]
         public async Task<DataPoints<DateTime, double>> GetDailyUsgaeGraphData()
         {

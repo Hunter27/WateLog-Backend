@@ -13,22 +13,39 @@ namespace WaterLog_Backend.Models
         public int EntityId;
         public string EntityType;
         public double Cost;
+        //Litres lost per hour based on sensor reading
+        public double LitresPerHour;
         public string Severity;
         //Litres related to the Type IE- Leak
         public double TypeLitres;
         //Total Litres used throughout the system during the event timeline
         public double TotalLitres;
+        //Resolution status related to all entities
+        public EnumResolveStatus Status;
 
-        public GetAlerts(DateTime date, string entityname, int entityid, string entitytype, double cost, string severity, double totalperlitre,double totallitre)
+        public GetAlerts(
+            DateTime date, 
+            string entityname, 
+            int entityid, 
+            string entitytype, 
+            double cost, 
+            double litresperhour,
+            string severity, 
+            double totalperlitre,
+            double totallitre,
+            EnumResolveStatus status
+        )
         {
             Date = date;
             EntityName = entityname;
             EntityType = entitytype;
             EntityId = entityid;
             Cost = cost;
+            LitresPerHour = litresperhour;
             Severity = severity;
             TypeLitres = totalperlitre;
             TotalLitres = totallitre;
+            Status = status;
         }
     }
 }

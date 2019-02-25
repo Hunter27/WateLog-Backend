@@ -24,21 +24,21 @@ namespace WaterLog_Backend.Controllers
             _config = config;
         }
 
-        // GET api/values
+        // GET api/pumps
         [HttpGet]
         public async Task<ActionResult<IEnumerable<PumpEntry>>> Get()
         {
             return await _db.Pumps.ToListAsync();
         }
 
-        // GET api/values/
+        // GET api/pumpsById/
         [HttpGet("{id}")]
         public async Task<ActionResult<PumpEntry>> Get(int id)
         {
             return await _db.Pumps.FindAsync(id);
         }
 
-        // POST api/values
+        // POST api/pump
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] PumpEntry value)
         {
@@ -52,11 +52,11 @@ namespace WaterLog_Backend.Controllers
             {
                 return new BadRequestObjectResult("Not Found");
             }
-
         }
-        // PUT api/values/
-        [HttpPut("{id}")]
-        public async Task<PumpEntry> Put(int id)
+
+        // PUT api/pumps/
+        [HttpPost("{id}")]
+        public async Task<PumpEntry> TogglePump(int id)
         {
             try
             {
@@ -79,7 +79,7 @@ namespace WaterLog_Backend.Controllers
             }
         }
 
-        // DELETE api/values/
+        // DELETE api/pumps/
         [HttpDelete("{id}")]
         public async Task Delete(int id)
         {
