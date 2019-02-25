@@ -40,7 +40,7 @@ namespace WaterLog_Backend.Controllers
             return await _db.Monitors.FindAsync(id);
         }
 
-        [HttpGet("{heat}")]
+        [Route("heat")]
         public  MonitorHeat[] getHeat()
         {
             Procedures procedure = new Procedures(_db, _config);
