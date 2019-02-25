@@ -197,6 +197,29 @@ namespace WaterLog_Backend.Migrations
                     b.ToTable("Segments");
                 });
 
+            modelBuilder.Entity("WaterLog_Backend.Models.SensorHistoryEntry", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("AttendedDate");
+
+                    b.Property<DateTime>("EmailSentDate");
+
+                    b.Property<DateTime>("FaultDate");
+
+                    b.Property<int>("SensorId");
+
+                    b.Property<int>("SensorResolved");
+
+                    b.Property<int>("SensorType");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SensorHistory");
+                });
+
             modelBuilder.Entity("WaterLog_Backend.Models.TankLevelsEntry", b =>
                 {
                     b.Property<int>("TankId")

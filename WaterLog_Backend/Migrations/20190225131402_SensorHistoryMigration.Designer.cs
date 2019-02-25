@@ -10,8 +10,8 @@ using WaterLog_Backend.Models;
 namespace WaterLog_Backend.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20190220130936_UpdatedLeakEntry")]
-    partial class UpdatedLeakEntry
+    [Migration("20190225131402_SensorHistoryMigration")]
+    partial class SensorHistoryMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -197,6 +197,29 @@ namespace WaterLog_Backend.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Segments");
+                });
+
+            modelBuilder.Entity("WaterLog_Backend.Models.SensorHistoryEntry", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("AttendedDate");
+
+                    b.Property<DateTime>("EmailSentDate");
+
+                    b.Property<DateTime>("FaultDate");
+
+                    b.Property<int>("SensorId");
+
+                    b.Property<int>("SensorResolved");
+
+                    b.Property<int>("SensorType");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SensorHistory");
                 });
 
             modelBuilder.Entity("WaterLog_Backend.Models.TankLevelsEntry", b =>

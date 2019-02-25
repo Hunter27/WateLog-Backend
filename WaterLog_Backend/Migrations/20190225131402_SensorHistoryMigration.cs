@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace WaterLog_Backend.Migrations
 {
-    public partial class UpdatedLeakEntry : Migration
+    public partial class SensorHistoryMigration : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -163,6 +163,24 @@ namespace WaterLog_Backend.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "SensorHistory",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    SensorId = table.Column<int>(nullable: false),
+                    SensorResolved = table.Column<int>(nullable: false),
+                    FaultDate = table.Column<DateTime>(nullable: false),
+                    AttendedDate = table.Column<DateTime>(nullable: false),
+                    EmailSentDate = table.Column<DateTime>(nullable: false),
+                    SensorType = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SensorHistory", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "TankLevels",
                 columns: table => new
                 {
@@ -210,6 +228,9 @@ namespace WaterLog_Backend.Migrations
 
             migrationBuilder.DropTable(
                 name: "Segments");
+
+            migrationBuilder.DropTable(
+                name: "SensorHistory");
 
             migrationBuilder.DropTable(
                 name: "TankLevels");
