@@ -41,20 +41,20 @@ namespace WaterLog_Backend
             ReadingsEntry reading1 = await _db.Readings
             .Where(r => r.MonitorsId == segmentInid)
             .OrderByDescending(r => r.TimesStamp)
-            .FirstAsync();
+            .FirstOrDefaultAsync();
 
             ReadingsEntry reading2 = await _db.Readings
             .Where(re => re.MonitorsId == segmentOutid)
             .OrderByDescending(re => re.TimesStamp)
-            .FirstAsync();
+            .FirstOrDefaultAsync();
 
-            if (IsLeakage(reading1.Value, reading2.Value))
+            if (reading1 != null && reading2 != null && IsLeakage(reading1.Value, reading2.Value))
             {
                 await CreateSegmentsEventAsync(segmentid, "leak", reading1.Value, reading2.Value);
                 var leakExists = await _db.SegmentLeaks
                     .Where(leak => leak.SegmentsId == segmentid && leak.ResolvedStatus == EnumResolveStatus.UNRESOLVED)
                     .OrderByDescending(lk => lk.LatestTimeStamp)
-                    .FirstAsync();
+                    .FirstOrDefaultAsync();
                 //Updateleakagestatus
                 if (leakExists != null)
                 {
@@ -62,14 +62,17 @@ namespace WaterLog_Backend
                         SegmentEventsEntry entry = await _db.SegmentEvents
                         .Where(leak => leak.SegmentsId == segmentid)
                         .OrderByDescending(lks => lks.TimeStamp)
-                        .FirstAsync();
+                        .FirstOrDefaultAsync();
 
+                    if (entry != null)
+                    {
                         if (entry.EventType == "leak")
                         {
                             var severity = await CalculateSeverity(leakExists);
-                            await UpdateSegmentLeaksAsync(leakExists.Id, segmentid,severity,leakExists.OriginalTimeStamp, 
-                            entry.TimeStamp,EnumResolveStatus.UNRESOLVED,leakExists.LastNotificationDate);
+                            await UpdateSegmentLeaksAsync(leakExists.Id, segmentid, severity, leakExists.OriginalTimeStamp,
+                            entry.TimeStamp, EnumResolveStatus.UNRESOLVED, leakExists.LastNotificationDate);
                         }
+                    }
                 }
                 else
                 {
