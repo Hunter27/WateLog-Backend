@@ -95,7 +95,7 @@ namespace WaterLog_Backend.Controllers
                     var proc = new Procedures(_db, _config);
                     foreach (SegmentLeaksEntry entry in leaks)
                     {
-                        double totalSystemLitres = -1, litresUsed = -1, 
+                        double totalSystemLitres = -1.0, litresUsed = -1.0, 
                             perhourwastagelitre = await proc.CalculatePerHourWastageLitre(entry),
                             cost = await proc.CalculatePerHourWastageCost(entry);
 

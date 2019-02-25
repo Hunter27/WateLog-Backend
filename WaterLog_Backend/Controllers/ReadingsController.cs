@@ -61,8 +61,8 @@ namespace WaterLog_Backend.Controllers
             ReadingsEntry reading2 = new ReadingsEntry();
             reading.TimesStamp = DateTime.UtcNow;
             reading2.TimesStamp = DateTime.UtcNow;
-            reading.Value = (values.valueIn)*60;
-            reading2.Value = (values.valueOut)*60;
+            reading.Value = (values.valueIn)*Globals.MinuteToHour;
+            reading2.Value = (values.valueOut)*Globals.MinuteToHour;
             reading.MonitorsId = values.IdIn;
             reading2.MonitorsId = values.IdOut;
             await _db.Readings.AddAsync(reading);

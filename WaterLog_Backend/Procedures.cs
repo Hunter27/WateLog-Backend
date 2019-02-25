@@ -351,7 +351,9 @@ namespace WaterLog_Backend
 
         public async Task<double> CalculatePerHourWastageLitre(SegmentLeaksEntry leak)
         {
-            var list = await _db.SegmentEvents.Where(inlist => inlist.SegmentsId == leak.SegmentsId && inlist.EventType == "leak" && inlist.TimeStamp >= leak.OriginalTimeStamp && inlist.TimeStamp <= leak.LatestTimeStamp).ToListAsync();
+            var list = await _db.SegmentEvents.Where(inlist => inlist.SegmentsId == leak.SegmentsId && 
+                inlist.EventType == "leak" && inlist.TimeStamp >= leak.OriginalTimeStamp && 
+                inlist.TimeStamp <= leak.LatestTimeStamp).ToListAsync();
 
             double usageperpoll = 0.0;
             foreach (var item in list)
@@ -361,7 +363,7 @@ namespace WaterLog_Backend
             usageperpoll *= 0.0167;
             var minutes = (leak.LatestTimeStamp - leak.OriginalTimeStamp).TotalMinutes;
             usageperpoll /= minutes;
-            usageperpoll *= 60.00;
+            usageperpoll *= Globals.MinuteToHour;
             return Math.Max(usageperpoll,0);
         }
 
@@ -378,7 +380,7 @@ namespace WaterLog_Backend
             usageperpoll *= 0.0167;
             var minutes = (leak.LatestTimeStamp - leak.OriginalTimeStamp).TotalMinutes;
             usageperpoll /= minutes;
-            usageperpoll *= 60.00;
+            usageperpoll *= Globals.MinuteToHour;
             return Math.Max(((usageperpoll) * Globals.RandPerLitre),0);
 
         }
@@ -399,10 +401,10 @@ namespace WaterLog_Backend
                 var perhour = (totalUsageForPeriod *0.0167);
                 var minutes = (leak.LatestTimeStamp - leak.OriginalTimeStamp).TotalMinutes;
                 perhour /= minutes;
-                perhour *= 60.00;
+                perhour *= Globals.MinuteToHour;
 
                 //
-                var timebetween = minutes / 60.00;
+                var timebetween = minutes / Globals.MinuteToHour;
                 return (Math.Max((perhour * timebetween),0));
             }
             else
@@ -420,7 +422,7 @@ namespace WaterLog_Backend
             .Last();
 
             var timebetween = (leak.LatestTimeStamp - leak.OriginalTimeStamp).TotalMinutes;
-            timebetween /= 60.00;
+            timebetween /= Globals.MinuteToHour;
             var perhour = await CalculatePerHourWastageLitre(leak);
             var ltotal = (timebetween * perhour);
             return Math.Max(ltotal, 0);
