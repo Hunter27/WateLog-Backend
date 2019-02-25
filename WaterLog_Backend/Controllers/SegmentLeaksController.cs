@@ -44,7 +44,7 @@ namespace WaterLog_Backend.Controllers
                 return NotFound();
             }
             Procedures procedures = new Procedures(_db, _config);
-            return (JsonConvert.SerializeObject((procedures.CalculateTotalCost(leaks), procedures.CalculatePerHourWastageCost(leaks))));
+            return (JsonConvert.SerializeObject((procedures.CalculateTotalCostAsync(leaks), procedures.CalculatePerHourWastageCost(leaks))));
         }
 
         [Route("litres/{id}")]
@@ -88,9 +88,10 @@ namespace WaterLog_Backend.Controllers
 
         // GET api/segmentById/
         [HttpGet("{id}")]
-        public async Task<ActionResult<SegmentLeaksEntry>> Get(int id)
+        public async Task<ActionResult<SegmentLeaksEntry>> GetBySegmentId(int id)
         {
-            var leaks = await _db.SegmentLeaks.FindAsync(id);
+            //System makes assumption that segment and resolved status make entry distinct
+            var leaks = await _db.SegmentLeaks.Where(a => a.SegmentsId == id && a.ResolvedStatus == EnumResolveStatus.UNRESOLVED).FirstOrDefaultAsync();
             if (leaks == null)
             {
                 return NotFound();

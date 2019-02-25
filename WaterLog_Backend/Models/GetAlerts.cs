@@ -20,6 +20,8 @@ namespace WaterLog_Backend.Models
         public double TypeLitres;
         //Total Litres used throughout the system during the event timeline
         public double TotalLitres;
+        //Resolution status related to all entities
+        public EnumResolveStatus Status;
 
         public GetAlerts(
             DateTime date, 
@@ -30,7 +32,8 @@ namespace WaterLog_Backend.Models
             double litresperhour,
             string severity, 
             double totalperlitre,
-            double totallitre
+            double totallitre,
+            EnumResolveStatus status
         )
         {
             Date = date;
@@ -42,6 +45,7 @@ namespace WaterLog_Backend.Models
             Severity = severity;
             TypeLitres = totalperlitre;
             TotalLitres = totallitre;
+            Status = status;
         }
     }
 }

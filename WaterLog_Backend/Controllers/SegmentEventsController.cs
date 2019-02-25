@@ -82,22 +82,31 @@ namespace WaterLog_Backend.Controllers
         //Routing to get all currently opened events
         [Route("GetAlerts")]
         public async Task<List<GetAlerts>> GetAlerts()
+
         {
             try
             {
                 //Get all leaks first
-                var leaks = await _db.SegmentLeaks.Where(a => a.ResolvedStatus == EnumResolveStatus.UNRESOLVED).ToListAsync();
+                var leaks = await _db.SegmentLeaks.ToListAsync();
+                leaks = leaks.OrderByDescending(a => a.OriginalTimeStamp).OrderByDescending(a => a.ResolvedStatus).ToList();
                 if (leaks != null)
                 {
                     List<GetAlerts> alerts = new List<GetAlerts>();
                     var proc = new Procedures(_db, _config);
                     foreach (SegmentLeaksEntry entry in leaks)
                     {
+                        double totalSystemLitres = -1, litresUsed = -1, 
+                            perhourwastagelitre = await proc.CalculatePerHourWastageLitre(entry),
+                            cost = await proc.CalculatePerHourWastageCost(entry);
+
                         //Find Cost
-                        var cost = proc.CalculatePerHourWastageCost(entry);
+                        if (entry.ResolvedStatus == EnumResolveStatus.UNRESOLVED) {
+
+                            totalSystemLitres = await proc.CalculateTotalUsageLitres(entry);
+                            litresUsed = await proc.CalculateTotalWastageLitres(entry);
+                        }
+                       
                         //Find Litre Usage
-                        var totalSystemLitres = await proc.CalculateTotalUsageLitres(entry);
-                        var litresUsed = await proc.CalculateTotalWastageLitres(entry);
                         alerts.Add
                         (
                             new GetAlerts
@@ -107,10 +116,11 @@ namespace WaterLog_Backend.Controllers
                                 entry.SegmentsId,
                                 "leak",
                                 cost,
-                                proc.CalculatePerHourWastageLitre(entry),
+                                perhourwastagelitre,
                                 entry.Severity,
                                 litresUsed,
-                                totalSystemLitres
+                                totalSystemLitres,
+                                entry.ResolvedStatus
                              )
                         );
                     }
@@ -141,13 +151,14 @@ namespace WaterLog_Backend.Controllers
                                         0.0,
                                         "High",
                                         sensor.Value,
-                                        entry.Max_flow
+                                        entry.Max_flow,
+                                        EnumResolveStatus.UNRESOLVED
                                      )
                                  );
                             }
                         }
                     }
-                    return alerts;
+                    return (alerts.OrderByDescending(a => a.Date).ToList());
                 }
                 throw new Exception("ERROR : Null SegmentLeaks");
             }
