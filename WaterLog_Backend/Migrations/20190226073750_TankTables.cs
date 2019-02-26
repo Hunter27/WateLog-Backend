@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Metadata;
+﻿using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace WaterLog_Backend.Migrations
@@ -10,18 +9,6 @@ namespace WaterLog_Backend.Migrations
         {
             migrationBuilder.DropTable(
                 name: "TankLevels");
-
-            migrationBuilder.AddColumn<int>(
-                name: "FaultCount",
-                table: "Segments",
-                nullable: false,
-                defaultValue: 0);
-
-            migrationBuilder.AddColumn<int>(
-                name: "FaultCount",
-                table: "Monitors",
-                nullable: false,
-                defaultValue: 0);
 
             migrationBuilder.CreateTable(
                 name: "TankMonitors",
@@ -48,8 +35,7 @@ namespace WaterLog_Backend.Migrations
                     TankMonitorsId = table.Column<int>(nullable: false),
                     PumpId = table.Column<int>(nullable: false),
                     PercentageLevel = table.Column<double>(nullable: false),
-                    OptimalLevel = table.Column<double>(nullable: false),
-                    TimeStamp = table.Column<DateTime>(nullable: false)
+                    OptimalLevel = table.Column<double>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -65,19 +51,11 @@ namespace WaterLog_Backend.Migrations
             migrationBuilder.DropTable(
                 name: "TankReadings");
 
-            migrationBuilder.DropColumn(
-                name: "FaultCount",
-                table: "Segments");
-
-            migrationBuilder.DropColumn(
-                name: "FaultCount",
-                table: "Monitors");
-
             migrationBuilder.CreateTable(
                 name: "TankLevels",
                 columns: table => new
                 {
-                    TankId = table.Column<int>(nullable: false)
+                    Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     Instruction = table.Column<string>(nullable: true),
                     LevelStatus = table.Column<string>(nullable: true),
@@ -86,7 +64,7 @@ namespace WaterLog_Backend.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_TankLevels", x => x.TankId);
+                    table.PrimaryKey("PK_TankLevels", x => x.Id);
                 });
         }
     }
