@@ -38,10 +38,10 @@ namespace WaterLog_Backend.Controllers
             return await _db.TankReadings.FindAsync(id);
         }
 
-        [HttpGet("{level}")]
-        public async Task<ActionResult<TankReadingsEntry>> GetLevel(int id)
+        [HttpGet("id/{id}")]
+        public async Task<ActionResult<TankMonitorsEntry>> GetLevel(int id)
         {
-            return await _db.TankReadings.FindAsync(id);
+            return await _db.TankMonitors.FindAsync(id);
         }
 
         [HttpGet("graph/{id}")]
