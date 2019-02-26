@@ -88,11 +88,12 @@ namespace WaterLog_Backend
                         {
                             string[] template = await populateEmailAsync(lastInsert);
                             Email email = new Email(template, _config);
-                            Recipient[] mailers = new Recipient[(mailing.Count - 1)];
+                            Recipient[] mailers = new Recipient[mailing.Count];
                             int countForMailers = 0;
                             foreach (var rec in mailing)
                             {
                                 mailers[countForMailers] = new Recipient(rec.Address, (rec.Name + " " + rec.Surname));
+                                countForMailers++;
                             }
                             email.SendMail(mailers);
                         }
@@ -293,6 +294,33 @@ namespace WaterLog_Backend
             return false;
         }
 
+        public async Task<string[]> populateEmailAsync(SegmentLeaksEntry section, string entityEvent)
+        {
+            try
+            {
+                var totalCost = await CalculateTotalCostAsync(section);
+                var perHourWastageCost = await CalculatePerHourWastageCost(section);
+                var perHourWastageLitre = await CalculatePerHourWastageLitre(section);
+                string[] template =
+                {
+                 "Segment " + section.SegmentsId,
+                  entityEvent,
+                  section.Severity,
+                  GetLeakPeriodInMinutes(section),
+                  (totalCost).ToString(),
+                  (perHourWastageCost).ToString(),
+                  (perHourWastageLitre).ToString(),
+                  BuildUrl(section.SegmentsId)
+                };
+                return template;
+            }
+            catch (Exception error)
+
+            {
+                throw error;
+            }
+        }
+
         public async Task<string[]> populateEmailAsync(SegmentLeaksEntry section)
         {
             try
@@ -305,10 +333,10 @@ namespace WaterLog_Backend
                  "Segment " + section.SegmentsId,
                   GetSegmentStatus(section.SegmentsId),
                   section.Severity,
-                  GetLeakPeriod(section),
-                  Math.Round(totalCost).ToString(),
-                  Math.Round(perHourWastageCost).ToString(),
-                  Math.Round(perHourWastageLitre).ToString(),
+                  GetLeakPeriodInMinutes(section),
+                  (totalCost).ToString(),
+                  (perHourWastageCost).ToString(),
+                  (perHourWastageLitre).ToString(),
                   BuildUrl(section.SegmentsId)
                 };
                 return template;
@@ -320,9 +348,9 @@ namespace WaterLog_Backend
             }  
         }
 
-        private string GetLeakPeriod(SegmentLeaksEntry leak)
+        private string GetLeakPeriodInMinutes(SegmentLeaksEntry leak)
         {
-                return ((Math.Round((leak.LatestTimeStamp - leak.OriginalTimeStamp).TotalDays,1)).ToString());
+                return Math.Max((leak.LatestTimeStamp - leak.OriginalTimeStamp).TotalMinutes,1).ToString();
         }
 
         public async Task<double> CalculateTotalCostAsync(SegmentLeaksEntry leak)
