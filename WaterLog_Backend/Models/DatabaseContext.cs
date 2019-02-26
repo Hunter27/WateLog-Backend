@@ -23,7 +23,8 @@ namespace WaterLog_Backend.Models
         public DbSet<SegmentEventsEntry> SegmentEvents { get; set; }
         public virtual DbSet<SegmentLeaksEntry> SegmentLeaks { get; set; } 
         public DbSet<PumpEntry> Pumps { get; set; }
-        public virtual DbSet<TankLevelsEntry> TankLevels { get; set; }
+        public virtual DbSet<TankMonitorsEntry> TankMonitors { get; set; }
+        public virtual DbSet<TankReadingsEntry> TankReadings { get; set; }
         public DbSet<MailingListEntry> MailingList { get; set; }
         public DbSet<HistoryLogEntry> HistoryLogs { get; set; }
         public DbSet<SensorHistoryEntry> SensorHistory { get; set; }

@@ -7,10 +7,12 @@ using System.Threading.Tasks;
 using EmailNotifications;
 using WaterLog_Backend.Models;
 
+
 namespace WaterLog_Backend
 {
     public class Procedures
     {
+        enum FaultHeat : int { High = 5, Medium = 3, Low = 1 };
         DatabaseContext _db;
         IConfiguration _config;
         public Procedures() {
@@ -88,11 +90,12 @@ namespace WaterLog_Backend
                         {
                             string[] template = await populateEmailAsync(lastInsert);
                             Email email = new Email(template, _config);
-                            Recipient[] mailers = new Recipient[(mailing.Count - 1)];
+                            Recipient[] mailers = new Recipient[mailing.Count];
                             int countForMailers = 0;
                             foreach (var rec in mailing)
                             {
                                 mailers[countForMailers] = new Recipient(rec.Address, (rec.Name + " " + rec.Surname));
+                                countForMailers++;
                             }
                             email.SendMail(mailers);
                         }
@@ -293,6 +296,33 @@ namespace WaterLog_Backend
             return false;
         }
 
+        public async Task<string[]> populateEmailAsync(SegmentLeaksEntry section, string entityEvent)
+        {
+            try
+            {
+                var totalCost = await CalculateTotalCostAsync(section);
+                var perHourWastageCost = await CalculatePerHourWastageCost(section);
+                var perHourWastageLitre = await CalculatePerHourWastageLitre(section);
+                string[] template =
+                {
+                 "Segment " + section.SegmentsId,
+                  entityEvent,
+                  section.Severity,
+                  GetLeakPeriodInMinutes(section),
+                  (totalCost).ToString(),
+                  (perHourWastageCost).ToString(),
+                  (perHourWastageLitre).ToString(),
+                  BuildUrl(section.SegmentsId)
+                };
+                return template;
+            }
+            catch (Exception error)
+
+            {
+                throw error;
+            }
+        }
+
         public async Task<string[]> populateEmailAsync(SegmentLeaksEntry section)
         {
             try
@@ -305,10 +335,10 @@ namespace WaterLog_Backend
                  "Segment " + section.SegmentsId,
                   GetSegmentStatus(section.SegmentsId),
                   section.Severity,
-                  GetLeakPeriod(section),
-                  Math.Round(totalCost).ToString(),
-                  Math.Round(perHourWastageCost).ToString(),
-                  Math.Round(perHourWastageLitre).ToString(),
+                  GetLeakPeriodInMinutes(section),
+                  (totalCost).ToString(),
+                  (perHourWastageCost).ToString(),
+                  (perHourWastageLitre).ToString(),
                   BuildUrl(section.SegmentsId)
                 };
                 return template;
@@ -320,9 +350,9 @@ namespace WaterLog_Backend
             }  
         }
 
-        private string GetLeakPeriod(SegmentLeaksEntry leak)
+        private string GetLeakPeriodInMinutes(SegmentLeaksEntry leak)
         {
-                return ((Math.Round((leak.LatestTimeStamp - leak.OriginalTimeStamp).TotalDays,1)).ToString());
+                return Math.Max((leak.LatestTimeStamp - leak.OriginalTimeStamp).TotalMinutes,1).ToString();
         }
 
         public async Task<double> CalculateTotalCostAsync(SegmentLeaksEntry leak)
@@ -1005,7 +1035,67 @@ namespace WaterLog_Backend
             arrayOfSeasonsCost.AddPoint("Spring", cost_season[2]);
             arrayOfSeasonsCost.AddPoint("Autum", cost_season[3]);
             return arrayOfSeasonsCost;
-        } 
+        }
+
+        public List<MonitorHeat> getMonitorsFaultLevels()
+        {
+            List<MonitorHeat> HeatValues = new List<MonitorHeat>();
+            IEnumerable<MonitorsEntry> all = _db.Monitors.ToArray();
+            foreach (MonitorsEntry entry in all)
+            {
+                MonitorHeat heat = new MonitorHeat();
+                heat.Long = entry.Long;
+                heat.Lat = entry.Lat;
+                string level = "";
+                if (entry.FaultCount >= 5)
+                {
+                    level = "High";
+                }else if(entry.FaultCount >= 3)
+                {
+                    level = "Medium";
+                }
+                else if (entry.FaultCount > 0)
+                {
+                    level = "Low";
+                }
+                else
+                {
+                    level = "Clear";
+                }
+                heat.FaultLevel = level;
+                HeatValues.Add(heat);
+            }
+
+            return HeatValues; 
+        }
+
+        public async Task<DataPoints<DateTime, double>> getTankGraph(int tankId)
+        {
+            var dailyTank = await _db
+                            .TankReadings.Where(a => a.TimeStamp.Month == DateTime.Now.Month && a.TimeStamp.Year == DateTime.Now.Year && a.TankMonitorsId==tankId)
+                            .GroupBy(b => b.TimeStamp.Day)
+                            .ToListAsync();
+
+            return getDailyValues(dailyTank);
+
+        }
+
+        public DataPoints<DateTime, double> getDailyValues(List<IGrouping<int, TankReadingsEntry>> list)
+        {
+            DataPoints<DateTime, double> daily = new DataPoints<DateTime, double>();
+            var levelForDay = 0.0;
+            DateTime time;
+            for (int i = 0; i < list.Count; i++)
+            {
+                var element = list.ElementAt(i).OrderByDescending(a=> a.TimeStamp);
+                levelForDay = element.ElementAt(0).PercentageLevel;
+                time = element.ElementAt(0).TimeStamp;
+                daily.AddPoint(time,levelForDay);
+            }
+
+            return daily;
+
+        }
     } 
 }
 
