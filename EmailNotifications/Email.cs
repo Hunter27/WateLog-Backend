@@ -96,16 +96,16 @@ namespace EmailNotifications
             if (values.Length > 0)
             {
                 string[] styleProperties = {
-                "color:red;padding-top: 40px;",
-                "color:red;",
+                GetSeverityColor(values[2])+";padding-top: 40px;",
+                GetSeverityColor(values[2]),
                 "color:black;padding-top: 11px;",
-                "color:red;padding-top: 35px;",
+                GetSeverityColor(values[2])+ ";padding-top: 35px;",
                 "color:black;",
                 "color:black;padding-top: 20px;",
                 "color:grey;" ,
                 "color:grey;",
                 "color:red;padding-top: 24px;",
-                "color:red;",
+                GetLogItStyle(values[1]),
                 "color:grey;padding-top: 9px;" };
                 string[] fontSizeProperties = { "6", "3", "3", "6", "4", "6", "4", "4", "4", "4", "2" };
                 System.Text.StringBuilder sb = new System.Text.StringBuilder();
@@ -115,13 +115,13 @@ namespace EmailNotifications
                     int count = 0;
                     string[] items =
                     {
-                        "<b>" + values[0] + " has a " + values[1] + "</b>",
+                        "<b>" + values[0] + " is " + BuildVerb(values[1]) + "</b>",
                         "<b>(" + values[2]+")</b>",
-                        "This problem has been <b>unresolved for " + values[3]+" days</b>",
-                        "<b>R " + values[4] + "</b>",
-                        "<b>Has been lost!</b>",
-                        "<b>" +values[6]+"L or R "+ values[5] + "</b>",
-                        " is currently being lost", "per hour",""
+                        "This problem has been <b>unresolved for " + GetRelevantUnit(values[3])+ "</b>",
+                        "<b>" + GetRelevantRand(values[0],values[1],values[4],values[5]) + "</b>",
+                        "<b>"+ GetRelevantDescription(values[0],values[1])+"</b>",
+                        "<b>" + GetRelevantLossPH(values[0],values[1],values[6],values[5]) + "</b>",
+                        GetRelevantLossDescriptionLine1(values[0],values[1]), GetRelevantLossDescriptionLine2(values[0],values[1]),""
                         ,values[7],
                         "call third party help: <u>&zwj;011111929292</u>"
                     };
@@ -154,6 +154,185 @@ namespace EmailNotifications
             {
                 //Something went wrong
                 return "ERROR";
+            }
+        }
+
+        private string GetLogItStyle(string status)
+        {
+            switch (status.ToLower())
+            {
+                case "resolved":
+                    return "opacity:0;pointer-events: none;";
+                default:
+                    return "opacity:1;";
+            }
+        }
+
+        private string GetSeverityColor(string severity)
+        {
+            switch (severity.ToLower())
+            {
+                case "low":
+                    return "color:#ffea00";
+                case "medium":
+                    return "color:#ffab00";
+                case "high":
+                    return "color:#ff1744";
+            }
+            return "color:#ffea00";
+        }
+
+        private string BuildVerb(string entityEventType)
+        {
+            if(entityEventType == "leak")
+            {
+                return "leaking";
+            }
+            if(entityEventType == "sufficient")
+            {
+                return "at a Sufficient Level";
+            }
+            else
+            {
+                return entityEventType;
+            }
+        }
+
+        private string GetRelevantLossDescriptionLine2(string entity, string entityType)
+        {
+            string[] split = entity.Split(" ");
+            switch ((split[0]).ToLower())
+            {
+                case "segment":
+                    return "per hour";
+                case "tank":
+                    switch (entityType.ToLower())
+                    {
+                        case "leak":
+                            return "reduce wastage";
+                        case "sufficient":
+                            return "reduce wastage";
+                        case "empty":
+                            return "";
+                    }
+                    break;
+                default:
+                    return "";
+            }
+            return "";
+        }
+
+        private string GetRelevantLossDescriptionLine1(string entity, string entityType)
+        {
+            string[] split = entity.Split(" ");
+            switch ((split[0]).ToLower())
+            {
+                case "segment":
+                    switch (entityType.ToLower())
+                    {
+                        case "resolved":
+                            return "was being lost";
+                        default:
+                            return "is currently being lost";
+                    }
+                case "tank":
+                    switch (entityType.ToLower())
+                    {
+                        case "leak":
+                            return "fix the leak to";
+                        case "sufficient":
+                            return "switch off the pump to";
+                        case "empty":
+                            return "switch on the pump to";
+                    }
+                    break;
+                default:
+                    return "";
+            }
+            return "";
+        }
+
+        private string GetRelevantLossPH(string entity, string entityType, string entityLitres, string entityRand)
+        {
+            string[] split = entity.Split(" ");
+            if(split[0].ToLower() == "segment" && entityType.ToLower() == "leak")
+            {
+                return Math.Round(Double.Parse(entityLitres),1) + "L or R " + Math.Round(Double.Parse(entityRand),1);
+            }
+            else if(entityType.ToLower() == "resolved")
+            {
+                return "R" + Math.Round(Double.Parse(entityRand), 1);
+            }
+            else
+            {
+                return "";
+            }
+        }
+
+        private string GetRelevantDescription(string entity, string entityType)
+        {
+            string[] split = entity.Split(" ");
+            switch ((split[0]).ToLower())
+            {
+                case "segment":
+                    return "Has been lost!";
+                case "tank":
+                    if(entityType.ToLower() != "empty")
+                    {
+                        return "Will be lost per hour";
+                    }
+                    break;
+                case "sensor":
+                    //TODO: Return needed text
+                    break;
+                default:
+                    return "";
+            }
+            return "";
+        }
+
+        //Displays the element based on what entity it is
+        private string GetRelevantRand(string entity, string entityType, string randValue, string randPH)
+        {
+            //Get string before " "
+            string[] split = entity.Split(" ");
+            if( (split[0]).ToLower() == "sensor" || (split[0]).ToLower() == "tank" && entityType.ToLower() == "empty")
+            {
+                return "";
+            }
+            else
+            {
+                if ((split[0]).ToLower() == "tank")
+                {
+                    double randPh = Double.Parse(randPH);
+                    return "R " + Math.Max(Math.Round(randPh,1),0.1);
+                }
+                else
+                {
+                    double rand = Double.Parse(randValue);
+                    return "R " + Math.Max(Math.Round(rand,1),0.1);
+                }
+            }
+        }
+
+        //Receive minutes and convert into relevant
+        private string GetRelevantUnit(string v)
+        {
+            double value = Double.Parse(v);
+            if(value < 60.00)
+            {
+                //Can continue in minutes
+                return (Math.Round(value) + " minutes");
+            }
+            else if(value < 1440)
+            {
+                //Can continue in hours
+                return (Math.Round((value / 60.00)) + " hours");
+            }
+            else
+            {
+                //Can continue in days
+                return (Math.Round((value / 1440.00)) + " days");
             }
         }
     }
