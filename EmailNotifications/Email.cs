@@ -127,9 +127,11 @@ namespace EmailNotifications
                     int count = 0;
                     string[] items =
                     {
-                        "<b>" + values[dictionary["entityFullName"]] + " is " + BuildVerb(values[dictionary["entityEvent"]]) + "</b>",
+                        "<b>" + values[dictionary["entityFullName"]] + 
+                            " is " + BuildVerb(values[dictionary["entityEvent"]]) + "</b>",
                         "<b>(" + values[dictionary["entitySeverity"]]+")</b>",
-                        "This problem has been <b>unresolved for " + GetRelevantUnit(values[dictionary["entityDuration"]])+ "</b>",
+                            "This problem has been <b>unresolved for " +
+                            GetRelevantUnit(values[dictionary["entityDuration"]])+ "</b>",
                         "<b>" + GetRelevantRand(values[dictionary["entityFullName"]],
                         values[dictionary["entityEvent"]],
                         values[dictionary["entityTotalCost"]],
@@ -137,10 +139,12 @@ namespace EmailNotifications
                         "<b>"+ GetRelevantDescription(values[dictionary["entityFullName"]],
                         values[dictionary["entityEvent"]])+"</b>",
                         "<b>" + GetRelevantLossPH(values[dictionary["entityFullName"]],
-                        values[dictionary["entityEvent"]],values[dictionary["entityPerHourWastageLitre"]],
+                        values[dictionary["entityEvent"]],
+                        values[dictionary["entityPerHourWastageLitre"]],
                         values[dictionary["entityPerHourWastageCost"]]) + "</b>",
                         GetRelevantLossDescriptionLine1(values[dictionary["entityFullName"]],
-                        values[dictionary["entityEvent"]]), GetRelevantLossDescriptionLine2(values[dictionary["entityFullName"]],
+                        values[dictionary["entityEvent"]]),
+                        GetRelevantLossDescriptionLine2(values[dictionary["entityFullName"]],
                         values[dictionary["entityEvent"]]),"",
                         values[dictionary["entityURL"]],
                         "call third party help: <u>&zwj;011111929292</u>"
