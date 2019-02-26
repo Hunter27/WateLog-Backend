@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 namespace WaterLog_Backend.Models
 {
-    public class TankLevelsEntry
+    public class TankReadingsEntry
     {
         public int Id { get; set; }
+        public int TankMonitorsId { get; set; }
         public int PumpId { get; set; }
-        public int Percentage { get; set; }
-        public string LevelStatus { get; set; }
-        public string Instruction { get; set; }
-        
+        public double PercentageLevel { get; set; }
+        public double OptimalLevel { get; set; }
+        public DateTime TimeStamp { get; set; }
     }
 }

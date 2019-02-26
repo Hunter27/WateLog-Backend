@@ -1036,11 +1036,35 @@ namespace WaterLog_Backend
                 HeatValues.Add(heat);
             }
 
-            return HeatValues;
+            return HeatValues; 
+        }
 
+        public async Task<DataPoints<DateTime, double>> getTankGraph(int tankId)
+        {
+            var dailyTank = await _db
+                            .TankReadings.Where(a => a.TimeStamp.Month == DateTime.Now.Month && a.TimeStamp.Year == DateTime.Now.Year && a.TankMonitorsId==tankId)
+                            .GroupBy(b => b.TimeStamp.Day)
+                            .ToListAsync();
 
+            return getDailyValues(dailyTank);
 
-          
+        }
+
+        public DataPoints<DateTime, double> getDailyValues(List<IGrouping<int, TankReadingsEntry>> list)
+        {
+            DataPoints<DateTime, double> daily = new DataPoints<DateTime, double>();
+            var levelForDay = 0.0;
+            DateTime time;
+            for (int i = 0; i < list.Count; i++)
+            {
+                var element = list.ElementAt(i).OrderByDescending(a=> a.TimeStamp);
+                levelForDay = element.ElementAt(0).PercentageLevel;
+                time = element.ElementAt(0).TimeStamp;
+                daily.AddPoint(time,levelForDay);
+            }
+
+            return daily;
+
         }
     } 
 }
