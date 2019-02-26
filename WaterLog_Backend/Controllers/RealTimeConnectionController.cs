@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +13,13 @@ namespace WaterLog_Backend.Controllers
     {
         public async Task SendNewAlert(GetAlerts newAlert)
         {
-            await Clients.All.SendAsync(JsonConvert.SerializeObject(newAlert));
+            await Clients.All.SendAsync("NewAlertDetected",JsonConvert.SerializeObject(newAlert));
+        }
+
+        //Sends new information to map
+        public async Task SendNewMapAlert(SegmentsEntry segment)
+        {
+            await Clients.All.SendAsync("MapChangeDetected",JsonConvert.SerializeObject(segment));
         }
     }
 }

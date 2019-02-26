@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using EmailNotifications;
 using WaterLog_Backend.Models;
 using WaterLog_Backend.Controllers;
-
+using Microsoft.AspNet.SignalR;
 
 namespace WaterLog_Backend
 {
@@ -28,8 +28,9 @@ namespace WaterLog_Backend
         public async Task TriggerInsert(ReadingsEntry value)
         {
             //Testing SignalR
-            RealTimeConnectionController obj = new RealTimeConnectionController();
-            await obj.SendNewAlert(new GetAlerts(DateTime.Now, "Segment", -1, "leak", 25.11, 0.1, "high", 50.00, 25.00, EnumResolveStatus.UNRESOLVED));
+            var hub = GlobalHost.ConnectionManager.GetHubContext<Hub>();
+            hub.Clients.All.SendNewAlert(new GetAlerts(DateTime.Now, "Segment", -1, "leak", 25.11, 0.1, "high", 50.00, 25.00, EnumResolveStatus.UNRESOLVED));
+
             SegmentsEntry segment = await _db.Segments.Where(ins => ins.SenseIDIn == value.MonitorsId).SingleOrDefaultAsync();
             if (segment == null)
             {

@@ -10,8 +10,8 @@ using WaterLog_Backend.Models;
 namespace WaterLog_Backend.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20190225143014_faultCount2")]
-    partial class faultCount2
+    [Migration("20190220184333_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -95,8 +95,6 @@ namespace WaterLog_Backend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int>("FaultCount");
-
                     b.Property<double>("Lat");
 
                     b.Property<double>("Long");
@@ -175,7 +173,7 @@ namespace WaterLog_Backend.Migrations
 
                     b.Property<DateTime>("OriginalTimeStamp");
 
-                    b.Property<int>("ResolvedStatus");
+                    b.Property<string>("ResolvedStatus");
 
                     b.Property<int>("SegmentsId");
 
@@ -192,8 +190,6 @@ namespace WaterLog_Backend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int>("FaultCount");
-
                     b.Property<int>("SenseIDIn");
 
                     b.Property<int>("SenseIDOut");
@@ -205,7 +201,7 @@ namespace WaterLog_Backend.Migrations
 
             modelBuilder.Entity("WaterLog_Backend.Models.TankLevelsEntry", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("TankId")
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
@@ -217,7 +213,7 @@ namespace WaterLog_Backend.Migrations
 
                     b.Property<int>("PumpId");
 
-                    b.HasKey("Id");
+                    b.HasKey("TankId");
 
                     b.ToTable("TankLevels");
                 });

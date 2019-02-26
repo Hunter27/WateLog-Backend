@@ -10,7 +10,7 @@ using WaterLog_Backend.Models;
 namespace WaterLog_Backend.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20190226073750_TankTables")]
+    [Migration("20190226121530_TankTables")]
     partial class TankTables
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -235,6 +235,8 @@ namespace WaterLog_Backend.Migrations
                     b.Property<int>("PumpId");
 
                     b.Property<int>("TankMonitorsId");
+
+                    b.Property<DateTime>("TimeStamp");
 
                     b.HasKey("Id");
 
