@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using WaterLog_Backend;
+using WaterLog_Backend.Controllers;
 using WaterLog_Backend.Models;
 namespace WebApplication1
 {
@@ -22,6 +23,7 @@ namespace WebApplication1
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             services.AddDbContext<DatabaseContext>(options => options.UseSqlServer(Configuration.GetSection("LiveConnectionString").Value));
+            services.AddSignalR();
             services.AddScoped<IControllerService, ControllerService>();
             services.AddCors(options =>
             {
@@ -37,6 +39,11 @@ namespace WebApplication1
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
+            app.UseSignalR(routes =>
+            {
+                routes.MapHub<RealTimeConnectionController>("/realtime");
+            });
+
             app.UseCors("CorsPolicy");
             if (env.IsDevelopment())
             {
