@@ -26,24 +26,22 @@ namespace WaterLog_Backend.Controllers
             _db = context;
             _config = config;
             _service = service;
-        }
-
+        } 
         // GET api/sensor history
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<SensorHistoryEntry>>> Get()
+        public async Task<ActionResult<IEnumerable<SensorHistoryEntry>>> GetAllHistory()
         {
             return await _db.SensorHistory.ToListAsync();
-        }
-
+        } 
         // GET api/sensorHistory/
         [HttpGet("{id}")]
-        public async Task<ActionResult<SensorHistoryEntry>> Get(int id)
+        public async Task<ActionResult<SensorHistoryEntry>> GetSensor(int id)
         {
             return await _db.SensorHistory.FindAsync(id);
         }
         // POST api/sensorHistory
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] SensorHistoryEntry value)
+        public async Task<IActionResult> PostHistory([FromBody] SensorHistoryEntry value)
         {
             if (ModelState.IsValid)
             {
@@ -58,7 +56,7 @@ namespace WaterLog_Backend.Controllers
         }
         // DELETE api/sensorHistory/
         [HttpDelete("{id}")]
-        public async Task Delete(int id)
+        public async Task DeleteHistory(int id)
         {
             try
             {

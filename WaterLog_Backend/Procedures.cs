@@ -1005,14 +1005,7 @@ namespace WaterLog_Backend
             arrayOfSeasonsCost.AddPoint("Spring", cost_season[2]);
             arrayOfSeasonsCost.AddPoint("Autum", cost_season[3]);
             return arrayOfSeasonsCost;
-        }
-
-        public async Task<double> getTankLevel(int Id)
-        {
-
-
-            return 0.0;
-        }
+        } 
     } 
 }
 
