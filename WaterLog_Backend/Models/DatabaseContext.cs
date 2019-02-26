@@ -27,5 +27,6 @@ namespace WaterLog_Backend.Models
         public virtual DbSet<TankReadingsEntry> TankReadings { get; set; }
         public DbSet<MailingListEntry> MailingList { get; set; }
         public DbSet<HistoryLogEntry> HistoryLogs { get; set; }
+        public DbSet<SensorHistoryEntry> SensorHistory { get; set; }
     }
 }
