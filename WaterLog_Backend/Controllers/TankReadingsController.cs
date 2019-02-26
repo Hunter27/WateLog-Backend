@@ -26,14 +26,14 @@ namespace WaterLog_Backend.Controllers
 
         // GET api/levels
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TankReadingsEntry>>> Get()
+        public async Task<ActionResult<IEnumerable<TankReadingsEntry>>> GetTankReadingsValues()
         {
             return await _db.TankReadings.ToListAsync();
         }
 
         // GET api/levelsById/
         [HttpGet("{id}")]
-        public async Task<ActionResult<TankReadingsEntry>> Get(int id)
+        public async Task<ActionResult<TankReadingsEntry>> GetTankReadingsId(int id)
         {
             return await _db.TankReadings.FindAsync(id);
         }
