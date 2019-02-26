@@ -14,11 +14,11 @@ namespace WaterLog_Backend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class TankLevelsController : ControllerBase
+    public class TankReadingsController : ControllerBase
     {
         private readonly DatabaseContext _db;
         readonly IConfiguration _config;
-        public TankLevelsController(DatabaseContext context, IConfiguration config)
+        public TankReadingsController(DatabaseContext context, IConfiguration config)
         {
             _db = context;
             _config = config;
@@ -26,31 +26,38 @@ namespace WaterLog_Backend.Controllers
 
         // GET api/levels
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TankLevelsEntry>>> Get()
+        public async Task<ActionResult<IEnumerable<TankReadingsEntry>>> Get()
         {
-            return await _db.TankLevels.ToListAsync();
+            return await _db.TankReadings.ToListAsync();
         }
 
         // GET api/levelsById/
         [HttpGet("{id}")]
-        public async Task<ActionResult<TankLevelsEntry>> Get(int id)
+        public async Task<ActionResult<TankReadingsEntry>> Get(int id)
         {
-            return await _db.TankLevels.FindAsync(id);
+            return await _db.TankReadings.FindAsync(id);
         }
 
         [HttpGet("{level}")]
-        public async Task<ActionResult<TankLevelsEntry>> GetLevel(int id)
+        public async Task<ActionResult<TankReadingsEntry>> GetLevel(int id)
         {
-            return await _db.TankLevels.FindAsync(id);
+            return await _db.TankReadings.FindAsync(id);
         }
 
+        [HttpGet("graph/{id}")]
+        public async Task<ActionResult<DataPoints<DateTime, double>>> GetGraph(int id)
+        {
+            Procedures p = new Procedures(_db, _config);
+            return await p.getTankGraph(id);
+        }
+        
         // POST api/level
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] TankLevelsEntry value)
+        public async Task<IActionResult> Post([FromBody] TankReadingsEntry value)
         {
             if (ModelState.IsValid)
             {
-                await _db.TankLevels.AddAsync(value);
+                await _db.TankReadings.AddAsync(value);
                 await _db.SaveChangesAsync();
                 return Ok("Ok");
             }
@@ -61,10 +68,10 @@ namespace WaterLog_Backend.Controllers
 
         // PUT api/levelById/
         [HttpPut("{id}")]
-        public async Task Put(int id, [FromBody] TankLevelsEntry value)
+        public async Task Put(int id, [FromBody] TankReadingsEntry value)
         {
             try {
-                var old = await _db.TankLevels.FindAsync(id);
+                var old = await _db.TankReadings.FindAsync(id);
                 _db.Entry(old).CurrentValues.SetValues(value);
                 await _db.SaveChangesAsync();
             }
@@ -79,8 +86,8 @@ namespace WaterLog_Backend.Controllers
         {
             try
             {
-                var entry = await _db.TankLevels.FindAsync(id);
-                _db.TankLevels.Remove(entry);
+                var entry = await _db.TankReadings.FindAsync(id);
+                _db.TankReadings.Remove(entry);
                 await _db.SaveChangesAsync();
             }
             catch (Exception error)
