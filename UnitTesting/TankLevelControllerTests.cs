@@ -13,15 +13,15 @@ namespace UnitTesting
 {
     class TankLevelControllerTests
     {
-        private IQueryable<TankLevelsEntry> mockData = new List<TankLevelsEntry>
+        private IQueryable<TankReadingsEntry> mockData = new List<TankReadingsEntry>
         {
-            new TankLevelsEntry
+            new TankReadingsEntry
             {
-                TankId = 1, Percentage = 50, Instruction = "Turn off", LevelStatus = "Sufficient"
+                TankMonitorsId  = 1,PumpId=1, PercentageLevel = 50, OptimalLevel = 80
             },
-            new TankLevelsEntry
+            new TankReadingsEntry
             {
-                TankId = 2, Percentage = 20, Instruction = "Turn on", LevelStatus = "Not Sufficient"
+                TankMonitorsId  = 2,PumpId=2, PercentageLevel= 20, OptimalLevel = 80
             },
 
         }.AsQueryable();
@@ -29,18 +29,18 @@ namespace UnitTesting
         [TestCase(1)]
         public void TestGetById(int id)
         {
-            var mockSet = new Mock<DbSet<TankLevelsEntry>>();
-            mockSet.As<IOrderedQueryable<TankLevelsEntry>>().Setup(x => x.GetEnumerator())
+            var mockSet = new Mock<DbSet<TankReadingsEntry>>();
+            mockSet.As<IOrderedQueryable<TankReadingsEntry>>().Setup(x => x.GetEnumerator())
                 .Returns(mockData.GetEnumerator());
             var mockContext = new Mock<DatabaseContext>();
-            mockContext.Setup(dbc => dbc.TankLevels).Returns(mockSet.Object);
-            var tankLevelsController = new TankLevelsController(mockContext.Object, null);
-            mockContext.Setup(x => x.TankLevels.FindAsync(id))
-                .Returns(Task.FromResult(mockData.Where(x => x.TankId == id).First()));
-            var levels = tankLevelsController.Get(id).Result;
+            mockContext.Setup(dbc => dbc.TankReadings).Returns(mockSet.Object);
+            var tankReadingsController = new TankReadingsController(mockContext.Object, null);
+            mockContext.Setup(x => x.TankReadings.FindAsync(id))
+                .Returns(Task.FromResult(mockData.Where(x => x.Id == id).First()));
+            var levels = tankReadingsController.Get(id).Result;
             Assert.IsNotNull(levels);
-            Assert.AreEqual(levels.Value.TankId, id);
-            Assert.AreEqual(levels.Value.Instruction, "Turn off");
+            Assert.AreEqual(levels.Value.Id, id);
+            Assert.AreEqual(levels.Value.PercentageLevel, 50.0);
         }
     }
 }

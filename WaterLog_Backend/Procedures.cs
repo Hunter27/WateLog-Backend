@@ -8,10 +8,12 @@ using EmailNotifications;
 using WaterLog_Backend.Models;
 using WaterLog_Backend.Controllers;
 
+
 namespace WaterLog_Backend
 {
     public class Procedures
     {
+        enum FaultHeat : int { High = 5, Medium = 3, Low = 1 };
         DatabaseContext _db;
         IConfiguration _config;
         public Procedures() {
@@ -1037,6 +1039,66 @@ namespace WaterLog_Backend
             arrayOfSeasonsCost.AddPoint("Spring", cost_season[2]);
             arrayOfSeasonsCost.AddPoint("Autum", cost_season[3]);
             return arrayOfSeasonsCost;
+        }
+
+        public List<MonitorHeat> getMonitorsFaultLevels()
+        {
+            List<MonitorHeat> HeatValues = new List<MonitorHeat>();
+            IEnumerable<MonitorsEntry> all = _db.Monitors.ToArray();
+            foreach (MonitorsEntry entry in all)
+            {
+                MonitorHeat heat = new MonitorHeat();
+                heat.Long = entry.Long;
+                heat.Lat = entry.Lat;
+                string level = "";
+                if (entry.FaultCount >= 5)
+                {
+                    level = "High";
+                }else if(entry.FaultCount >= 3)
+                {
+                    level = "Medium";
+                }
+                else if (entry.FaultCount > 0)
+                {
+                    level = "Low";
+                }
+                else
+                {
+                    level = "Clear";
+                }
+                heat.FaultLevel = level;
+                HeatValues.Add(heat);
+            }
+
+            return HeatValues; 
+        }
+
+        public async Task<DataPoints<DateTime, double>> getTankGraph(int tankId)
+        {
+            var dailyTank = await _db
+                            .TankReadings.Where(a => a.TimeStamp.Month == DateTime.Now.Month && a.TimeStamp.Year == DateTime.Now.Year && a.TankMonitorsId==tankId)
+                            .GroupBy(b => b.TimeStamp.Day)
+                            .ToListAsync();
+
+            return getDailyValues(dailyTank);
+
+        }
+
+        public DataPoints<DateTime, double> getDailyValues(List<IGrouping<int, TankReadingsEntry>> list)
+        {
+            DataPoints<DateTime, double> daily = new DataPoints<DateTime, double>();
+            var levelForDay = 0.0;
+            DateTime time;
+            for (int i = 0; i < list.Count; i++)
+            {
+                var element = list.ElementAt(i).OrderByDescending(a=> a.TimeStamp);
+                levelForDay = element.ElementAt(0).PercentageLevel;
+                time = element.ElementAt(0).TimeStamp;
+                daily.AddPoint(time,levelForDay);
+            }
+
+            return daily;
+
         }
     } 
 }

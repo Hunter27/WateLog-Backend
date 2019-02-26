@@ -10,8 +10,8 @@ using WaterLog_Backend.Models;
 namespace WaterLog_Backend.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20190220130936_UpdatedLeakEntry")]
-    partial class UpdatedLeakEntry
+    [Migration("20190226073750_TankTables")]
+    partial class TankTables
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -94,6 +94,8 @@ namespace WaterLog_Backend.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("FaultCount");
 
                     b.Property<double>("Lat");
 
@@ -190,6 +192,8 @@ namespace WaterLog_Backend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<int>("FaultCount");
+
                     b.Property<int>("SenseIDIn");
 
                     b.Property<int>("SenseIDOut");
@@ -199,23 +203,42 @@ namespace WaterLog_Backend.Migrations
                     b.ToTable("Segments");
                 });
 
-            modelBuilder.Entity("WaterLog_Backend.Models.TankLevelsEntry", b =>
+            modelBuilder.Entity("WaterLog_Backend.Models.TankMonitorsEntry", b =>
                 {
-                    b.Property<int>("TankId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<string>("Instruction");
+                    b.Property<int>("FaultCount");
 
-                    b.Property<string>("LevelStatus");
+                    b.Property<double>("Lat");
 
-                    b.Property<int>("Percentage");
+                    b.Property<double>("Long");
+
+                    b.Property<string>("Status");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TankMonitors");
+                });
+
+            modelBuilder.Entity("WaterLog_Backend.Models.TankReadingsEntry", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<double>("OptimalLevel");
+
+                    b.Property<double>("PercentageLevel");
 
                     b.Property<int>("PumpId");
 
-                    b.HasKey("TankId");
+                    b.Property<int>("TankMonitorsId");
 
-                    b.ToTable("TankLevels");
+                    b.HasKey("Id");
+
+                    b.ToTable("TankReadings");
                 });
 #pragma warning restore 612, 618
         }
