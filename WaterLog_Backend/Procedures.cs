@@ -1015,6 +1015,7 @@ namespace WaterLog_Backend
                 MonitorHeat heat = new MonitorHeat();
                 heat.Long = entry.Long;
                 heat.Lat = entry.Lat;
+                heat.Id = entry.Id;
                 string level = "";
                 if (entry.FaultCount >= 5)
                 {
