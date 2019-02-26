@@ -88,11 +88,12 @@ namespace WaterLog_Backend
                         {
                             string[] template = await populateEmailAsync(lastInsert);
                             Email email = new Email(template, _config);
-                            Recipient[] mailers = new Recipient[(mailing.Count - 1)];
+                            Recipient[] mailers = new Recipient[mailing.Count];
                             int countForMailers = 0;
                             foreach (var rec in mailing)
                             {
                                 mailers[countForMailers] = new Recipient(rec.Address, (rec.Name + " " + rec.Surname));
+                                countForMailers++;
                             }
                             email.SendMail(mailers);
                         }

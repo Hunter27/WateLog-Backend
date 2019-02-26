@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using System.Threading.Tasks;
 using System.IO;
 using WaterLog_Backend.Models;
+using System.Collections.Generic;
 
 namespace EmailNotifications
 {
@@ -93,19 +94,30 @@ namespace EmailNotifications
 
         public string ConstructEmail()
         {
+            //Define Dictionary
+            Dictionary<string, int> dictionary = new Dictionary<string, int>();
+            dictionary.Add("entityFullName",0);
+            dictionary.Add("entityEvent", 1);
+            dictionary.Add("entitySeverity", 2);
+            dictionary.Add("entityDuration", 3);
+            dictionary.Add("entityTotalCost", 4);
+            dictionary.Add("entityPerHourWastageCost", 5);
+            dictionary.Add("entityPerHourWastageLitre", 6);
+            dictionary.Add("entityURL", 7);
+           
             if (values.Length > 0)
             {
                 string[] styleProperties = {
-                GetSeverityColor(values[2])+";padding-top: 40px;",
-                GetSeverityColor(values[2]),
+                GetSeverityColor(values[dictionary["entitySeverity"]])+";padding-top: 40px;",
+                GetSeverityColor(values[dictionary["entitySeverity"]]),
                 "color:black;padding-top: 11px;",
-                GetSeverityColor(values[2])+ ";padding-top: 35px;",
+                GetSeverityColor(values[dictionary["entitySeverity"]])+ ";padding-top: 35px;",
                 "color:black;",
                 "color:black;padding-top: 20px;",
                 "color:grey;" ,
                 "color:grey;",
                 "color:red;padding-top: 24px;",
-                GetLogItStyle(values[1]),
+                GetLogItStyle(values[dictionary["entityEvent"]]),
                 "color:grey;padding-top: 9px;" };
                 string[] fontSizeProperties = { "6", "3", "3", "6", "4", "6", "4", "4", "4", "4", "2" };
                 System.Text.StringBuilder sb = new System.Text.StringBuilder();
@@ -115,14 +127,22 @@ namespace EmailNotifications
                     int count = 0;
                     string[] items =
                     {
-                        "<b>" + values[0] + " is " + BuildVerb(values[1]) + "</b>",
-                        "<b>(" + values[2]+")</b>",
-                        "This problem has been <b>unresolved for " + GetRelevantUnit(values[3])+ "</b>",
-                        "<b>" + GetRelevantRand(values[0],values[1],values[4],values[5]) + "</b>",
-                        "<b>"+ GetRelevantDescription(values[0],values[1])+"</b>",
-                        "<b>" + GetRelevantLossPH(values[0],values[1],values[6],values[5]) + "</b>",
-                        GetRelevantLossDescriptionLine1(values[0],values[1]), GetRelevantLossDescriptionLine2(values[0],values[1]),""
-                        ,values[7],
+                        "<b>" + values[dictionary["entityFullName"]] + " is " + BuildVerb(values[dictionary["entityEvent"]]) + "</b>",
+                        "<b>(" + values[dictionary["entitySeverity"]]+")</b>",
+                        "This problem has been <b>unresolved for " + GetRelevantUnit(values[dictionary["entityDuration"]])+ "</b>",
+                        "<b>" + GetRelevantRand(values[dictionary["entityFullName"]],
+                        values[dictionary["entityEvent"]],
+                        values[dictionary["entityTotalCost"]],
+                        values[dictionary["entityPerHourWastageCost"]]) + "</b>",
+                        "<b>"+ GetRelevantDescription(values[dictionary["entityFullName"]],
+                        values[dictionary["entityEvent"]])+"</b>",
+                        "<b>" + GetRelevantLossPH(values[dictionary["entityFullName"]],
+                        values[dictionary["entityEvent"]],values[dictionary["entityPerHourWastageLitre"]],
+                        values[dictionary["entityPerHourWastageCost"]]) + "</b>",
+                        GetRelevantLossDescriptionLine1(values[dictionary["entityFullName"]],
+                        values[dictionary["entityEvent"]]), GetRelevantLossDescriptionLine2(values[dictionary["entityFullName"]],
+                        values[dictionary["entityEvent"]]),"",
+                        values[dictionary["entityURL"]],
                         "call third party help: <u>&zwj;011111929292</u>"
                     };
                     foreach (var alert in items)
@@ -261,7 +281,7 @@ namespace EmailNotifications
             }
             else if(entityType.ToLower() == "resolved")
             {
-                return "R" + Math.Round(Double.Parse(entityRand), 1);
+                return "R " + Math.Round(Double.Parse(entityRand), 1);
             }
             else
             {
