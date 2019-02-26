@@ -3,17 +3,15 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WaterLog_Backend.Models;
 
 namespace WaterLog_Backend.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20190225132528_faultCount")]
-    partial class faultCount
+    partial class DatabaseContextModelSnapshot : ModelSnapshot
     {
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -95,7 +93,7 @@ namespace WaterLog_Backend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<double>("FaultCount");
+                    b.Property<int>("FaultCount");
 
                     b.Property<double>("Lat");
 
@@ -192,7 +190,7 @@ namespace WaterLog_Backend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<double>("FaultCount");
+                    b.Property<int>("FaultCount");
 
                     b.Property<int>("SenseIDIn");
 
@@ -203,23 +201,67 @@ namespace WaterLog_Backend.Migrations
                     b.ToTable("Segments");
                 });
 
-            modelBuilder.Entity("WaterLog_Backend.Models.TankLevelsEntry", b =>
+            modelBuilder.Entity("WaterLog_Backend.Models.SensorHistoryEntry", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<string>("Instruction");
+                    b.Property<DateTime>("AttendedDate");
 
-                    b.Property<string>("LevelStatus");
+                    b.Property<DateTime>("EmailSentDate");
 
-                    b.Property<int>("Percentage");
+                    b.Property<DateTime>("FaultDate");
 
-                    b.Property<int>("PumpId");
+                    b.Property<int>("SensorId");
+
+                    b.Property<int>("SensorResolved");
+
+                    b.Property<int>("SensorType");
 
                     b.HasKey("Id");
 
-                    b.ToTable("TankLevels");
+                    b.ToTable("SensorHistory");
+                });
+
+            modelBuilder.Entity("WaterLog_Backend.Models.TankMonitorsEntry", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("FaultCount");
+
+                    b.Property<double>("Lat");
+
+                    b.Property<double>("Long");
+
+                    b.Property<string>("Status");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TankMonitors");
+                });
+
+            modelBuilder.Entity("WaterLog_Backend.Models.TankReadingsEntry", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<double>("OptimalLevel");
+
+                    b.Property<double>("PercentageLevel");
+
+                    b.Property<int>("PumpId");
+
+                    b.Property<int>("TankMonitorsId");
+
+                    b.Property<DateTime>("TimeStamp");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TankReadings");
                 });
 #pragma warning restore 612, 618
         }

@@ -79,6 +79,74 @@ namespace WaterLog_Backend.Controllers
             return await proc.CalculatePeriodWastageAsync(Procedures.Period.Seasonally);
         }
 
+        //Gets Alerts only loading max 10 elements at a time
+        [Route("GetAlerts/{id}")]
+        public async Task<List<GetAlerts>> GetAlertsByPage(int id = 1)
+        {
+            List<GetAlerts> ListOfAlerts = new List<GetAlerts>();
+            //Get Entries from SegmentLeaks
+            var leaksQuery = await _db.SegmentLeaks.OrderByDescending(a => a.OriginalTimeStamp).OrderByDescending(b => b.ResolvedStatus).Skip((id - 1) * Globals.NumberItems).Take(Globals.NumberItems).ToListAsync();
+            if(leaksQuery != null)
+            {
+                leaksQuery = leaksQuery.OrderByDescending(a => a.OriginalTimeStamp).OrderByDescending(a => a.ResolvedStatus).ToList();
+                var proc = new Procedures(_db, _config);
+
+                foreach(SegmentLeaksEntry entry in leaksQuery)
+                {
+                    double totalSystemLitres = await proc.CalculateTotalUsageLitres(entry), 
+                            litresUsed = await proc.CalculateTotalWastageLitres(entry),
+                            perhourwastagelitre = await proc.CalculatePerHourWastageLitre(entry),
+                            cost = await proc.CalculatePerHourWastageCost(entry);
+
+                    //Find Litre Usage
+                   ListOfAlerts.Add
+                    (
+                        new GetAlerts
+                        (
+                            entry.OriginalTimeStamp,
+                            "Segment",
+                            entry.SegmentsId,
+                            "leak",
+                            cost,
+                            perhourwastagelitre,
+                            entry.Severity,
+                            litresUsed,
+                            totalSystemLitres,
+                            entry.ResolvedStatus
+                         )
+                    );
+                }
+
+                //Find All Sensors that are faulty
+                var faultySensors = await _db.SensorHistory.OrderByDescending(a => a.FaultDate).OrderByDescending(b => b.SensorResolved).Skip((id - 1) * Globals.NumberItems).Take(Globals.NumberItems).ToListAsync();
+                if (faultySensors != null)
+                {
+                    foreach (SensorHistoryEntry entry in faultySensors)
+                    {
+                        
+                        var sensorInfo = await _db.Monitors.Where(a => a.Id == entry.SensorId).FirstOrDefaultAsync();
+                        var latestReading = await _db.Readings.Where(a => a.MonitorsId == entry.SensorId).OrderByDescending(a => a.TimesStamp).FirstOrDefaultAsync();
+                            ListOfAlerts.Add
+                            (
+                                new GetAlerts
+                                (
+                                    entry.FaultDate,
+                                    ((entry.SensorType == EnumSensorType.WATER_FLOW_SENSOR) ? "Water Sensor" : "Sensor"),
+                                    entry.SensorId,
+                                    "faulty",
+                                    0.0,
+                                    0.0,
+                                    "High",
+                                    latestReading.Value,
+                                    sensorInfo.Max_flow,
+                                    entry.SensorResolved
+                                 )
+                             );
+                    }
+                }
+            }
+            return ListOfAlerts.OrderByDescending(a => a.Date).OrderByDescending(a => a.Status).ToList();
+        }
         //Routing to get all currently opened events
         [Route("GetAlerts")]
         public async Task<List<GetAlerts>> GetAlerts()
