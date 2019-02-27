@@ -52,7 +52,7 @@ namespace WaterLog_Backend
 
             if (reading1 != null && reading2 != null && IsLeakage(reading1.Value, reading2.Value))
             {
-                await CreateSegmentsEventAsync(segmentid, "leak", reading1.Value, reading2.Value);
+                var startDate = await CreateSegmentsEventAsync(segmentid, "leak", reading1.Value, reading2.Value);
                 var leakExists = await _db.SegmentLeaks
                     .Where(leak => leak.SegmentsId == segmentid && leak.ResolvedStatus == EnumResolveStatus.UNRESOLVED)
                     .OrderByDescending(lk => lk.LatestTimeStamp)
@@ -79,7 +79,7 @@ namespace WaterLog_Backend
                 else
                 {
                     //Normal Add
-                    await CreateSegmentLeaksAsync(segmentid, EnumResolveStatus.UNRESOLVED);
+                    await CreateSegmentLeaksAsync(segmentid, EnumResolveStatus.UNRESOLVED,startDate);
                     //Call an initial email
                     //Get recipients.
                     var mailing = await _db.MailingList.Where(a => a.ListGroup == "tier2").ToListAsync();
@@ -109,7 +109,7 @@ namespace WaterLog_Backend
             }
         }
 
-        private async Task CreateSegmentsEventAsync(int id, string status, double inv, double outv)
+        private async Task<DateTime> CreateSegmentsEventAsync(int id, string status, double inv, double outv)
         {
             SegmentEventsEntry entry = new SegmentEventsEntry();
             entry.TimeStamp = DateTime.Now;
@@ -119,6 +119,7 @@ namespace WaterLog_Backend
             entry.EventType = status;
             await _db.SegmentEvents.AddAsync(entry);
             await _db.SaveChangesAsync();
+            return entry.TimeStamp;
         }
 
         public async Task<string> CalculateSeverity(SegmentLeaksEntry entry)
@@ -145,12 +146,12 @@ namespace WaterLog_Backend
             }
         }
 
-        public async Task CreateSegmentLeaksAsync(int segId, EnumResolveStatus resolvedStatus)
+        public async Task CreateSegmentLeaksAsync(int segId, EnumResolveStatus resolvedStatus,DateTime creationTime)
         {
             SegmentLeaksEntry entry = new SegmentLeaksEntry();
             entry.SegmentsId = segId;
-            entry.LatestTimeStamp = DateTime.Now;
-            entry.OriginalTimeStamp = DateTime.Now;
+            entry.LatestTimeStamp = creationTime;
+            entry.OriginalTimeStamp = creationTime;
             entry.LastNotificationDate = DateTime.Now;
             entry.ResolvedStatus = resolvedStatus;
             entry.Severity = await CalculateSeverity(entry);
@@ -365,7 +366,7 @@ namespace WaterLog_Backend
             var timebetween = (leak.LatestTimeStamp - leak.OriginalTimeStamp).TotalHours;
             if (timebetween < 1)
             {
-                return await CalculatePerHourWastageCost(leak)/60;
+                return await CalculatePerHourWastageCost(leak)/Globals.MinuteToHour;
             }
             else
             {
@@ -374,7 +375,15 @@ namespace WaterLog_Backend
             var perhour = await CalculatePerHourWastageCost(leak);
             var total =  (timebetween * perhour);
 
-            return Math.Max(total, 0);
+            if (Math.Max(total, 0) == 0)
+            {
+                //Return a projected cost instead
+                return (perhour * 1);
+            }
+            else
+            {
+                return total;
+            }
         }
 
         private string BuildUrl(int segmentId)
@@ -395,6 +404,10 @@ namespace WaterLog_Backend
             }
             usageperpoll *= 0.0167;
             var minutes = (leak.LatestTimeStamp - leak.OriginalTimeStamp).TotalMinutes;
+            if (leak.LatestTimeStamp.Date == leak.OriginalTimeStamp.Date && leak.OriginalTimeStamp.Minute == leak.LatestTimeStamp.Minute)
+            {
+                minutes = 1;
+            }
             usageperpoll /= minutes;
             usageperpoll *= Globals.MinuteToHour;
             return Math.Max(usageperpoll,0);
@@ -414,6 +427,10 @@ namespace WaterLog_Backend
             //Convert Poll Into Minutes
             usageperpoll *= 0.0167;
             var minutes = (leak.LatestTimeStamp - leak.OriginalTimeStamp).TotalMinutes;
+            if(minutes < 1)
+            {
+                minutes = 60;
+            }
             usageperpoll /= minutes;
             usageperpoll *= Globals.MinuteToHour;
             return Math.Max(((usageperpoll) * Globals.RandPerLitre),0);
