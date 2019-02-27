@@ -1066,6 +1066,28 @@ namespace WaterLog_Backend
             return daily;
 
         }
+
+        public async Task<List<TankObject>> getObjects()
+        {
+            var allGrouped  = await _db
+                            .TankReadings.Where(a => a.TimeStamp.Month == DateTime.Now.Month && a.TimeStamp.Year == DateTime.Now.Year )
+                            .GroupBy(b => b.TankMonitorsId)
+                            .ToListAsync();
+            List<TankObject> objects = new List<TankObject>();
+            for (int i = 0; i < allGrouped.Count; i++)
+            {
+                var element = allGrouped.ElementAt(i).OrderByDescending(a => a.TimeStamp);
+                TankObject temp = new TankObject();
+                temp.Id = element.ElementAt(0).TankMonitorsId;
+                temp.PercentageLevel = element.ElementAt(0).PercentageLevel;
+                temp.OptimalLevel = element.ElementAt(0).OptimalLevel;
+                objects.Add(temp);
+            }
+
+            return objects;
+
+
+        }
     } 
 }
 
