@@ -1057,10 +1057,15 @@ namespace WaterLog_Backend
             DateTime time;
             for (int i = 0; i < list.Count; i++)
             {
-                var element = list.ElementAt(i).OrderByDescending(a=> a.TimeStamp);
-                levelForDay = element.ElementAt(0).PercentageLevel;
-                time = element.ElementAt(0).TimeStamp;
-                daily.AddPoint(time,levelForDay);
+                var element = list.ElementAt(i).OrderBy(a=> a.TimeStamp);
+                for (int j =0;j<element.Count(); j++)
+                {
+                    levelForDay = element.ElementAt(j).PercentageLevel;
+                    time = element.ElementAt(j).TimeStamp;
+                    daily.AddPoint(time, levelForDay);
+
+                }
+                
             }
 
             return daily;
