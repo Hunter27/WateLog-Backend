@@ -109,6 +109,7 @@ namespace WaterLog_Backend.Controllers
                         new GetAlerts
                         (
                             entry.OriginalTimeStamp,
+                            (entry.LatestTimeStamp.Subtract(entry.OriginalTimeStamp) < TimeSpan.Zero ? TimeSpan.Zero : entry.LatestTimeStamp.Subtract(entry.OriginalTimeStamp)),
                             "Segment",
                             entry.SegmentsId,
                             "leak",
@@ -141,6 +142,7 @@ namespace WaterLog_Backend.Controllers
                                 new GetAlerts
                                 (
                                     entry.FaultDate,
+                                    (entry.AttendedDate.Subtract(entry.AttendedDate) < TimeSpan.Zero ? TimeSpan.Zero : entry.FaultDate.Subtract(entry.AttendedDate)),
                                     ((entry.SensorType == EnumSensorType.WATER_FLOW_SENSOR) ? "Water Sensor" : "Sensor"),
                                     entry.SensorId,
                                     "faulty",
@@ -173,23 +175,18 @@ namespace WaterLog_Backend.Controllers
                     var proc = new Procedures(_db, _config);
                     foreach (SegmentLeaksEntry entry in leaks)
                     {
-                        double totalSystemLitres = -1.0, litresUsed = -1.0, 
+                        double totalSystemLitres = await proc.CalculateTotalUsageLitres(entry),
+                            litresUsed = await proc.CalculateTotalWastageLitres(entry),
                             perhourwastagelitre = await proc.CalculatePerHourWastageLitre(entry),
                             cost = await proc.CalculatePerHourWastageCost(entry);
 
-                        //Find Cost
-                        if (entry.ResolvedStatus == EnumResolveStatus.UNRESOLVED) {
-
-                            totalSystemLitres = await proc.CalculateTotalUsageLitres(entry);
-                            litresUsed = await proc.CalculateTotalWastageLitres(entry);
-                        }
-                       
                         //Find Litre Usage
                         alerts.Add
                         (
                             new GetAlerts
                             (
                                 entry.OriginalTimeStamp,
+                                (entry.LatestTimeStamp.Subtract(entry.OriginalTimeStamp) < TimeSpan.Zero ? TimeSpan.Zero : entry.LatestTimeStamp.Subtract(entry.OriginalTimeStamp)),
                                 "Segment",
                                 entry.SegmentsId,
                                 "leak",
@@ -219,6 +216,7 @@ namespace WaterLog_Backend.Controllers
                                 new GetAlerts
                                 (
                                     entry.FaultDate,
+                                    (entry.FaultDate.Subtract(entry.AttendedDate) < TimeSpan.Zero ? TimeSpan.Zero : entry.FaultDate.Subtract(entry.AttendedDate)),
                                     ((entry.SensorType == EnumSensorType.WATER_FLOW_SENSOR) ? "Water Sensor" : "Sensor"),
                                     entry.SensorId,
                                     "faulty",
