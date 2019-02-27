@@ -37,7 +37,7 @@ namespace UnitTesting
             var tankReadingsController = new TankReadingsController(mockContext.Object, null);
             mockContext.Setup(x => x.TankReadings.FindAsync(id))
                 .Returns(Task.FromResult(mockData.Where(x => x.Id == id).First()));
-            var levels = tankReadingsController.Get(id).Result;
+            var levels = tankReadingsController.GetTankReadingsId(id).Result;
             Assert.IsNotNull(levels);
             Assert.AreEqual(levels.Value.Id, id);
             Assert.AreEqual(levels.Value.PercentageLevel, 50.0);
