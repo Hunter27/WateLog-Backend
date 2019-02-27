@@ -85,10 +85,15 @@ namespace WaterLog_Backend.Controllers
         {
             List<GetAlerts> ListOfAlerts = new List<GetAlerts>();
             //Get Entries from SegmentLeaks
-            var leaksQuery = await _db.SegmentLeaks.OrderByDescending(a => a.OriginalTimeStamp).OrderByDescending(b => b.ResolvedStatus).Skip((id - 1) * Globals.NumberItems).Take(Globals.NumberItems).ToListAsync();
+            var leaksQuery = await _db.SegmentLeaks.OrderByDescending(a => a.OriginalTimeStamp)
+                .OrderByDescending(b => b.ResolvedStatus).Skip((id - 1) * Globals.NumberItems)
+                .Take(Globals.NumberItems).ToListAsync();
+
             if(leaksQuery != null)
             {
-                leaksQuery = leaksQuery.OrderByDescending(a => a.OriginalTimeStamp).OrderByDescending(a => a.ResolvedStatus).ToList();
+                leaksQuery = leaksQuery.OrderByDescending(a => a.OriginalTimeStamp)
+                    .OrderByDescending(a => a.ResolvedStatus).ToList();
+
                 var proc = new Procedures(_db, _config);
 
                 foreach(SegmentLeaksEntry entry in leaksQuery)
@@ -118,14 +123,19 @@ namespace WaterLog_Backend.Controllers
                 }
 
                 //Find All Sensors that are faulty
-                var faultySensors = await _db.SensorHistory.OrderByDescending(a => a.FaultDate).OrderByDescending(b => b.SensorResolved).Skip((id - 1) * Globals.NumberItems).Take(Globals.NumberItems).ToListAsync();
+                var faultySensors = await _db.SensorHistory.OrderByDescending(a => a.FaultDate)
+                    .OrderByDescending(b => b.SensorResolved)
+                    .Skip((id - 1) * Globals.NumberItems).Take(Globals.NumberItems).ToListAsync();
+
                 if (faultySensors != null)
                 {
                     foreach (SensorHistoryEntry entry in faultySensors)
                     {
                         
                         var sensorInfo = await _db.Monitors.Where(a => a.Id == entry.SensorId).FirstOrDefaultAsync();
-                        var latestReading = await _db.Readings.Where(a => a.MonitorsId == entry.SensorId).OrderByDescending(a => a.TimesStamp).FirstOrDefaultAsync();
+                        var latestReading = await _db.Readings.Where(a => a.MonitorsId == entry.SensorId)
+                            .OrderByDescending(a => a.TimesStamp).FirstOrDefaultAsync();
+
                             ListOfAlerts.Add
                             (
                                 new GetAlerts
@@ -194,36 +204,32 @@ namespace WaterLog_Backend.Controllers
                     }
 
                     //Find All Sensors that are faulty
-                    var faultySensors = await _db.Monitors.Where(a => a.Status == "faulty").ToListAsync();
+                    var faultySensors = await _db.SensorHistory.ToListAsync();
                     if (faultySensors != null)
                     {
-                        foreach (MonitorsEntry entry in faultySensors)
+                        foreach (SensorHistoryEntry entry in faultySensors)
                         {
-                            //Get latest faulty sensor
-                            var sensor = await _db.Readings.Where(a => a.MonitorsId == entry.Id)
-                                        .OrderByDescending(a => a.TimesStamp)
-                                        .FirstOrDefaultAsync();
 
-                            if (entry.Id == sensor.MonitorsId)
-                            {
-                                //Have the correct information
-                                alerts.Add
+                            var sensorInfo = await _db.Monitors.Where(a => a.Id == entry.SensorId).FirstOrDefaultAsync();
+                            var latestReading = await _db.Readings.Where(a => a.MonitorsId == entry.SensorId)
+                                .OrderByDescending(a => a.TimesStamp).FirstOrDefaultAsync();
+
+                            alerts.Add
+                            (
+                                new GetAlerts
                                 (
-                                    new GetAlerts
-                                    (
-                                        sensor.TimesStamp,
-                                        "Sensor",
-                                        sensor.MonitorsId,
-                                        "faulty",
-                                        0.0,
-                                        0.0,
-                                        "High",
-                                        sensor.Value,
-                                        entry.Max_flow,
-                                        EnumResolveStatus.UNRESOLVED
-                                     )
-                                 );
-                            }
+                                    entry.FaultDate,
+                                    ((entry.SensorType == EnumSensorType.WATER_FLOW_SENSOR) ? "Water Sensor" : "Sensor"),
+                                    entry.SensorId,
+                                    "faulty",
+                                    0.0,
+                                    0.0,
+                                    "High",
+                                    latestReading.Value,
+                                    sensorInfo.Max_flow,
+                                    entry.SensorResolved
+                                 )
+                             );
                         }
                     }
                     return (alerts.OrderByDescending(a => a.Date).ToList());
