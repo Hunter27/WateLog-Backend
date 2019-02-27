@@ -139,11 +139,6 @@ namespace WaterLog_Backend
             }
         }
 
-        private async void SendMail(SegmentLeaksEntry leak, string status)
-        {
-            
-        }
-
         private async Task<SegmentLeaksEntry> ResolveCurrentLeak(int segmentid)
         {
             var leaks = await _db.SegmentLeaks.Where(a => a.SegmentsId == segmentid).OrderByDescending(b => b.LatestTimeStamp).FirstOrDefaultAsync();
