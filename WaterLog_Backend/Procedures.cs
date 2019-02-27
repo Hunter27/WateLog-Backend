@@ -106,9 +106,95 @@ namespace WaterLog_Backend
             }
             else
             {
-                //Check if events exist
-                //Updatewithoutleakagestatus
                 await CreateSegmentsEventAsync(segmentid, "normal", reading1.Value, reading2.Value);
+                //Check if we need to resolve the issue.
+                var resolvable = await LeakResolvable(segmentid);
+                if (resolvable)
+                {
+                    //We resolve the leak
+                    var resolveLeak = await ResolveCurrentLeak(segmentid);
+                    if (resolveLeak != null)
+                    {
+                        //Send Email
+                        var mailing = await _db.MailingList.Where(a => a.ListGroup == "tier2").ToListAsync();
+                        if (mailing.Count > 0)
+                        {
+
+                            if (resolveLeak != null)
+                            {
+                                string[] template = await populateEmailAsync(resolveLeak, "resolved");
+                                Email email = new Email(template, _config);
+                                Recipient[] mailers = new Recipient[mailing.Count];
+                                int countForMailers = 0;
+                                foreach (var rec in mailing)
+                                {
+                                    mailers[countForMailers] = new Recipient(rec.Address, (rec.Name + " " + rec.Surname));
+                                    countForMailers++;
+                                }
+                                email.SendMail(mailers);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private async void SendMail(SegmentLeaksEntry leak, string status)
+        {
+            
+        }
+
+        private async Task<SegmentLeaksEntry> ResolveCurrentLeak(int segmentid)
+        {
+            var leaks = await _db.SegmentLeaks.Where(a => a.SegmentsId == segmentid).OrderByDescending(b => b.LatestTimeStamp).FirstOrDefaultAsync();
+            if (leaks == null)
+            {
+                return null;
+            }
+            else if (leaks.ResolvedStatus == EnumResolveStatus.UNRESOLVED)
+            {
+                leaks.ResolvedStatus = EnumResolveStatus.RESOLVED;
+                var hist = new HistoryLogEntry();
+                hist.Date = DateTime.Now;
+                hist.EventsId = leaks.SegmentsId;
+                hist.Type = EnumTypeOfEvent.LEAK;
+
+                _db.SegmentLeaks.Update(leaks);
+                await _db.HistoryLogs.AddAsync(hist);
+                await _db.SaveChangesAsync();
+                return leaks;
+
+            }
+            return null;
+           
+        }
+
+        private async Task<bool> LeakResolvable(int segmentid)
+        {
+            //Get All Leaks
+            var leak = await _db.SegmentLeaks
+                .Where(a => a.SegmentsId == segmentid && a.ResolvedStatus == EnumResolveStatus.UNRESOLVED)
+                .FirstOrDefaultAsync();
+
+            //Top 3 segments that have leak status.
+            var possibleLeakEvents = await _db.SegmentEvents.Where(a => a.SegmentsId == segmentid)
+                .OrderByDescending(a => a.TimeStamp).Take(Globals.LeakThreshold).ToListAsync();
+            bool allInRange = true;
+            if (leak != null)
+            {
+                //Checks if segmentevent date is within leak date.
+                foreach (SegmentEventsEntry entry in possibleLeakEvents)
+                {
+                   if(!(entry.TimeStamp >= leak.OriginalTimeStamp && entry.EventType == "normal"))
+                   {
+                        allInRange = false;
+                   }
+                }
+                return allInRange;
+            }
+            else
+            {
+                return false;
             }
         }
 
