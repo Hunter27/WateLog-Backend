@@ -1078,9 +1078,12 @@ namespace WaterLog_Backend
             {
                 var element = allGrouped.ElementAt(i).OrderByDescending(a => a.TimeStamp);
                 TankObject temp = new TankObject();
-                temp.Id = element.ElementAt(0).TankMonitorsId;
-                temp.PercentageLevel = element.ElementAt(0).PercentageLevel;
-                temp.OptimalLevel = element.ElementAt(0).OptimalLevel;
+                TankReadingsEntry reading = element.ElementAt(0);
+                temp.Id = reading.TankMonitorsId;
+                temp.PercentageLevel = reading.PercentageLevel;
+                PumpEntry pump = await _db.Pumps.FindAsync(reading.PumpId);
+                temp.PumpStatus = pump.Status;
+                temp.OptimalLevel = reading.OptimalLevel;
                 objects.Add(temp);
             }
 

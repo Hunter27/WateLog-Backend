@@ -11,5 +11,6 @@ namespace WaterLog_Backend.Models
         public int Id { get; set; }
         public double PercentageLevel { get; set; }
         public double OptimalLevel { get; set; }
+        public string PumpStatus { get; set; }
     }
 }
