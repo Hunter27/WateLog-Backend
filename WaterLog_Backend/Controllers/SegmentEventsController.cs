@@ -162,27 +162,15 @@ namespace WaterLog_Backend.Controllers
         public async Task<List<GetAlerts>> GetAlertsByPage([FromBody] Filter filter)
         {
 
-            //Get Entries from SegmentLeaks
-            int severity = (int)filter.Severity;
-            string tableSeverity = "";
-            if (severity==1)
-            {
-                tableSeverity = "low";
-            }else if (severity==2)
-            {
-                tableSeverity = "medium";
-            }
-            else
-            {
-                tableSeverity = "high";
-            }
+           
+            int severity = (int)filter.Severity; 
             int segment = filter.Segment;
             int type = filter.SensorType;
             int SenseId = filter.SensorId;
 
             List<GetAlerts> ListOfAlerts = new List<GetAlerts>();
             //Get Entries from SegmentLeaks
-
+            //filter for segmentId
             if (segment != 0) {
                 var leaksQuery = await _db.SegmentLeaks
                                           .Where(a=> a.SegmentsId==segment)
@@ -221,6 +209,82 @@ namespace WaterLog_Backend.Controllers
 
                 }
             }
+            //end filter segments
+            //faulty sensors filter 
+            var faultySensors = await _db.SensorHistory
+               .OrderByDescending(a => a.FaultDate)
+               .OrderByDescending(b => b.SensorResolved)
+               .Skip((1 - 1) * Globals.NumberItems).Take(Globals.NumberItems).ToListAsync();
+
+            if (faultySensors.Count != 0)
+            {
+                foreach (SensorHistoryEntry entry in faultySensors)
+                {
+                  
+                    if (type == 0)
+                    {
+                        var latestReading = await _db.TankReadings
+                            .Where(a => a.TankMonitorsId == entry.SensorId)
+                            .OrderByDescending(a => a.TimeStamp).FirstOrDefaultAsync();
+                        if (entry.SensorId == SenseId && (int)entry.SensorType == (int)EnumSensorType.WATER_LEVEL_SENSOR)
+                        {
+                            ListOfAlerts.Add
+                            (
+                               new GetAlerts
+                               (
+                                   entry.FaultDate,
+                                   ((entry.SensorType == EnumSensorType.WATER_LEVEL_SENSOR) ? "Tank Level" : "Sensor"),
+                                   entry.SensorId,
+                                   "faulty",
+                                   -1,
+                                   -1,
+                                   "High",
+                                   latestReading.PercentageLevel,
+                                   -1,
+                                   entry.SensorResolved
+                                )
+                        );
+                        }
+
+                    }
+                    else
+                    {
+                        var sensorInfo = await _db.Monitors.Where(a => a.Id == entry.SensorId).FirstOrDefaultAsync();
+                        var latestReading = await _db.Readings
+                            .Where(a => a.MonitorsId == entry.SensorId)
+                            .OrderByDescending(a => a.TimesStamp).FirstOrDefaultAsync();
+                        if (entry.SensorId == SenseId && (int)entry.SensorType == (int)EnumSensorType.WATER_FLOW_SENSOR)
+                        {
+                            ListOfAlerts.Add(
+                                new GetAlerts
+                                (
+                                    entry.FaultDate,
+                                    ((entry.SensorType == EnumSensorType.WATER_FLOW_SENSOR) ? "Water Sensor" : "Sensor"),
+                                    entry.SensorId,
+                                    "faulty",
+                                    0.0,
+                                    0.0,
+                                    "High",
+                                    latestReading.Value,
+                                    sensorInfo.Max_flow,
+                                    entry.SensorResolved
+                                )
+                            );
+                        }
+                    }
+                }
+            } // filter faulty sensor end
+
+            //filter for severity
+            //if return list is empty just filter by severty else filter current list
+            if (ListOfAlerts.Count == 0)
+            {
+
+            }
+            else
+            {
+
+            }
 
             return ListOfAlerts.OrderByDescending(a => a.Date).OrderByDescending(a => a.Status).ToList();
         }
@@ -234,7 +298,7 @@ namespace WaterLog_Backend.Controllers
                 //Get all leaks first
                 var leaks = await _db.SegmentLeaks.ToListAsync();
                 leaks = leaks.OrderByDescending(a => a.OriginalTimeStamp).OrderByDescending(a => a.ResolvedStatus).ToList();
-                if (leaks != null)
+                if (leaks.Count != 0)
                 {
                     List<GetAlerts> alerts = new List<GetAlerts>();
                     var proc = new Procedures(_db, _config);
@@ -272,7 +336,7 @@ namespace WaterLog_Backend.Controllers
 
                     //Find All Sensors that are faulty
                     var faultySensors = await _db.SensorHistory.ToListAsync();
-                    if (faultySensors != null)
+                    if (faultySensors.Count != 0)
                     {
                         foreach (SensorHistoryEntry entry in faultySensors)
                         {
