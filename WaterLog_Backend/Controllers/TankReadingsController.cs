@@ -31,6 +31,15 @@ namespace WaterLog_Backend.Controllers
             return await _db.TankReadings.ToListAsync();
         }
 
+        [HttpGet("tankObject")]
+        public async Task<IEnumerable<TankObject>> GetTankObject()
+        {
+            List<TankObject> obj = new List<TankObject>();
+            Procedures p = new Procedures(_db, _config);
+            obj = await p.getObjects();
+            return obj.AsEnumerable();
+        }
+
         // GET api/levelsById/
         [HttpGet("{id}")]
         public async Task<ActionResult<TankReadingsEntry>> GetTankReadingsId(int id)
@@ -38,10 +47,23 @@ namespace WaterLog_Backend.Controllers
             return await _db.TankReadings.FindAsync(id);
         }
 
-        [HttpGet("{level}")]
-        public async Task<ActionResult<TankReadingsEntry>> GetLevel(int id)
+        [HttpGet("tankObject/{id}")]
+        public async Task<TankObject> GetLevel(int id)
         {
-            return await _db.TankReadings.FindAsync(id);
+            List<TankObject> obj = new List<TankObject>();
+            Procedures p = new Procedures(_db, _config);
+            obj = await p.getObjects();
+            IEnumerable<TankObject> objects=  obj.AsEnumerable();
+            TankObject returnV = new TankObject();
+            foreach(TankObject item in objects)
+            {
+                if (item.Id == id)
+                {
+                    returnV = item;
+                }
+
+            }
+            return returnV;
         }
 
         [HttpGet("graph/{id}")]

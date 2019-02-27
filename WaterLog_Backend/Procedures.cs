@@ -1166,6 +1166,7 @@ namespace WaterLog_Backend
                 MonitorHeat heat = new MonitorHeat();
                 heat.Long = entry.Long;
                 heat.Lat = entry.Lat;
+                heat.Id = entry.Id;
                 string level = "";
                 if (entry.FaultCount >= 5)
                 {
@@ -1192,7 +1193,8 @@ namespace WaterLog_Backend
         public async Task<DataPoints<DateTime, double>> getTankGraph(int tankId)
         {
             var dailyTank = await _db
-                            .TankReadings.Where(a => a.TimeStamp.Month == DateTime.Now.Month && a.TimeStamp.Year == DateTime.Now.Year && a.TankMonitorsId==tankId)
+                            .TankReadings
+                            .Where(a => a.TimeStamp.Day == DateTime.Now.Day && a.TimeStamp.Month == DateTime.Now.Month && a.TimeStamp.Year == DateTime.Now.Year && a.TankMonitorsId==tankId)
                             .GroupBy(b => b.TimeStamp.Day)
                             .ToListAsync();
 
@@ -1214,6 +1216,32 @@ namespace WaterLog_Backend
             }
 
             return daily;
+
+        }
+
+        public async Task<List<TankObject>> getObjects()
+        {
+            var allGrouped  = await _db
+                            .TankReadings
+                            .Where(a => a.TimeStamp.Month == DateTime.Now.Month && a.TimeStamp.Year == DateTime.Now.Year )
+                            .GroupBy(b => b.TankMonitorsId)
+                            .ToListAsync();
+            List<TankObject> objects = new List<TankObject>();
+            for (int i = 0; i < allGrouped.Count; i++)
+            {
+                var element = allGrouped.ElementAt(i).OrderByDescending(a => a.TimeStamp);
+                TankObject temp = new TankObject();
+                TankReadingsEntry reading = element.ElementAt(0);
+                temp.Id = reading.TankMonitorsId;
+                temp.PercentageLevel = reading.PercentageLevel;
+                PumpEntry pump = await _db.Pumps.FindAsync(reading.PumpId);
+                temp.PumpStatus = pump.Status;
+                temp.OptimalLevel = reading.OptimalLevel;
+                objects.Add(temp);
+            }
+
+            return objects;
+
 
         }
     } 
