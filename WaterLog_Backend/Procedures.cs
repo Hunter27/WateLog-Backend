@@ -1042,7 +1042,8 @@ namespace WaterLog_Backend
         public async Task<DataPoints<DateTime, double>> getTankGraph(int tankId)
         {
             var dailyTank = await _db
-                            .TankReadings.Where(a => a.TimeStamp.Month == DateTime.Now.Month && a.TimeStamp.Year == DateTime.Now.Year && a.TankMonitorsId==tankId)
+                            .TankReadings
+                            .Where(a => a.TimeStamp.Day == DateTime.Now.Day && a.TimeStamp.Month == DateTime.Now.Month && a.TimeStamp.Year == DateTime.Now.Year && a.TankMonitorsId==tankId)
                             .GroupBy(b => b.TimeStamp.Day)
                             .ToListAsync();
 
@@ -1070,7 +1071,8 @@ namespace WaterLog_Backend
         public async Task<List<TankObject>> getObjects()
         {
             var allGrouped  = await _db
-                            .TankReadings.Where(a => a.TimeStamp.Month == DateTime.Now.Month && a.TimeStamp.Year == DateTime.Now.Year )
+                            .TankReadings
+                            .Where(a => a.TimeStamp.Month == DateTime.Now.Month && a.TimeStamp.Year == DateTime.Now.Year )
                             .GroupBy(b => b.TankMonitorsId)
                             .ToListAsync();
             List<TankObject> objects = new List<TankObject>();
