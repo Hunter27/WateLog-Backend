@@ -86,10 +86,10 @@ namespace WaterLog_Backend.Controllers
             List<GetAlerts> ListOfAlerts = new List<GetAlerts>();
             //Get Entries from SegmentLeaks
             var leaksQuery = await _db.SegmentLeaks.OrderByDescending(a => a.OriginalTimeStamp)
-                .OrderByDescending(b => b.ResolvedStatus).Skip((id - 1) * Globals.NumberItems)
-                .Take(Globals.NumberItems).ToListAsync();
+                                      .OrderByDescending(b => b.ResolvedStatus).Skip((id - 1) * Globals.NumberItems)
+                                      .Take(Globals.NumberItems).ToListAsync();
 
-            if(leaksQuery != null)
+            if(leaksQuery.Count != 0)
             {
                 leaksQuery = leaksQuery.OrderByDescending(a => a.OriginalTimeStamp)
                     .OrderByDescending(a => a.ResolvedStatus).ToList();
@@ -127,7 +127,7 @@ namespace WaterLog_Backend.Controllers
                     .OrderByDescending(b => b.SensorResolved)
                     .Skip((id - 1) * Globals.NumberItems).Take(Globals.NumberItems).ToListAsync();
 
-                if (faultySensors != null)
+                if (faultySensors.Count != 0)
                 {
                     foreach (SensorHistoryEntry entry in faultySensors)
                     {
@@ -155,6 +155,73 @@ namespace WaterLog_Backend.Controllers
                     }
                 }
             }
+            return ListOfAlerts.OrderByDescending(a => a.Date).OrderByDescending(a => a.Status).ToList();
+        }
+
+        [HttpGet("GetAlertsFilter")]
+        public async Task<List<GetAlerts>> GetAlertsByPage([FromBody] Filter filter)
+        {
+
+            //Get Entries from SegmentLeaks
+            int severity = (int)filter.Severity;
+            string tableSeverity = "";
+            if (severity==1)
+            {
+                tableSeverity = "low";
+            }else if (severity==2)
+            {
+                tableSeverity = "medium";
+            }
+            else
+            {
+                tableSeverity = "high";
+            }
+            int segment = filter.Segment;
+            int type = filter.SensorType;
+            int SenseId = filter.SensorId;
+
+            List<GetAlerts> ListOfAlerts = new List<GetAlerts>();
+            //Get Entries from SegmentLeaks
+
+            if (segment != 0) {
+                var leaksQuery = await _db.SegmentLeaks
+                                          .Where(a=> a.SegmentsId==segment)
+                                          .OrderByDescending(a => a.OriginalTimeStamp)
+                                          .OrderByDescending(b => b.ResolvedStatus).Skip((1 - 1) * Globals.NumberItems)
+                                          .Take(Globals.NumberItems).ToListAsync();
+                if (leaksQuery.Count != 0)
+                {
+                    var proc = new Procedures(_db, _config);
+
+                    foreach (SegmentLeaksEntry entry in leaksQuery)
+                    {
+                        double totalSystemLitres = await proc.CalculateTotalUsageLitres(entry),
+                                litresUsed = await proc.CalculateTotalWastageLitres(entry),
+                                perhourwastagelitre = await proc.CalculatePerHourWastageLitre(entry),
+                                cost = await proc.CalculatePerHourWastageCost(entry);
+
+                        //Find Litre Usage
+                        ListOfAlerts.Add
+                         (
+                             new GetAlerts
+                             (
+                                 entry.OriginalTimeStamp,
+                                 "Segment",
+                                 entry.SegmentsId,
+                                 "leak",
+                                 cost,
+                                 perhourwastagelitre,
+                                 entry.Severity,
+                                 litresUsed,
+                                 totalSystemLitres,
+                                 entry.ResolvedStatus
+                              )
+                         );
+                    }
+
+                }
+            }
+
             return ListOfAlerts.OrderByDescending(a => a.Date).OrderByDescending(a => a.Status).ToList();
         }
         //Routing to get all currently opened events
