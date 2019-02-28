@@ -62,11 +62,40 @@ namespace WaterLog_Backend.Controllers
             return (JsonConvert.SerializeObject((procedures.CalculateTotalWastageLitres(leaks), procedures.CalculatePerHourWastageLitre(leaks))));
         }
 
+        //Gets segment based on id and date
+        [Route("segment/{id}/{date}")]
+        public async Task<List<GetAlerts>> GetSegmentLeakByDate(int id, DateTime date)
+        {
+            var alert = await _db.SegmentLeaks
+                .Where(a => a.OriginalTimeStamp == date && a.SegmentsId == id)
+                .FirstOrDefaultAsync();
+
+            List<GetAlerts> alerts = new List<GetAlerts>();
+            if(alert != null)
+            {
+                Procedures proc = new Procedures(_db, _config);
+                double totalSystemLitres = await proc.CalculateTotalUsageLitres(alert),
+                           litresUsed = await proc.CalculateTotalWastageLitres(alert),
+                           perhourwastagelitre = await proc.CalculatePerHourWastageLitre(alert),
+                           cost = await proc.CalculatePerHourWastageCost(alert);
+
+                alerts.Add(new GetAlerts(alert.OriginalTimeStamp,
+                    (alert.LatestTimeStamp.Subtract(alert.OriginalTimeStamp) < TimeSpan.Zero ? TimeSpan.Zero :
+                        alert.LatestTimeStamp.Subtract(alert.OriginalTimeStamp)),
+                    "Segment", alert.SegmentsId, "leak", cost, perhourwastagelitre, 
+                    alert.Severity, litresUsed, totalSystemLitres, alert.ResolvedStatus));
+            }
+            return alerts;
+        }
         //Resolve Leakage
         [HttpPost("resolveleaks")]
         public async Task<ActionResult<SegmentLeaksEntry>> Resolve([FromForm] int id)
         {
-            var leaks = await _db.SegmentLeaks.Where(a => a.SegmentsId == id).OrderByDescending(b => b.LatestTimeStamp).FirstOrDefaultAsync();
+            var leaks = await _db.SegmentLeaks
+                .Where(a => a.SegmentsId == id)
+                .OrderByDescending(b => b.LatestTimeStamp)
+                .FirstOrDefaultAsync();
+
             if (leaks == null)
             {
                 return NotFound();
@@ -94,7 +123,8 @@ namespace WaterLog_Backend.Controllers
         public async Task<ActionResult<SegmentLeaksEntry>> GetBySegmentId(int id)
         {
             //System makes assumption that segment and resolved status make entry distinct
-            var leaks = await _db.SegmentLeaks.Where(a => a.SegmentsId == id && a.ResolvedStatus == EnumResolveStatus.UNRESOLVED)
+            var leaks = await _db.SegmentLeaks
+                .Where(a => a.SegmentsId == id && a.ResolvedStatus == EnumResolveStatus.UNRESOLVED)
                 .FirstOrDefaultAsync();
 
             if (leaks == null)
