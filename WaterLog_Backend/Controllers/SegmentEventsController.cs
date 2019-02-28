@@ -116,9 +116,9 @@ namespace WaterLog_Backend.Controllers
                              .LatestTimeStamp.
                              Subtract(entry
                              .OriginalTimeStamp)),
-                             "Segment",
+                             Globals.Segment,
                              entry.SegmentsId,
-                             "leak",
+                             Globals.Leak,
                              cost,
                              perhourwastagelitre,
                              entry.Severity,
@@ -154,9 +154,9 @@ namespace WaterLog_Backend.Controllers
                                 .FaultDate.
                                 Subtract(entry
                                 .AttendedDate)),
-                                "Sensor",
+                                Globals.Sensor,
                                 entry.SensorId,
-                                "faulty",
+                                Globals.Faulty,
                                 0.0,
                                 0.0,
                                 "High",
@@ -230,9 +230,9 @@ namespace WaterLog_Backend.Controllers
                                      .LatestTimeStamp.
                                      Subtract(entry
                                      .OriginalTimeStamp)),
-                                     "Segment",
+                                     Globals.Segment,
                                      entry.SegmentsId,
-                                     "leak",
+                                     Globals.Leak,
                                      cost,
                                      perhourwastagelitre,
                                      entry.Severity,
@@ -274,9 +274,9 @@ namespace WaterLog_Backend.Controllers
                                      .LatestTimeStamp.
                                      Subtract(entry
                                      .OriginalTimeStamp)),
-                                     "Segment",
+                                     Globals.Segment,
                                      entry.SegmentsId,
-                                     "leak",
+                                     Globals.Leak,
                                      cost,
                                      perhourwastagelitre,
                                      entry.Severity,
@@ -321,9 +321,9 @@ namespace WaterLog_Backend.Controllers
                                      .LatestTimeStamp.
                                      Subtract(entry
                                      .OriginalTimeStamp)),
-                                     "Segment",
+                                     Globals.Segment,
                                      entry.SegmentsId,
-                                     "leak",
+                                     Globals.Leak,
                                      cost,
                                      perhourwastagelitre,
                                      entry.Severity,
@@ -364,9 +364,9 @@ namespace WaterLog_Backend.Controllers
                                      .LatestTimeStamp.
                                      Subtract(entry
                                      .OriginalTimeStamp)),
-                                     "Segment",
+                                     Globals.Segment,
                                      entry.SegmentsId,
-                                     "leak",
+                                     Globals.Leak,
                                      cost,
                                      perhourwastagelitre,
                                      entry.Severity,
@@ -408,9 +408,9 @@ namespace WaterLog_Backend.Controllers
                                     .FaultDate.
                                     Subtract(entry
                                     .AttendedDate)),
-                                    "Sensor",
+                                    Globals.Sensor,
                                     entry.SensorId,
-                                    "faulty",
+                                    Globals.Faulty,
                                    -1,
                                    -1,
                                    "High",
@@ -439,9 +439,9 @@ namespace WaterLog_Backend.Controllers
                                     .FaultDate.
                                     Subtract(entry
                                     .AttendedDate)),
-                                    "Sensor",
+                                    Globals.Sensor,
                                     entry.SensorId,
-                                    "faulty",
+                                    Globals.Sensor,
                                     0.0,
                                     0.0,
                                     "High",
@@ -454,7 +454,7 @@ namespace WaterLog_Backend.Controllers
                     }
                 }
             } // filter faulty sensor end
-            return ListOfAlerts.OrderByDescending(a => a.Date).OrderByDescending(a => a.Status).ToList();
+            return (ListOfAlerts.OrderByDescending(a => a.Date).OrderByDescending(a => a.Status).ToList());
         }
         //Routing to get all currently opened events
         [Route("GetAlerts")]
@@ -496,15 +496,15 @@ namespace WaterLog_Backend.Controllers
                                  .LatestTimeStamp.
                                  Subtract(entry
                                  .OriginalTimeStamp)),
-                                "Segment",
-                                entry.SegmentsId,
-                                "leak",
-                                cost,
-                                perhourwastagelitre,
-                                entry.Severity,
-                                litresUsed,
-                                totalSystemLitres,
-                                entry.ResolvedStatus
+                                 Globals.Segment,
+                                 entry.SegmentsId,
+                                 Globals.Leak,
+                                 cost,
+                                 perhourwastagelitre,
+                                 entry.Severity,
+                                 litresUsed,
+                                 totalSystemLitres,
+                                 entry.ResolvedStatus
                              )
                         );
                     }
@@ -530,9 +530,9 @@ namespace WaterLog_Backend.Controllers
                                     .FaultDate.
                                     Subtract(entry
                                     .AttendedDate)),
-                                    "Sensor",
+                                    Globals.Sensor,
                                     entry.SensorId,
-                                    "faulty",
+                                    Globals.Faulty,
                                     0.0,
                                     0.0,
                                     "High",

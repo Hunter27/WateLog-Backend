@@ -102,7 +102,10 @@ namespace WaterLog_Backend.Controllers
             }
             else if(leaks.ResolvedStatus == EnumResolveStatus.UNRESOLVED)
             {
-                var latestEntry = await _db.HistoryLogs.Where(a => a.EventsId == leaks.SegmentsId && a.Type == EnumTypeOfEvent.LEAK).OrderByDescending(b => b.CreationDate).FirstOrDefaultAsync();
+                var latestEntry = await _db.HistoryLogs
+                    .Where(a => a.EventsId == leaks.SegmentsId && a.Type == EnumTypeOfEvent.LEAK)
+                    .OrderByDescending(b => b.CreationDate).FirstOrDefaultAsync();
+
                 if (latestEntry == null)
                 {
                     var hist = new HistoryLogEntry();

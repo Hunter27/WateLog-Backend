@@ -93,9 +93,9 @@ namespace WaterLog_Backend.Controllers
                             TimeSpan.Zero : 
                             alert.FaultDate.Subtract(alert.AttendedDate
                         )),
-                        "Sensor",
+                        Globals.Sensor,
                         alert.SensorId,
-                        "faulty",
+                        Globals.Faulty,
                         0.0,
                         0.0,
                         "High",
