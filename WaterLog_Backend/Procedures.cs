@@ -43,69 +43,187 @@ namespace WaterLog_Backend
             ReadingsEntry reading1 = await _db.Readings
             .Where(r => r.MonitorsId == segmentInid)
             .OrderByDescending(r => r.TimesStamp)
-            .FirstAsync();
+            .FirstOrDefaultAsync();
 
             ReadingsEntry reading2 = await _db.Readings
             .Where(re => re.MonitorsId == segmentOutid)
             .OrderByDescending(re => re.TimesStamp)
-            .FirstAsync();
+            .FirstOrDefaultAsync();
 
-            if (IsLeakage(reading1.Value, reading2.Value))
+            if (reading1 != null && reading2 != null && IsLeakage(reading1.Value, reading2.Value))
             {
-                await CreateSegmentsEventAsync(segmentid, "leak", reading1.Value, reading2.Value);
+                var startDate = await CreateSegmentsEventAsync(segmentid, "leak", reading1.Value, reading2.Value);
                 var leakExists = await _db.SegmentLeaks
                     .Where(leak => leak.SegmentsId == segmentid && leak.ResolvedStatus == EnumResolveStatus.UNRESOLVED)
                     .OrderByDescending(lk => lk.LatestTimeStamp)
-                    .FirstAsync();
+                    .FirstOrDefaultAsync();
                 //Updateleakagestatus
                 if (leakExists != null)
                 {
                     //Check in SegmentEntry if latest event related to entry has been resolved
-                        SegmentEventsEntry entry = await _db.SegmentEvents
-                        .Where(leak => leak.SegmentsId == segmentid)
-                        .OrderByDescending(lks => lks.TimeStamp)
-                        .FirstAsync();
+                    SegmentEventsEntry entry = await _db.SegmentEvents
+                    .Where(leak => leak.SegmentsId == segmentid)
+                    .OrderByDescending(lks => lks.TimeStamp)
+                    .FirstOrDefaultAsync();
 
                         if (entry.EventType == "leak")
                         {
                             var severity = await CalculateSeverity(leakExists);
-                            await UpdateSegmentLeaksAsync(leakExists.Id, segmentid,severity,leakExists.OriginalTimeStamp, 
-                            entry.TimeStamp,EnumResolveStatus.UNRESOLVED,leakExists.LastNotificationDate);
+                            await UpdateSegmentLeaksAsync(leakExists.Id, segmentid, severity, leakExists.OriginalTimeStamp,
+                            entry.TimeStamp, EnumResolveStatus.UNRESOLVED, leakExists.LastNotificationDate);
                         }
                 }
                 else
                 {
-                    //Normal Add
-                    await CreateSegmentLeaksAsync(segmentid, EnumResolveStatus.UNRESOLVED);
-                    //Call an initial email
-                    //Get recipients.
-                    var mailing = await _db.MailingList.Where(a => a.ListGroup == "tier2").ToListAsync();
-                    if (mailing.Count > 0)
+                    //Check if SegmentEvents entries exist that constitute a threshold leak.
+                    var shouldInsert = await LeakEvent(segmentid);
+                    if (shouldInsert)
                     {
-                        var lastInsert = await _db.SegmentLeaks.LastAsync();
-                        if (lastInsert != null)
+                        await CreateSegmentLeaksAsync(segmentid, EnumResolveStatus.UNRESOLVED,startDate);
+                        //Call an initial email
+                        //Get recipients.
+                        var mailing = await _db.MailingList.Where(a => a.ListGroup == "tier2").ToListAsync();
+                        if (mailing.Count > 0)
                         {
-                            string[] template = await populateEmailAsync(lastInsert);
-                            Email email = new Email(template, _config);
-                            Recipient[] mailers = new Recipient[(mailing.Count - 1)];
-                            int countForMailers = 0;
-                            foreach (var rec in mailing)
+                            var lastInsert = await _db.SegmentLeaks.LastAsync();
+                            if (lastInsert != null)
                             {
-                                mailers[countForMailers] = new Recipient(rec.Address, (rec.Name + " " + rec.Surname));
+                                string[] template = await populateEmailAsync(lastInsert);
+                                Email email = new Email(template, _config);
+                                Recipient[] mailers = new Recipient[mailing.Count];
+                                int countForMailers = 0;
+                                foreach (var rec in mailing)
+                                {
+                                    mailers[countForMailers] = new Recipient(rec.Address, (rec.Name + " " + rec.Surname));
+                                    countForMailers++;
+                                }
+                                email.SendMail(mailers);
                             }
-                            email.SendMail(mailers);
                         }
                     }
                 }
             }
             else
             {
-                //Updatewithoutleakagestatus
-                await UpdateSegmentsEventAsync(segmentid, "normal", reading1.Value, reading2.Value);
+                await CreateSegmentsEventAsync(segmentid, "normal", reading1.Value, reading2.Value);
+                //Check if we need to resolve the issue.
+                var resolvable = await LeakResolvable(segmentid);
+                if (resolvable)
+                {
+                    //We resolve the leak
+                    var resolveLeak = await ResolveCurrentLeak(segmentid);
+                    if (resolveLeak != null)
+                    {
+                        //Send Email
+                        var mailing = await _db.MailingList.Where(a => a.ListGroup == "tier2").ToListAsync();
+                        if (mailing.Count > 0)
+                        {
+
+                            if (resolveLeak != null)
+                            {
+                                string[] template = await populateEmailAsync(resolveLeak, "resolved");
+                                Email email = new Email(template, _config);
+                                Recipient[] mailers = new Recipient[mailing.Count];
+                                int countForMailers = 0;
+                                foreach (var rec in mailing)
+                                {
+                                    mailers[countForMailers] = new Recipient(rec.Address, (rec.Name + " " + rec.Surname));
+                                    countForMailers++;
+                                }
+                                email.SendMail(mailers);
+                            }
+                        }
+                    }
+                }
             }
         }
 
-        private async Task CreateSegmentsEventAsync(int id, string status, double inv, double outv)
+        private async Task<SegmentLeaksEntry> ResolveCurrentLeak(int segmentid)
+        {
+            var leaks = await _db.SegmentLeaks.Where(a => a.SegmentsId == segmentid).OrderByDescending(b => b.LatestTimeStamp).FirstOrDefaultAsync();
+            if (leaks == null)
+            {
+                return null;
+            }
+            else if (leaks.ResolvedStatus == EnumResolveStatus.UNRESOLVED)
+            {
+                leaks.ResolvedStatus = EnumResolveStatus.RESOLVED;
+                var hist = new HistoryLogEntry();
+                hist.Date = DateTime.Now;
+                hist.EventsId = leaks.SegmentsId;
+                hist.Type = EnumTypeOfEvent.LEAK;
+
+                _db.SegmentLeaks.Update(leaks);
+                await _db.HistoryLogs.AddAsync(hist);
+                await _db.SaveChangesAsync();
+                return leaks;
+
+            }
+            return null;
+           
+        }
+
+        private async Task<bool> LeakResolvable(int segmentid)
+        {
+            //Get All Leaks
+            var leak = await _db.SegmentLeaks
+                .Where(a => a.SegmentsId == segmentid && a.ResolvedStatus == EnumResolveStatus.UNRESOLVED)
+                .FirstOrDefaultAsync();
+
+            //Top 3 segments that have leak status.
+            var possibleLeakEvents = await _db.SegmentEvents.Where(a => a.SegmentsId == segmentid)
+                .OrderByDescending(a => a.TimeStamp).Take(Globals.LeakThreshold).ToListAsync();
+            bool allInRange = true;
+            if (leak != null)
+            {
+                //Checks if segmentevent date is within leak date.
+                foreach (SegmentEventsEntry entry in possibleLeakEvents)
+                {
+                   if(!(entry.TimeStamp >= leak.OriginalTimeStamp && entry.EventType == "normal"))
+                   {
+                        allInRange = false;
+                   }
+                }
+                return allInRange;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        //Determines whether a leak should be created or not.
+        private async Task<bool> LeakEvent(int segmentid)
+        {
+            //Get All Leaks
+            var leak = await _db.SegmentLeaks
+                .Where(a =>a.SegmentsId == segmentid)
+                .ToListAsync();
+
+            //Top 3 segments that have leak status.
+            var possibleLeakEvents = await _db.SegmentEvents.Where(a => a.SegmentsId == segmentid)
+                .OrderByDescending(a => a.TimeStamp).Take(Globals.LeakThreshold).ToListAsync();
+
+            if(leak.Count > 0)
+            {
+                //Checks if segmentevent date is within leak date.
+                foreach(SegmentEventsEntry entry in possibleLeakEvents)
+                {
+                    foreach(SegmentLeaksEntry leakEntry in leak)
+                    if(entry.TimeStamp <= leakEntry.LatestTimeStamp)
+                    {
+                        return false;
+                    }
+                }
+            }
+            else
+            {
+                return true;
+            }
+            return true;
+        }
+
+        private async Task<DateTime> CreateSegmentsEventAsync(int id, string status, double inv, double outv)
         {
             SegmentEventsEntry entry = new SegmentEventsEntry();
             entry.TimeStamp = DateTime.Now;
@@ -115,6 +233,7 @@ namespace WaterLog_Backend
             entry.EventType = status;
             await _db.SegmentEvents.AddAsync(entry);
             await _db.SaveChangesAsync();
+            return entry.TimeStamp;
         }
 
         public async Task<string> CalculateSeverity(SegmentLeaksEntry entry)
@@ -141,12 +260,12 @@ namespace WaterLog_Backend
             }
         }
 
-        public async Task CreateSegmentLeaksAsync(int segId, EnumResolveStatus resolvedStatus)
+        public async Task CreateSegmentLeaksAsync(int segId, EnumResolveStatus resolvedStatus,DateTime creationTime)
         {
             SegmentLeaksEntry entry = new SegmentLeaksEntry();
             entry.SegmentsId = segId;
-            entry.LatestTimeStamp = DateTime.Now;
-            entry.OriginalTimeStamp = DateTime.Now;
+            entry.LatestTimeStamp = creationTime;
+            entry.OriginalTimeStamp = creationTime;
             entry.LastNotificationDate = DateTime.Now;
             entry.ResolvedStatus = resolvedStatus;
             entry.Severity = await CalculateSeverity(entry);
@@ -292,6 +411,33 @@ namespace WaterLog_Backend
             return false;
         }
 
+        public async Task<string[]> populateEmailAsync(SegmentLeaksEntry section, string entityEvent)
+        {
+            try
+            {
+                var totalCost = await CalculateTotalCostAsync(section);
+                var perHourWastageCost = await CalculatePerHourWastageCost(section);
+                var perHourWastageLitre = await CalculatePerHourWastageLitre(section);
+                string[] template =
+                {
+                 "Segment " + section.SegmentsId,
+                  entityEvent,
+                  section.Severity,
+                  GetLeakPeriodInMinutes(section),
+                  (totalCost).ToString(),
+                  (perHourWastageCost).ToString(),
+                  (perHourWastageLitre).ToString(),
+                  BuildUrl(section.SegmentsId)
+                };
+                return template;
+            }
+            catch (Exception error)
+
+            {
+                throw error;
+            }
+        }
+
         public async Task<string[]> populateEmailAsync(SegmentLeaksEntry section)
         {
             try
@@ -304,10 +450,10 @@ namespace WaterLog_Backend
                  "Segment " + section.SegmentsId,
                   GetSegmentStatus(section.SegmentsId),
                   section.Severity,
-                  GetLeakPeriod(section),
-                  Math.Round(totalCost).ToString(),
-                  Math.Round(perHourWastageCost).ToString(),
-                  Math.Round(perHourWastageLitre).ToString(),
+                  GetLeakPeriodInMinutes(section),
+                  (totalCost).ToString(),
+                  (perHourWastageCost).ToString(),
+                  (perHourWastageLitre).ToString(),
                   BuildUrl(section.SegmentsId)
                 };
                 return template;
@@ -319,9 +465,9 @@ namespace WaterLog_Backend
             }  
         }
 
-        private string GetLeakPeriod(SegmentLeaksEntry leak)
+        private string GetLeakPeriodInMinutes(SegmentLeaksEntry leak)
         {
-                return ((Math.Round((leak.LatestTimeStamp - leak.OriginalTimeStamp).TotalDays,1)).ToString());
+                return Math.Max((leak.LatestTimeStamp - leak.OriginalTimeStamp).TotalMinutes,1).ToString();
         }
 
         public async Task<double> CalculateTotalCostAsync(SegmentLeaksEntry leak)
@@ -334,7 +480,7 @@ namespace WaterLog_Backend
             var timebetween = (leak.LatestTimeStamp - leak.OriginalTimeStamp).TotalHours;
             if (timebetween < 1)
             {
-                return await CalculatePerHourWastageCost(leak)/60;
+                return await CalculatePerHourWastageCost(leak)/Globals.MinuteToHour;
             }
             else
             {
@@ -343,7 +489,15 @@ namespace WaterLog_Backend
             var perhour = await CalculatePerHourWastageCost(leak);
             var total =  (timebetween * perhour);
 
-            return Math.Max(total, 0);
+            if (Math.Max(total, 0) == 0)
+            {
+                //Return a projected cost instead
+                return (perhour * 1);
+            }
+            else
+            {
+                return total;
+            }
         }
 
         private string BuildUrl(int segmentId)
@@ -364,6 +518,10 @@ namespace WaterLog_Backend
             }
             usageperpoll *= 0.0167;
             var minutes = (leak.LatestTimeStamp - leak.OriginalTimeStamp).TotalMinutes;
+            if (leak.LatestTimeStamp.Date == leak.OriginalTimeStamp.Date && leak.OriginalTimeStamp.Minute == leak.LatestTimeStamp.Minute)
+            {
+                minutes = 1;
+            }
             usageperpoll /= minutes;
             usageperpoll *= Globals.MinuteToHour;
             return Math.Max(usageperpoll,0);
@@ -383,6 +541,10 @@ namespace WaterLog_Backend
             //Convert Poll Into Minutes
             usageperpoll *= 0.0167;
             var minutes = (leak.LatestTimeStamp - leak.OriginalTimeStamp).TotalMinutes;
+            if(minutes < 1)
+            {
+                minutes = 60;
+            }
             usageperpoll /= minutes;
             usageperpoll *= Globals.MinuteToHour;
             return Math.Max(((usageperpoll) * Globals.RandPerLitre),0);

@@ -141,7 +141,7 @@ namespace WaterLog_Backend.Migrations
                     OriginalTimeStamp = table.Column<DateTime>(nullable: false),
                     LatestTimeStamp = table.Column<DateTime>(nullable: false),
                     LastNotificationDate = table.Column<DateTime>(nullable: false),
-                    ResolvedStatus = table.Column<int>(nullable: false)
+                    ResolvedStatus = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -166,7 +166,7 @@ namespace WaterLog_Backend.Migrations
                 name: "TankLevels",
                 columns: table => new
                 {
-                    Id = table.Column<int>(nullable: false)
+                    TankId = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     PumpId = table.Column<int>(nullable: false),
                     Percentage = table.Column<int>(nullable: false),
@@ -175,7 +175,7 @@ namespace WaterLog_Backend.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_TankLevels", x => x.Id);
+                    table.PrimaryKey("PK_TankLevels", x => x.TankId);
                 });
         }
 
