@@ -7,7 +7,6 @@ namespace WaterLog_Backend.Models
 {
     public class Filter
     {
-        //public int id { get; set; }
         public int Segment { get; set; }
         public int SensorType { get; set; }
         public int SensorId { get; set; }

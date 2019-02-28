@@ -109,7 +109,13 @@ namespace WaterLog_Backend.Controllers
                          new GetAlerts
                          (
                              entry.OriginalTimeStamp,
-                             (entry.LatestTimeStamp.Subtract(entry.OriginalTimeStamp) < TimeSpan.Zero ? TimeSpan.Zero : entry.LatestTimeStamp.Subtract(entry.OriginalTimeStamp)),
+                             (entry
+                             .LatestTimeStamp
+                             .Subtract(entry
+                             .OriginalTimeStamp) < TimeSpan.Zero ? TimeSpan.Zero : entry
+                             .LatestTimeStamp.
+                             Subtract(entry
+                             .OriginalTimeStamp)),
                              "Segment",
                              entry.SegmentsId,
                              "leak",
@@ -142,7 +148,12 @@ namespace WaterLog_Backend.Controllers
                             new GetAlerts
                             (
                                 entry.FaultDate,
-                                (entry.AttendedDate.Subtract(entry.AttendedDate) < TimeSpan.Zero ? TimeSpan.Zero : entry.FaultDate.Subtract(entry.AttendedDate)),
+                                (entry
+                                .AttendedDate
+                                .Subtract(entry.AttendedDate) < TimeSpan.Zero ? TimeSpan.Zero : entry
+                                .FaultDate.
+                                Subtract(entry
+                                .AttendedDate)),
                                 ((entry.SensorType == EnumSensorType.WATER_FLOW_SENSOR) ? "Water Sensor" : "Sensor"),
                                 entry.SensorId,
                                 "faulty",
@@ -212,7 +223,13 @@ namespace WaterLog_Backend.Controllers
                                  new GetAlerts
                                  (
                                      entry.OriginalTimeStamp,
-                                     (entry.LatestTimeStamp.Subtract(entry.OriginalTimeStamp) < TimeSpan.Zero ? TimeSpan.Zero : entry.LatestTimeStamp.Subtract(entry.OriginalTimeStamp)),
+                                     (entry
+                                     .LatestTimeStamp
+                                     .Subtract(entry
+                                     .OriginalTimeStamp) < TimeSpan.Zero ? TimeSpan.Zero : entry
+                                     .LatestTimeStamp.
+                                     Subtract(entry
+                                     .OriginalTimeStamp)),
                                      "Segment",
                                      entry.SegmentsId,
                                      "leak",
@@ -250,7 +267,13 @@ namespace WaterLog_Backend.Controllers
                                  new GetAlerts
                                  (
                                      entry.OriginalTimeStamp,
-                                     (entry.LatestTimeStamp.Subtract(entry.OriginalTimeStamp) < TimeSpan.Zero ? TimeSpan.Zero : entry.LatestTimeStamp.Subtract(entry.OriginalTimeStamp)),
+                                     (entry
+                                     .LatestTimeStamp
+                                     .Subtract(entry
+                                     .OriginalTimeStamp) < TimeSpan.Zero ? TimeSpan.Zero : entry
+                                     .LatestTimeStamp.
+                                     Subtract(entry
+                                     .OriginalTimeStamp)),
                                      "Segment",
                                      entry.SegmentsId,
                                      "leak",
@@ -291,7 +314,13 @@ namespace WaterLog_Backend.Controllers
                                  new GetAlerts
                                  (
                                      entry.OriginalTimeStamp,
-                                     (entry.LatestTimeStamp.Subtract(entry.OriginalTimeStamp) < TimeSpan.Zero ? TimeSpan.Zero : entry.LatestTimeStamp.Subtract(entry.OriginalTimeStamp)),
+                                     (entry
+                                     .LatestTimeStamp
+                                     .Subtract(entry
+                                     .OriginalTimeStamp) < TimeSpan.Zero ? TimeSpan.Zero : entry
+                                     .LatestTimeStamp.
+                                     Subtract(entry
+                                     .OriginalTimeStamp)),
                                      "Segment",
                                      entry.SegmentsId,
                                      "leak",
@@ -328,7 +357,13 @@ namespace WaterLog_Backend.Controllers
                                  new GetAlerts
                                  (
                                      entry.OriginalTimeStamp,
-                                     (entry.LatestTimeStamp.Subtract(entry.OriginalTimeStamp) < TimeSpan.Zero ? TimeSpan.Zero : entry.LatestTimeStamp.Subtract(entry.OriginalTimeStamp)),
+                                     (entry
+                                     .LatestTimeStamp
+                                     .Subtract(entry
+                                     .OriginalTimeStamp) < TimeSpan.Zero ? TimeSpan.Zero : entry
+                                     .LatestTimeStamp.
+                                     Subtract(entry
+                                     .OriginalTimeStamp)),
                                      "Segment",
                                      entry.SegmentsId,
                                      "leak",
@@ -367,7 +402,12 @@ namespace WaterLog_Backend.Controllers
                                new GetAlerts
                                (
                                    entry.FaultDate,
-                                   (entry.AttendedDate.Subtract(entry.AttendedDate) < TimeSpan.Zero ? TimeSpan.Zero : entry.FaultDate.Subtract(entry.AttendedDate)),
+                                    (entry
+                                    .AttendedDate
+                                    .Subtract(entry.AttendedDate) < TimeSpan.Zero ? TimeSpan.Zero : entry
+                                    .FaultDate.
+                                    Subtract(entry
+                                    .AttendedDate)),
                                    ((entry.SensorType == EnumSensorType.WATER_LEVEL_SENSOR) ? "Tank Level" : "Sensor"),
                                    entry.SensorId,
                                    "faulty",
@@ -393,7 +433,12 @@ namespace WaterLog_Backend.Controllers
                                 new GetAlerts
                                 (
                                     entry.FaultDate,
-                                    (entry.AttendedDate.Subtract(entry.AttendedDate) < TimeSpan.Zero ? TimeSpan.Zero : entry.FaultDate.Subtract(entry.AttendedDate)),
+                                     (entry
+                                    .AttendedDate
+                                    .Subtract(entry.AttendedDate) < TimeSpan.Zero ? TimeSpan.Zero : entry
+                                    .FaultDate.
+                                    Subtract(entry
+                                    .AttendedDate)),
                                     ((entry.SensorType == EnumSensorType.WATER_FLOW_SENSOR) ? "Water Sensor" : "Sensor"),
                                     entry.SensorId,
                                     "faulty",
@@ -443,8 +488,14 @@ namespace WaterLog_Backend.Controllers
                         (
                             new GetAlerts
                             (
-                                entry.OriginalTimeStamp,
-                                (entry.LatestTimeStamp.Subtract(entry.OriginalTimeStamp) < TimeSpan.Zero ? TimeSpan.Zero : entry.LatestTimeStamp.Subtract(entry.OriginalTimeStamp)),
+                                entry.OriginalTimeStamp, 
+                                (entry
+                                 .LatestTimeStamp
+                                 .Subtract(entry
+                                 .OriginalTimeStamp) < TimeSpan.Zero ? TimeSpan.Zero : entry
+                                 .LatestTimeStamp.
+                                 Subtract(entry
+                                 .OriginalTimeStamp)),
                                 "Segment",
                                 entry.SegmentsId,
                                 "leak",
@@ -473,7 +524,12 @@ namespace WaterLog_Backend.Controllers
                                 new GetAlerts
                                 (
                                     entry.FaultDate,
-                                    (entry.AttendedDate.Subtract(entry.AttendedDate) < TimeSpan.Zero ? TimeSpan.Zero : entry.FaultDate.Subtract(entry.AttendedDate)),
+                                     (entry
+                                    .AttendedDate
+                                    .Subtract(entry.AttendedDate) < TimeSpan.Zero ? TimeSpan.Zero : entry
+                                    .FaultDate.
+                                    Subtract(entry
+                                    .AttendedDate)),
                                     ((entry.SensorType == EnumSensorType.WATER_FLOW_SENSOR) ? "Water Sensor" : "Sensor"),
                                     entry.SensorId,
                                     "faulty",
