@@ -108,10 +108,13 @@ namespace EmailNotifications
             if (values.Length > 0)
             {
                 string[] styleProperties = {
-                GetSeverityColor(values[dictionary["entitySeverity"]],values[dictionary["entityEvent"]])+";padding-top: 40px;",
-                GetSeverityColor(values[dictionary["entitySeverity"]],values[dictionary["entityEvent"]]),
+                GetSeverityColor(values[dictionary["entitySeverity"]],
+                values[dictionary["entityEvent"]])+";padding-top: 40px;",
+                GetSeverityColor(values[dictionary["entitySeverity"]],
+                values[dictionary["entityEvent"]]),
                 "color:black;padding-top: 11px;",
-                GetSeverityColor(values[dictionary["entitySeverity"]],values[dictionary["entityEvent"]])+ ";padding-top: 35px;",
+                GetSeverityColor(values[dictionary["entitySeverity"]],
+                values[dictionary["entityEvent"]])+ ";padding-top: 35px;",
                 "color:black;",
                 "color:black;padding-top: 20px;",
                 "color:grey;" ,
@@ -129,7 +132,8 @@ namespace EmailNotifications
                     {
                         "<b>" + values[dictionary["entityFullName"]] + 
                             " is " + BuildVerb(values[dictionary["entityEvent"]]) + "</b>",
-                        "<b>" + GetSeverityDescription(values[dictionary["entitySeverity"]],values[dictionary["entityEvent"]])+ "</b>",
+                        "<b>" + GetSeverityDescription(values[dictionary["entitySeverity"]],
+                        values[dictionary["entityEvent"]])+ "</b>",
                             "This problem has been <b>unresolved for " +
                             GetRelevantUnit(values[dictionary["entityDuration"]])+ "</b>",
                         "<b>" + GetRelevantRand(values[dictionary["entityFullName"]],
@@ -146,7 +150,8 @@ namespace EmailNotifications
                         values[dictionary["entityEvent"]]),
                         GetRelevantLossDescriptionLine2(values[dictionary["entityFullName"]],
                         values[dictionary["entityEvent"]]),"",
-                        (values[dictionary["entityEvent"]].ToLower() == "resolved" ? "" : values[dictionary["entityURL"]]),
+                        (values[dictionary["entityEvent"]].ToLower() == "resolved" ? 
+                            "" : values[dictionary["entityURL"]]),
                         GetPhoneHelp(values[dictionary["entityEvent"]])
                     };
                     foreach (var alert in items)
