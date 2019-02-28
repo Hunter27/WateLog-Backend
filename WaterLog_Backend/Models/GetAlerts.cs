@@ -9,6 +9,8 @@ namespace WaterLog_Backend.Models
     public class GetAlerts
     {
         public DateTime Date;
+        //How long the event lasted
+        public TimeSpan Duration;
         public string EntityName;
         public int EntityId;
         public string EntityType;
@@ -24,7 +26,8 @@ namespace WaterLog_Backend.Models
         public EnumResolveStatus Status;
 
         public GetAlerts(
-            DateTime date, 
+            DateTime date,
+            TimeSpan duration,
             string entityname, 
             int entityid, 
             string entitytype, 
@@ -37,6 +40,7 @@ namespace WaterLog_Backend.Models
         )
         {
             Date = date;
+            Duration = duration;
             EntityName = entityname;
             EntityType = entitytype;
             EntityId = entityid;

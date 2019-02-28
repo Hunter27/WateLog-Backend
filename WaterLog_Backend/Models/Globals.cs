@@ -11,5 +11,7 @@ namespace WaterLog_Backend.Models
         public static double MinuteToHour = 60.00;
         //Number of elements per page
         public static int NumberItems = 5;
+        //Number of continuous readings needed to be a leak to constitue a leak event.
+        public static int LeakThreshold = 3;
     }
 }
