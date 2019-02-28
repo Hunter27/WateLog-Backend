@@ -57,6 +57,41 @@ namespace WaterLog_Backend.Controllers
         [HttpPost("{value}")]
         public async Task Post([FromBody] InputSensor values)
         {
+            if (values.valueIn == 0)
+            {
+                MonitorsEntry mon = await _db.Monitors.FindAsync(values.IdIn);
+                MonitorsEntry old = await _db.Monitors.FindAsync(values.IdIn);
+                mon.Status = "faulty";
+                mon.FaultCount = mon.FaultCount + 1;
+                _db.Entry(old).CurrentValues.SetValues(mon);
+                await _db.SaveChangesAsync();
+                SensorHistoryEntry history = new SensorHistoryEntry();
+                history.SensorId = values.IdIn;
+                history.SensorType = EnumSensorType.WATER_FLOW_SENSOR;
+                history.SensorResolved = EnumResolveStatus.UNRESOLVED;
+                history.FaultDate = DateTime.Now;
+                history.EmailSentDate = DateTime.Now;
+                history.AttendedDate = DateTime.MinValue;
+                await  _db.SensorHistory.AddAsync(history);
+
+            }
+            else if(values.valueIn == 0){
+                MonitorsEntry mon = await _db.Monitors.FindAsync(values.IdOut);
+                MonitorsEntry old = await _db.Monitors.FindAsync(values.IdOut);
+                mon.Status = "faulty";
+                mon.FaultCount = mon.FaultCount + 1;
+                _db.Entry(old).CurrentValues.SetValues(mon);
+                await _db.SaveChangesAsync();
+                SensorHistoryEntry history = new SensorHistoryEntry();
+                history.SensorId = values.IdOut;
+                history.SensorType = EnumSensorType.WATER_FLOW_SENSOR;
+                history.SensorResolved = EnumResolveStatus.UNRESOLVED;
+                history.FaultDate = DateTime.Now;
+                history.EmailSentDate = DateTime.Now;
+                history.AttendedDate = DateTime.MinValue;
+                await _db.SensorHistory.AddAsync(history);
+            }
+
             ReadingsEntry reading = new ReadingsEntry();
             ReadingsEntry reading2 = new ReadingsEntry();
             reading.TimesStamp = DateTime.UtcNow;

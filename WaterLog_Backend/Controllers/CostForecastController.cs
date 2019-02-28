@@ -135,5 +135,19 @@ namespace WaterLog_Backend.Controllers
             return sum;
         }
 
+        [Route("falsePoints")]
+        public List<DateTime> getDummyPointsHours()
+        {
+            List<DateTime> dummyHours = new List<DateTime>();
+            for (int i = 0; i < 24; i++)
+            {
+                DateTime tempTime = DateTime.Now;
+                DateTime returnV = new DateTime(tempTime.Year, tempTime.Month, tempTime.Day, i, 0, 0);
+                dummyHours.Add(returnV);
+            }
+
+            return dummyHours;
+        }
+
     }
 }
