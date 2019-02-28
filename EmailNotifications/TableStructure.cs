@@ -72,6 +72,15 @@ namespace EmailNotifications
             }
             public void AddCell(string innerText, string classAttributes = "", string id = "", string colSpan = "", string align = "", string style = "", string fontSize = "", bool url = false)
             {
+                string txt = "";
+                if(innerText == "")
+                {
+                    txt = "<b>Logged As Resolved</b>";
+                }
+                else
+                {
+                    txt = "<b>Resolve the issue then</b><br><b>Log it here</b>";
+                }
                 Append("<td");
                 AddOptionalAttributes(classAttributes, id, colSpan, align, style); //put style value in here
                 if (url == false)
@@ -86,7 +95,7 @@ namespace EmailNotifications
                     Append("<a style='color:black;' href=" + innerText + ">");
                     Append("<font");
                     AppendOptionFont(classAttributes, id, fontSize, align);
-                    Append("<b>Log it here</b>");
+                    Append(txt);
                     Append("</font>");
                     Append("</a>");
                 }
