@@ -147,14 +147,31 @@ namespace WaterLog_Backend
             }
             else if (leaks.ResolvedStatus == EnumResolveStatus.UNRESOLVED)
             {
+                //Check if resolution already exists in table
+                var latestEntry = await _db.HistoryLogs
+                    .Where(a => a.EventsId == segmentid && a.Type == EnumTypeOfEvent.LEAK)
+                    .OrderByDescending(b => b.CreationDate).FirstOrDefaultAsync();
+                
                 leaks.ResolvedStatus = EnumResolveStatus.RESOLVED;
-                var hist = new HistoryLogEntry();
-                hist.Date = DateTime.Now;
-                hist.EventsId = leaks.SegmentsId;
-                hist.Type = EnumTypeOfEvent.LEAK;
-
+                if (latestEntry != null)
+                {
+                    //Update
+                    if(latestEntry.AutomaticDate == DateTime.Parse("0001-01-01 00:00:00.0000000"))
+                    {
+                        latestEntry.AutomaticDate = DateTime.Now;
+                        _db.HistoryLogs.Update(latestEntry);
+                    }
+                }
+                else
+                {
+                    var hist = new HistoryLogEntry();
+                    hist.AutomaticDate = DateTime.Now;
+                    hist.EventsId = leaks.SegmentsId;
+                    hist.Type = EnumTypeOfEvent.LEAK;
+                    await _db.HistoryLogs.AddAsync(hist);
+                    
+                }
                 _db.SegmentLeaks.Update(leaks);
-                await _db.HistoryLogs.AddAsync(hist);
                 await _db.SaveChangesAsync();
                 return leaks;
 
@@ -524,7 +541,8 @@ namespace WaterLog_Backend
             }
             usageperpoll *= 0.0167;
             var minutes = (leak.LatestTimeStamp - leak.OriginalTimeStamp).TotalMinutes;
-            if (leak.LatestTimeStamp.Date == leak.OriginalTimeStamp.Date && leak.OriginalTimeStamp.Minute == leak.LatestTimeStamp.Minute)
+            if (leak.LatestTimeStamp.Date == leak.OriginalTimeStamp.Date && 
+                leak.OriginalTimeStamp.Minute == leak.LatestTimeStamp.Minute)
             {
                 minutes = 1;
             }
@@ -542,7 +560,8 @@ namespace WaterLog_Backend
 
         public async Task<double> CalculateTotalUsageLitres(SegmentLeaksEntry leak)
         {
-           var events = await _db.SegmentEvents.Where(a => a.TimeStamp >= leak.OriginalTimeStamp || a.TimeStamp <= leak.LatestTimeStamp)
+           var events = await _db.SegmentEvents
+                .Where(a => a.TimeStamp >= leak.OriginalTimeStamp || a.TimeStamp <= leak.LatestTimeStamp)
                 .ToListAsync();
 
            var totalUsageForPeriod = 0.0;
@@ -672,7 +691,8 @@ namespace WaterLog_Backend
             {
                 case Period.Daily:
                     var daily = await _db
-                    .SegmentEvents.Where(a => a.TimeStamp.Month == DateTime.Now.Month && a.TimeStamp.Day == DateTime.Now.Day && a.TimeStamp.Year == DateTime.Now.Year)
+                    .SegmentEvents.Where(a => a.TimeStamp.Month == DateTime.Now.Month && 
+                        a.TimeStamp.Day == DateTime.Now.Day && a.TimeStamp.Year == DateTime.Now.Year)
                     .GroupBy(b => b.TimeStamp.Hour)
                     .ToListAsync();
                     return SummaryDailyUsage(daily);
@@ -733,7 +753,8 @@ namespace WaterLog_Backend
             {
                 case Period.Daily:
                     var daily = await _db
-                    .SegmentEvents.Where(a => a.TimeStamp.Month == DateTime.Now.Month && a.TimeStamp.Day == DateTime.Now.Day && a.TimeStamp.Year == DateTime.Now.Year)
+                    .SegmentEvents.Where(a => a.TimeStamp.Month == DateTime.Now.Month && 
+                        a.TimeStamp.Day == DateTime.Now.Day && a.TimeStamp.Year == DateTime.Now.Year)
                     .GroupBy(b => b.TimeStamp.Hour)
                     .ToListAsync();
                     return SummaryDailyCost(daily);
@@ -1194,7 +1215,9 @@ namespace WaterLog_Backend
         {
             var dailyTank = await _db
                             .TankReadings
-                            .Where(a => a.TimeStamp.Day == DateTime.Now.Day && a.TimeStamp.Month == DateTime.Now.Month && a.TimeStamp.Year == DateTime.Now.Year && a.TankMonitorsId==tankId)
+                            .Where(a => a.TimeStamp.Day == DateTime.Now.Day && 
+                                a.TimeStamp.Month == DateTime.Now.Month && 
+                                a.TimeStamp.Year == DateTime.Now.Year && a.TankMonitorsId==tankId)
                             .GroupBy(b => b.TimeStamp.Day)
                             .ToListAsync();
 
@@ -1246,5 +1269,3 @@ namespace WaterLog_Backend
         }
     } 
 }
-
-

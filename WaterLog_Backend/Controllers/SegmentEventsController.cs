@@ -154,7 +154,7 @@ namespace WaterLog_Backend.Controllers
                                 .FaultDate.
                                 Subtract(entry
                                 .AttendedDate)),
-                                ((entry.SensorType == EnumSensorType.WATER_FLOW_SENSOR) ? "Water Sensor" : "Sensor"),
+                                "Sensor",
                                 entry.SensorId,
                                 "faulty",
                                 0.0,
@@ -408,9 +408,9 @@ namespace WaterLog_Backend.Controllers
                                     .FaultDate.
                                     Subtract(entry
                                     .AttendedDate)),
-                                   ((entry.SensorType == EnumSensorType.WATER_LEVEL_SENSOR) ? "Tank Level" : "Sensor"),
-                                   entry.SensorId,
-                                   "faulty",
+                                    "Sensor",
+                                    entry.SensorId,
+                                    "faulty",
                                    -1,
                                    -1,
                                    "High",
@@ -439,7 +439,7 @@ namespace WaterLog_Backend.Controllers
                                     .FaultDate.
                                     Subtract(entry
                                     .AttendedDate)),
-                                    ((entry.SensorType == EnumSensorType.WATER_FLOW_SENSOR) ? "Water Sensor" : "Sensor"),
+                                    "Sensor",
                                     entry.SensorId,
                                     "faulty",
                                     0.0,
@@ -530,7 +530,7 @@ namespace WaterLog_Backend.Controllers
                                     .FaultDate.
                                     Subtract(entry
                                     .AttendedDate)),
-                                    ((entry.SensorType == EnumSensorType.WATER_FLOW_SENSOR) ? "Water Sensor" : "Sensor"),
+                                    "Sensor",
                                     entry.SensorId,
                                     "faulty",
                                     0.0,
