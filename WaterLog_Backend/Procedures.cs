@@ -427,7 +427,7 @@ namespace WaterLog_Backend
                   (totalCost).ToString(),
                   (perHourWastageCost).ToString(),
                   (perHourWastageLitre).ToString(),
-                  BuildUrl(section.SegmentsId,section.OriginalTimeStamp)
+                  BuildUrl(section)
                 };
                 return template;
             }
@@ -454,7 +454,7 @@ namespace WaterLog_Backend
                   (totalCost).ToString(),
                   (perHourWastageCost).ToString(),
                   (perHourWastageLitre).ToString(),
-                  BuildUrl(section.SegmentsId,section.OriginalTimeStamp)
+                  BuildUrl(section)
                 };
                 return template;
             }
@@ -500,10 +500,16 @@ namespace WaterLog_Backend
             }
         }
 
-        private string BuildUrl(int segmentId,DateTime date)
+        private string BuildUrl(SegmentLeaksEntry section)
         {
-            return "https://iot.retrotest.co.za/alert/segment/" + segmentId + "/" + date;
+            return Globals.BASE_URL + "/segment/" + section.SegmentsId + "/" + section.OriginalTimeStamp;
         }
+
+        private string BuildUrl(GetAlerts section)
+        {
+            return Globals.BASE_URL + "/"+section.EntityType.ToLower()+"/" + section.EntityId + "/" + section.Date;
+        }
+
 
         public async Task<double> CalculatePerHourWastageLitre(SegmentLeaksEntry leak)
         {

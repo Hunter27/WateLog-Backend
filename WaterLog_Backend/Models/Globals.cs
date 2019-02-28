@@ -13,5 +13,6 @@ namespace WaterLog_Backend.Models
         public static int NumberItems = 5;
         //Number of continuous readings needed to be a leak to constitue a leak event.
         public static int LeakThreshold = 3;
+        public static string BASE_URL = "https://iot.retrotest.co.za/alert/";
     }
 }
