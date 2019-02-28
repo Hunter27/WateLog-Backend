@@ -77,7 +77,7 @@ namespace WaterLog_Backend.Controllers
             data.end = epochDates.Last();
             data.numOfElements = epochDates.Count();
 
-            return new List<LinearRegressionModel>{ data };
+            return new List<LinearRegressionModel> { data };
         }
 
         [Route("monthly/{id}")]
@@ -85,12 +85,12 @@ namespace WaterLog_Backend.Controllers
         public async Task<ActionResult<double>> GetMonthCostForecast(int id)
         {
             Procedures P = new Procedures();
-            var thisMonthsEvents = P.SummaryDailyCost( await _db
+            var thisMonthsEvents = P.SummaryDailyCost(await _db
                     .SegmentEvents.Where(a => a.TimeStamp.Month == id && a.TimeStamp.Year == DateTime.Now.Year)
                     .GroupBy(b => b.TimeStamp.Hour)
                     .ToListAsync()).FirstOrDefault();
 
-            if(thisMonthsEvents.dataPoints.Count == 0)
+            if (thisMonthsEvents.dataPoints.Count == 0)
             {
                 return 0;
             }
@@ -111,20 +111,28 @@ namespace WaterLog_Backend.Controllers
 
             if (thisMonthsEvents.dataPoints.Count == 2)
             {
-                var _slope = (y.ElementAt(1) - y.ElementAt(0)) /(epochDates[1] - epochDates[0]);
+                var _slope = (y.ElementAt(1) - y.ElementAt(0)) / (epochDates[1] - epochDates[0]);
                 var _day = DateTime.DaysInMonth(DateTime.Now.Year, id);
                 var _date = new DateTime(DateTime.Now.Year, id, _day);
                 var _yint = y.ElementAt(1) - _slope * epochDates[1];
-                return _slope* (new DateTimeOffset(_date).ToUnixTimeSeconds()) + _yint;
+                return _slope * (new DateTimeOffset(_date).ToUnixTimeSeconds()) + _yint;
             }
 
             double rSquared, yIntercept, slope;
 
             forecast.LinearRegression(epochDates.ToArray(), y.ToArray(), out rSquared, out yIntercept, out slope);
+            double sum = 0;
             var day = DateTime.DaysInMonth(DateTime.Now.Year, id);
-            var date = new DateTime(DateTime.Now.Year, id, day);
-            
-            return slope*(new DateTimeOffset(date).ToUnixTimeSeconds()) + yIntercept;
+
+            for (int i = 1; i <= day; i++)
+            {
+                var date = new DateTime(DateTime.Now.Year, id, i);
+                var toAdd = slope * (new DateTimeOffset(date).ToUnixTimeSeconds()) + yIntercept;
+
+                sum += toAdd >= 0 ? toAdd : 0;
+            }
+
+            return sum;
         }
 
     }
