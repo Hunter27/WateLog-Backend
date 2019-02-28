@@ -93,9 +93,9 @@ namespace WaterLog_Backend.Controllers
                             TimeSpan.Zero : 
                             alert.FaultDate.Subtract(alert.AttendedDate
                         )),
-                        ((alert.SensorType == EnumSensorType.WATER_FLOW_SENSOR) ? "Water Sensor" : "Sensor"),
+                        Globals.Sensor,
                         alert.SensorId,
-                        "faulty",
+                        Globals.Faulty,
                         0.0,
                         0.0,
                         "High",

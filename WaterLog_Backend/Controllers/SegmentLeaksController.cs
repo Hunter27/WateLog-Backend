@@ -102,15 +102,27 @@ namespace WaterLog_Backend.Controllers
             }
             else if(leaks.ResolvedStatus == EnumResolveStatus.UNRESOLVED)
             {
-                leaks.ResolvedStatus = EnumResolveStatus.RESOLVED;
+                var latestEntry = await _db.HistoryLogs
+                    .Where(a => a.EventsId == leaks.SegmentsId && a.Type == EnumTypeOfEvent.LEAK)
+                    .OrderByDescending(b => b.CreationDate).FirstOrDefaultAsync();
 
-                var hist = new HistoryLogEntry();
-                hist.Date = DateTime.Now;
-                hist.EventsId = leaks.SegmentsId;
-                hist.Type = EnumTypeOfEvent.LEAK;
+                if (latestEntry == null)
+                {
+                    var hist = new HistoryLogEntry();
+                    hist.CreationDate = DateTime.Now;
+                    hist.EventsId = leaks.SegmentsId;
+                    hist.Type = EnumTypeOfEvent.LEAK;
+                    await _db.HistoryLogs.AddAsync(hist);
+                }
+                else
+                {
+                    if (latestEntry.ManualDate == DateTime.Parse("0001-01-01 00:00:00.0000000"))
+                    {
+                        latestEntry.ManualDate = DateTime.Now;
+                        _db.HistoryLogs.Update(latestEntry);
+                    }
+                }
 
-                _db.SegmentLeaks.Update(leaks);
-                await _db.HistoryLogs.AddAsync(hist);
                 await _db.SaveChangesAsync();
                 return leaks;
 
