@@ -68,6 +68,44 @@ namespace WaterLog_Backend.Controllers
             {
                 throw new Exception(error.Message);
             }
-        } 
+        }
+
+        [Route("sensor/{id}/{date}")]
+        public async Task<List<GetAlerts>> GetSensorByDate(int id, DateTime date)
+        {
+            var alert = await _db.SensorHistory
+                .Where(a => a.FaultDate == date && a.SensorId == id)
+                .FirstOrDefaultAsync();
+
+            List<GetAlerts> alerts = new List<GetAlerts>();
+            if (alert != null)
+            {
+                var sensorInfo = await _db.Monitors.Where(a => a.Id == alert.SensorId).FirstOrDefaultAsync();
+                var latestReading = await _db.Readings.Where(a => a.MonitorsId == alert.SensorId)
+                    .OrderByDescending(a => a.TimesStamp).FirstOrDefaultAsync();
+
+                alerts.Add
+                (
+                    new GetAlerts
+                    (
+                        alert.FaultDate,
+                        (alert.FaultDate.Subtract(alert.AttendedDate) < TimeSpan.Zero ? 
+                            TimeSpan.Zero : 
+                            alert.FaultDate.Subtract(alert.AttendedDate
+                        )),
+                        ((alert.SensorType == EnumSensorType.WATER_FLOW_SENSOR) ? "Water Sensor" : "Sensor"),
+                        alert.SensorId,
+                        "faulty",
+                        0.0,
+                        0.0,
+                        "High",
+                        latestReading.Value,
+                        sensorInfo.Max_flow,
+                        alert.SensorResolved
+                     )
+                 );
+            }
+            return alerts;
+        }
     }
 }

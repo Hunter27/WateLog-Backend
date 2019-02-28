@@ -40,6 +40,40 @@ namespace WaterLog_Backend.Controllers
             return obj.AsEnumerable();
         }
 
+        [Route("tank/{id}/{date}")]
+        public async Task<List<GetAlerts>> GetTankByDate(int id, DateTime date)
+        {
+            var alert = await _db.TankReadings.Where(a => a.TimeStamp == date && a.TankMonitorsId == id)
+                .FirstOrDefaultAsync();
+            List<GetAlerts> alerts = new List<GetAlerts>();
+            if (alert != null)
+            {
+                var sensorInfo = await _db.TankMonitors.Where(a => a.Id == alert.TankMonitorsId).FirstOrDefaultAsync();
+
+                alerts.Add
+                (
+                    new GetAlerts
+                    (
+                        alert.TimeStamp,
+                        TimeSpan.Zero,
+                        "Tank",
+                        alert.TankMonitorsId,
+                        "faulty",
+                        0.0,
+                        0.0,
+                        "High",
+                        alert.PercentageLevel,
+                        alert.OptimalLevel,
+                        (sensorInfo.Status == "unresolved" ? 
+                            EnumResolveStatus.UNRESOLVED : 
+                            EnumResolveStatus.RESOLVED
+                        )
+                     )
+                 );
+            }
+            return alerts;
+        }
+
         // GET api/levelsById/
         [HttpGet("{id}")]
         public async Task<ActionResult<TankReadingsEntry>> GetTankReadingsId(int id)
