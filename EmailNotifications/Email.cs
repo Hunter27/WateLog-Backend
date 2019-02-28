@@ -108,10 +108,13 @@ namespace EmailNotifications
             if (values.Length > 0)
             {
                 string[] styleProperties = {
-                GetSeverityColor(values[dictionary["entitySeverity"]])+";padding-top: 40px;",
-                GetSeverityColor(values[dictionary["entitySeverity"]]),
+                GetSeverityColor(values[dictionary["entitySeverity"]],
+                values[dictionary["entityEvent"]])+";padding-top: 40px;",
+                GetSeverityColor(values[dictionary["entitySeverity"]],
+                values[dictionary["entityEvent"]]),
                 "color:black;padding-top: 11px;",
-                GetSeverityColor(values[dictionary["entitySeverity"]])+ ";padding-top: 35px;",
+                GetSeverityColor(values[dictionary["entitySeverity"]],
+                values[dictionary["entityEvent"]])+ ";padding-top: 35px;",
                 "color:black;",
                 "color:black;padding-top: 20px;",
                 "color:grey;" ,
@@ -129,7 +132,8 @@ namespace EmailNotifications
                     {
                         "<b>" + values[dictionary["entityFullName"]] + 
                             " is " + BuildVerb(values[dictionary["entityEvent"]]) + "</b>",
-                        "<b>(" + values[dictionary["entitySeverity"]]+")</b>",
+                        "<b>" + GetSeverityDescription(values[dictionary["entitySeverity"]],
+                        values[dictionary["entityEvent"]])+ "</b>",
                             "This problem has been <b>unresolved for " +
                             GetRelevantUnit(values[dictionary["entityDuration"]])+ "</b>",
                         "<b>" + GetRelevantRand(values[dictionary["entityFullName"]],
@@ -146,8 +150,9 @@ namespace EmailNotifications
                         values[dictionary["entityEvent"]]),
                         GetRelevantLossDescriptionLine2(values[dictionary["entityFullName"]],
                         values[dictionary["entityEvent"]]),"",
-                        values[dictionary["entityURL"]],
-                        "call third party help: <u>&zwj;011111929292</u>"
+                        (values[dictionary["entityEvent"]].ToLower() == "resolved" ? 
+                            "" : values[dictionary["entityURL"]]),
+                        GetPhoneHelp(values[dictionary["entityEvent"]])
                     };
                     foreach (var alert in items)
                     {
@@ -181,12 +186,34 @@ namespace EmailNotifications
             }
         }
 
+        private string GetSeverityDescription(string severity, string entityType)
+        {
+            switch (entityType.ToLower())
+            {
+                case "resolved":
+                    return "";
+                default:
+                    return "(" + severity + ")";
+            }
+        }
+
+        private string GetPhoneHelp(string entityEvent)
+        {
+            switch (entityEvent.ToLower())
+            {
+                case "resolved":
+                    return "";
+                default:
+                    return "call third party help: <u>&zwj;011111929292</u>";
+            }
+        }
+
         private string GetLogItStyle(string status)
         {
             switch (status.ToLower())
             {
                 case "resolved":
-                    return "opacity:0;pointer-events: none;";
+                    return "pointer-events: none;";
                 default:
                     return "opacity:1;";
             }
@@ -204,6 +231,18 @@ namespace EmailNotifications
                     return "color:#ff1744";
             }
             return "color:#ffea00";
+        }
+
+        private string GetSeverityColor(string severity,string entityEvent)
+        {
+            if(entityEvent.ToLower() == "resolved")
+            {
+                return "color:#56CCF7";
+            }
+            else
+            {
+                return GetSeverityColor(severity);
+            }
         }
 
         private string BuildVerb(string entityEventType)
