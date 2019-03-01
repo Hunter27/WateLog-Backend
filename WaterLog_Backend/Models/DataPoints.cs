@@ -47,8 +47,7 @@ namespace WaterLog_Backend
             List<Y> outV = new List<Y>() ; 
             foreach (DataNode<T, Y> listV in dataPoints)
             {
-                outV.Add(listV.y);
-                
+                outV.Add(listV.y);     
             }
             return outV;
         }
@@ -59,7 +58,6 @@ namespace WaterLog_Backend
             foreach (DataNode<T, Y> listV in dataPoints)
             {
                 outV.Add(listV.x);
-
             }
             return outV;
         }
