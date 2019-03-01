@@ -79,11 +79,7 @@ namespace WaterLog_Backend.Controllers
                     {
                         v.AddPoint(t.ElementAt(0), 0);
                     }
-
-                }
-               
-
-                
+                }              
             }
 
             return v;
