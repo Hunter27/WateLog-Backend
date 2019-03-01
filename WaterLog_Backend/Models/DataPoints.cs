@@ -42,24 +42,22 @@ namespace WaterLog_Backend
                 return true;
             }
         }
-         public List<Y> getv()
+         public List<Y> getValueY()
         {
             List<Y> outV = new List<Y>() ; 
             foreach (DataNode<T, Y> listV in dataPoints)
             {
-                outV.Add(listV.y);
-                
+                outV.Add(listV.y);     
             }
             return outV;
         }
 
-        public List<T> getv2()
+        public List<T> getvalueT()
         {
             List<T> outV = new List<T>();
             foreach (DataNode<T, Y> listV in dataPoints)
             {
                 outV.Add(listV.x);
-
             }
             return outV;
         }
