@@ -52,6 +52,17 @@ namespace WaterLog_Backend
             }
             return outV;
         }
+
+        public List<T> getv2()
+        {
+            List<T> outV = new List<T>();
+            foreach (DataNode<T, Y> listV in dataPoints)
+            {
+                outV.Add(listV.x);
+
+            }
+            return outV;
+        }
     }
 
     //Unit of Data that will be plotted

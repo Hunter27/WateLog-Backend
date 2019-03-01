@@ -61,7 +61,32 @@ namespace WaterLog_Backend.Controllers
         {
             Procedures proc = new Procedures(_db, _config);
             var ret = await proc.CalculatePeriodWastageAsync(Procedures.Period.Daily);
-            return ret.FirstOrDefault();
+            DataPoints<DateTime, double> v = new DataPoints<DateTime, double>();
+            List<DateTime> dummyHours = new List<DateTime>();
+            for (int i = 0; i < 24; i++)
+            {
+                DateTime tempTime = DateTime.Now;
+                DateTime returnV = new DateTime(tempTime.Year, tempTime.Month, tempTime.Day, i, 0, 0);
+                for (int j =0; j< ret.Count(); j++)
+                {
+                    List<DateTime> t = ret.ElementAt(j).getv2();
+                    List<double> d = ret.ElementAt(j).getv();
+                    if (t.ElementAt(0).Hour == returnV.Hour)
+                    {
+                        v.AddPoint(t.ElementAt(0), d.ElementAt(0));
+                    }
+                    else
+                    {
+                        v.AddPoint(t.ElementAt(0), 0);
+                    }
+
+                }
+               
+
+                
+            }
+
+            return v;
         }
 
         [Route("monthlywastage")]
@@ -558,7 +583,28 @@ namespace WaterLog_Backend.Controllers
         {
             Procedures proc = new Procedures(_db, _config);
             var ret = await proc.SummaryPeriodUsageAsync(Procedures.Period.Daily);
-            return ret.FirstOrDefault();
+            DataPoints<DateTime, double> v = new DataPoints<DateTime, double>();
+            List<DateTime> dummyHours = new List<DateTime>();
+            for (int i = 0; i < 24; i++)
+            {
+                DateTime tempTime = DateTime.Now;
+                DateTime returnV = new DateTime(tempTime.Year, tempTime.Month, tempTime.Day, i, 0, 0);
+                for (int j = 0; j < ret.Count(); j++)
+                {
+                    List<DateTime> t = ret.ElementAt(j).getv2();
+                    List<double> d = ret.ElementAt(j).getv();
+                    if (t.ElementAt(0).Hour == returnV.Hour)
+                    {
+                        v.AddPoint(t.ElementAt(0), d.ElementAt(0));
+                    }
+                    else
+                    {
+                        v.AddPoint(t.ElementAt(0), 0);
+                    }
+                }
+            }
+
+            return v;
         }
         [Route("monthlyUsage")]
         public async Task<DataPoints<DateTime, double>> GetMonthlyUsageGraphData()
@@ -578,7 +624,28 @@ namespace WaterLog_Backend.Controllers
         {
             Procedures proc = new Procedures(_db, _config);
             var ret = await proc.SummaryPeriodCostsAsync(Procedures.Period.Daily);
-            return ret.FirstOrDefault();
+            DataPoints<DateTime, double> v = new DataPoints<DateTime, double>();
+            List<DateTime> dummyHours = new List<DateTime>();
+            for (int i = 0; i < 24; i++)
+            {
+                DateTime tempTime = DateTime.Now;
+                DateTime returnV = new DateTime(tempTime.Year, tempTime.Month, tempTime.Day, i, 0, 0);
+                for (int j = 0; j < ret.Count(); j++)
+                {
+                    List<DateTime> t = ret.ElementAt(j).getv2();
+                    List<double> d = ret.ElementAt(j).getv();
+                    if (t.ElementAt(0).Hour == returnV.Hour)
+                    {
+                        v.AddPoint(t.ElementAt(0), d.ElementAt(0));
+                    }
+                    else
+                    {
+                        v.AddPoint(t.ElementAt(0), 0);
+                    }
+                }
+            }
+
+            return v;
         }
         [Route("monthlyCost")]
         public async Task<DataPoints<DateTime, double>> GetMonthlyCostGraphData()
