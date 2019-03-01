@@ -59,18 +59,18 @@ namespace WaterLog_Backend.Controllers
         [Route("dailywastage")]
         public async Task<DataPoints<DateTime, double>> GetDailyWastageGraphData()
         {
-            Procedures proc = new Procedures(_db, _config);
+            var proc = new Procedures(_db, _config);
             var ret = await proc.CalculatePeriodWastageAsync(Procedures.Period.Daily);
-            DataPoints<DateTime, double> outV = new DataPoints<DateTime, double>();
-            List<DateTime> dummyHours = new List<DateTime>();
+            var outV = new DataPoints<DateTime, double>();
+            var dummyHours = new List<DateTime>();
             for (int i = 0; i < 24; i++)
             {
                 DateTime tempTime = DateTime.Now;
                 DateTime returnV = new DateTime(tempTime.Year, tempTime.Month, tempTime.Day, i, 0, 0);
                 for (int j =0; j< ret.Count(); j++)
                 {
-                    List<DateTime> dateValue = ret.ElementAt(j).getv2();
-                    List<double> reading = ret.ElementAt(j).getv();
+                    var dateValue = ret.ElementAt(j).getvalueT();
+                    var reading = ret.ElementAt(j).getValueY();
                     if (dateValue.ElementAt(0).Hour == returnV.Hour)
                     {
                         outV.AddPoint(dateValue.ElementAt(0), reading.ElementAt(0));
@@ -579,16 +579,16 @@ namespace WaterLog_Backend.Controllers
         {
             Procedures proc = new Procedures(_db, _config);
             var ret = await proc.SummaryPeriodUsageAsync(Procedures.Period.Daily);
-            DataPoints<DateTime, double> outV = new DataPoints<DateTime, double>();
-            List<DateTime> dummyHours = new List<DateTime>();
+            var outV = new DataPoints<DateTime, double>();
+            var dummyHours = new List<DateTime>();
             for (int i = 0; i < 24; i++)
             {
                 DateTime tempTime = DateTime.Now;
                 DateTime returnV = new DateTime(tempTime.Year, tempTime.Month, tempTime.Day, i, 0, 0);
                 for (int j = 0; j < ret.Count(); j++)
                 {
-                    List<DateTime> dateValue = ret.ElementAt(j).getv2();
-                    List<double> reading = ret.ElementAt(j).getv();
+                    var dateValue = ret.ElementAt(j).getvalueT();
+                    var reading = ret.ElementAt(j).getValueY();
                     if (dateValue.ElementAt(0).Hour == returnV.Hour)
                     {
                         outV.AddPoint(dateValue.ElementAt(0), reading.ElementAt(0));
@@ -620,16 +620,16 @@ namespace WaterLog_Backend.Controllers
         {
             Procedures proc = new Procedures(_db, _config);
             var ret = await proc.SummaryPeriodCostsAsync(Procedures.Period.Daily);
-            DataPoints<DateTime, double> outV = new DataPoints<DateTime, double>();
-            List<DateTime> dummyHours = new List<DateTime>();
+            var outV = new DataPoints<DateTime, double>();
+            var dummyHours = new List<DateTime>();
             for (int i = 0; i < 24; i++)
             {
                 DateTime tempTime = DateTime.Now;
                 DateTime returnV = new DateTime(tempTime.Year, tempTime.Month, tempTime.Day, i, 0, 0);
                 for (int j = 0; j < ret.Count(); j++)
                 {
-                    List<DateTime> dateValue = ret.ElementAt(j).getv2();
-                    List<double> reading = ret.ElementAt(j).getv();
+                    var dateValue = ret.ElementAt(j).getvalueT();
+                    var reading = ret.ElementAt(j).getValueY();
                     if (dateValue.ElementAt(0).Hour == returnV.Hour)
                     {
                         outV.AddPoint(dateValue.ElementAt(0), reading.ElementAt(0));

@@ -1104,7 +1104,7 @@ namespace WaterLog_Backend
             //Summer season
             if (usage[0].dataPoints.Count != 0)
             {
-                List<double> vals = usage[0].getv();
+                List<double> vals = usage[0].getValueY();
                 double sum = 0;
                 for (int i = 0; i < vals.Count; i++)
                 {
@@ -1121,7 +1121,7 @@ namespace WaterLog_Backend
             //winter season
             if (usage[1].dataPoints.Count != 0)
             {
-                List<double> vals1 = usage[1].getv();
+                List<double> vals1 = usage[1].getValueY();
                 double sum1 = 0;
 
                 for (int i = 0; i < vals1.Count; i++)
@@ -1138,7 +1138,7 @@ namespace WaterLog_Backend
             //spring season
             if (usage[2].dataPoints.Count != 0)
             {
-                List<double> vals2 = usage[2].getv();
+                List<double> vals2 = usage[2].getValueY();
                 double sum2 = 0;
 
                 for (int i = 0; i < vals2.Count; i++)
@@ -1156,7 +1156,7 @@ namespace WaterLog_Backend
             //Autum season
             if (usage[3].dataPoints.Count != 0)
             {
-                List<double> vals3 = usage[3].getv();
+                List<double> vals3 = usage[3].getValueY();
                 double sum3 = 0;
 
                 for (int i = 0; i < vals3.Count; i++)
