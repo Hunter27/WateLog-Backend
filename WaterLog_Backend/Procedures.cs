@@ -519,12 +519,12 @@ namespace WaterLog_Backend
 
         private string BuildUrl(SegmentLeaksEntry section)
         {
-            return Globals.BASE_URL + "/segment/" + section.SegmentsId + "/" + (section.OriginalTimeStamp).ToString("yyyy-MM-ddTHH:mm:ssZ");
+            return Globals.BASE_URL + "/segment/" + section.SegmentsId + "/" + (section.OriginalTimeStamp).ToString("yyyy-MM-ddTHH:mm:ss.fff");
         }
 
         private string BuildUrl(GetAlerts section)
         {
-            return Globals.BASE_URL + "/"+section.EntityType.ToLower()+"/" + section.EntityId + "/" + (section.Date).ToString("yyyy-MM-ddTHH:mm:ssZ");
+            return Globals.BASE_URL + "/"+section.EntityType.ToLower()+"/" + section.EntityId + "/" + (section.Date).ToString("yyyy-MM-ddTHH:mm:ss.fff");
         }
 
 
