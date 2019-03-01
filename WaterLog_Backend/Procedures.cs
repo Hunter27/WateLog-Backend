@@ -519,7 +519,7 @@ namespace WaterLog_Backend
 
         private string BuildUrl(SegmentLeaksEntry section)
         {
-            return Globals.BASE_URL + "/segment/" + section.SegmentsId + "/" + section.OriginalTimeStamp;
+            return Globals.BASE_URL + "/segment/" + section.SegmentsId + "/" + (section.OriginalTimeStamp).ToString();
         }
 
         private string BuildUrl(GetAlerts section)
