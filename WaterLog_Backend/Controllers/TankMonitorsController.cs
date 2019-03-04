@@ -13,10 +13,10 @@ using WaterLog_Backend.Models;
 
 namespace WaterLog_Backend.Controllers
 {
-        [Route("api/[controller]")]
-        [ApiController]
-        public class TankMonitorsController : ControllerBase
-        {
+    [Route("api/[controller]")]
+    [ApiController]
+    public class TankMonitorsController : ControllerBase
+    {
         private readonly DatabaseContext _db;
         readonly IConfiguration _config;
         public TankMonitorsController(DatabaseContext context, IConfiguration config)
@@ -33,9 +33,21 @@ namespace WaterLog_Backend.Controllers
 
         // GET api/TankMonitorById/
         [HttpGet("{id}")]
-        public async Task<ActionResult<TankMonitorsEntry>> Get(int id)
+        public async Task<ActionResult<TankMonitorsEntry>> GetWhateverYouGetting(int id)
         {
             return await _db.TankMonitors.FindAsync(id);
+            {
+                if (id == null)
+                {
+                    return NotFound();
+                }
+                var TankM = await _db.TankMonitors.FindAsync(id);
+                if (TankM == null)
+                {
+                    return NotFound();
+                }
+                return TankM;
+            }
         }
     }
- }
+}
