@@ -28,7 +28,14 @@ namespace WaterLog_Backend.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TankMonitorsEntry>>> Get()
         {
-            return await _db.TankMonitors.ToListAsync();
+            try
+            {
+                return await _db.TankMonitors.ToListAsync();
+            }
+            catch (Exception error)
+            {
+                throw new Exception(error.Message);
+            }
         }
 
         // GET api/TankMonitorById/
