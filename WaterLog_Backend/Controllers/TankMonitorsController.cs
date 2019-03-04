@@ -27,15 +27,8 @@ namespace WaterLog_Backend.Controllers
         // GET api/segments
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TankMonitorsEntry>>> Get()
-        {
-            try
-            {
-                return await _db.TankMonitors.ToListAsync();
-            }
-            catch (Exception error)
-            {
-                throw new Exception(error.Message);
-            }
+        { 
+            return await _db.TankMonitors.ToListAsync();       
         }
 
         // GET api/TankMonitorById/
