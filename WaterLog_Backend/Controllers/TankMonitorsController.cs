@@ -33,12 +33,8 @@ namespace WaterLog_Backend.Controllers
 
         // GET api/TankMonitorById/
         [HttpGet("{id}")]
-        public async Task<ActionResult<TankMonitorsEntry>> GetTankDataByID(int id, [FromBody] TankMonitorsEntry value)
+        public async Task<ActionResult<TankMonitorsEntry>> GetTankDataByID(int id)
         {
-            if (id != value.Id)
-            {
-                return NotFound();
-            }
             try
             {
               var TankM = await _db.TankMonitors.FindAsync(id);
