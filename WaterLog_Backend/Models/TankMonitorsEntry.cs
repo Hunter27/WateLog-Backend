@@ -14,3 +14,4 @@ namespace WaterLog_Backend.Models
         public int FaultCount { get; set; }
     }
 }
+
