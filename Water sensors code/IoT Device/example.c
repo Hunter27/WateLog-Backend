@@ -26,7 +26,7 @@
 #include <debug_printf.h>
 
 static uint8_t gsm_buffer[290];
-static char a[] = "{\"MonitorId\":\"xx\",\"Value\":\"xx\"}";//14-15; 27-28
+static char a[] ="{\"IdIn\":\"xx\",\"valueIn\":\"xx\",\"IdOut\":\"xx\",\"valueOut\":\"xx\"}" ;//9-10; 24-25; 37-38; 53-54
 static bool faulty= false;
 
 /* This routine is called after an ASSERT() macro has failed.
@@ -99,37 +99,44 @@ static void modem_callback(void *cookie, const char* response, uint16_t len)
 }
 
 int getFinalValue(int vals[]){
-    double value = (pow(2,5)*vals[0])+(pow(2,4)*vals[1])+(pow(2,3)*vals[2])+(pow(2,2)*vals[3])+(2*vals[4])+(1*vals[5]);
+	double value = (pow(2,4)*vals[0])+(pow(2,3)*vals[1])+(pow(2,2)*vals[2])+(pow(2,1)*vals[3])+(1*vals[4]);
     return (int)value;
 }
-void getMessageSend(int idMonitor){
-    int values[6];
-    values[0]= GPIO_ReadPinInput(GPIOD, 7);
-    values[1] = GPIO_ReadPinInput(GPIOD, 6);
-    values[2] = GPIO_ReadPinInput(GPIOD, 5);
-    values[3]= GPIO_ReadPinInput(GPIOD, 4);
-    values[4] = GPIO_ReadPinInput(GPIOC, 2);
-    values[5] = GPIO_ReadPinInput(GPIOC, 0);
-    int outV = getFinalValue(values);
-    char msg1[2];
-    char idMonitorArray[2];
-    if (outV<10){
-        sprintf(msg1, "%02u", outV);
-    }else{
-        sprintf(msg1, "%u", outV);
-    }
-    if (idMonitor<10){
-        sprintf(idMonitorArray,"%02u", idMonitor);
-    }else{
-        sprintf(idMonitorArray,"%u", idMonitor);
-    }
-    a[14]= idMonitorArray[0];
-    a[15]= idMonitorArray[1];
-    a[27]= msg1[0];
-    a[28]= msg1[1];
-    if (outV==0){
-        faulty = true;
-    }
+void getMessageSend(int idMonitor,bool next){
+	int values[5];
+	values[0]= GPIO_ReadPinInput(GPIOD, 7);
+	values[1] = GPIO_ReadPinInput(GPIOD, 6);
+	values[2] = GPIO_ReadPinInput(GPIOD, 5);
+	values[3]= GPIO_ReadPinInput(GPIOD, 4);
+	values[4] = GPIO_ReadPinInput(GPIOC, 2);
+
+	int outV = getFinalValue(values);
+	char msg1[2];
+	char idMonitorArray[2];
+	if (outV<10){
+		sprintf(msg1, "%02u", outV);
+	}else{
+		sprintf(msg1, "%u", outV);
+	}
+	if (idMonitor<10){
+		sprintf(idMonitorArray,"%02u", idMonitor);
+	}else{
+		sprintf(idMonitorArray,"%u", idMonitor);
+	}
+	if(next == false){
+		a[9]= idMonitorArray[0];
+		a[10]= idMonitorArray[1];
+		a[24]= msg1[0];
+		a[25]= msg1[1];
+	}else{
+		a[37]= idMonitorArray[0];
+		a[38]= idMonitorArray[1];
+		a[53]= msg1[0];
+		a[54]= msg1[1];
+	}
+	if (outV==0){
+		faulty = true;
+	}
 
 }
 
@@ -146,12 +153,10 @@ int main(void)
     GPIO_PinInit(GPIOD, 5, &gpioInConfig);
     GPIO_PinInit(GPIOD, 4, &gpioInConfig);
     GPIO_PinInit(GPIOC, 2, &gpioInConfig);
-    GPIO_PinInit(GPIOC, 0, &gpioInConfig);
+
     //1 bit for Id
     gpio_pin_config_t gpioInConfig2 = { kGPIO_DigitalOutput,0};
-    GPIO_PinInit(GPIOA, 19, &gpioInConfig2);
-    GPIO_PinInit(GPIOA, 18, &gpioInConfig2);
-    //GPIO_WritePinOutput(GPIOA, 18, 1);
+    GPIO_PinInit(GPIOB, 0, &gpioInConfig2);
     Led_Background(100, 0, 100); /* magenta = waiting for gsm carrier */
     DEBUGOUT("creating Transport layers\n");
     Transport* transport = gsm_uart_transport_create();
@@ -199,24 +204,26 @@ int main(void)
     cr = Client_register(client, topicName1, &topic);
     ASSERT(cr == CLIENT_SUCCESS);
     DEBUGOUT("publishing\n");
-    int count =0;
-    faulty = false;
-    for (int i=0;i<2;i++){
-        GPIO_WritePinOutput(GPIOA, 19, i);
-        getMessageSend(count);
-        cr = Client_publish(client, topic, MQTT_QOS1, false,
-             (uint8_t*)a, strlen(a), NULL);
-        ASSERT(cr == CLIENT_SUCCESS);
-        count++;
-    }
-    //reset arduino if faulty sensor
-    if (faulty == true){
-        GPIO_WritePinOutput(GPIOA, 18, 1);
-        GPIO_WritePinOutput(GPIOA, 18, 0);
-    }
-    cr = Client_publish(client, topic, MQTT_QOS1, false,
-                       (uint8_t*)a, strlen(a), NULL);
-    ASSERT(cr == CLIENT_SUCCESS);
+    int numSegments =1;
+	faulty = false;
+	for (int i=1;i<numSegments+1; i++){
+		bool next = false;
+		for (int j=0;j<2;j++){
+			GPIO_WritePinOutput(GPIOB, 0, j);
+			Platform_sleep(1000);
+			getMessageSend(j+3,next);
+			next = true;
+		}
+		cr = Client_publish(client, topic, MQTT_QOS1, false,
+			 (uint8_t*)a, strlen(a), NULL);
+			 ASSERT(cr == CLIENT_SUCCESS);
+	}
+	//reset arduino if faulty sensor
+	/*if (faulty == true){
+		GPIO_WritePinOutput(GPIOA, 18, 1);
+		GPIO_WritePinOutput(GPIOA, 18, 0);
+	}*/
+
     uint32_t waitSeconds = 3 * 60;
     DEBUGOUT("waiting %d seconds\n", waitSeconds);
     cr = Client_run(client, waitSeconds * 1000);
