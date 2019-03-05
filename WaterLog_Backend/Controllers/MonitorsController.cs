@@ -29,8 +29,16 @@ namespace WaterLog_Backend.Controllers
         // GET api/monitors
         [HttpGet]
         public async Task<ActionResult<IEnumerable<MonitorsEntry>>> Get()
-        {         
-            return await _db.Monitors.ToListAsync();
+        {
+            try
+            {
+                return await _db.Monitors.ToListAsync();
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500);
+            }
+            
         }
 
         // GET api/monitors/

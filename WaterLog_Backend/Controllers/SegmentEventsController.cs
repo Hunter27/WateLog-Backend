@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using NUnit.Framework;
 using WaterLog_Backend.Models;
 
 namespace WaterLog_Backend.Controllers
@@ -172,12 +173,15 @@ namespace WaterLog_Backend.Controllers
         }
 
         [HttpGet("GetAlertsFilter")]
-        public async Task<List<GetAlerts>> GetAlertsByPage([FromBody] Filter filter)
+        public async Task<List<GetAlerts>> GetAlertsByPage (
+            [FromQuery(Name = "segment")] int segment, 
+            [FromQuery(Name = "sensorType")] int sensorType, 
+            [FromQuery(Name = "sensorId")] int sensorId, 
+            [FromQuery(Name = "severity")] int severity )
         {
 
             //Get Entries from SegmentLeaks
             //ToDo chnage events table to have enum like filter
-            int severity = (int)filter.Severity;
             string tableSeverity = "";
             if (severity == 1)
             {
@@ -191,10 +195,7 @@ namespace WaterLog_Backend.Controllers
             {
                 tableSeverity = "High";
             }
-            int segment = filter.Segment;
-            int type = filter.SensorType;
-            int SenseId = filter.SensorId;
-
+           
             List<GetAlerts> ListOfAlerts = new List<GetAlerts>();
             //Get Entries from SegmentLeaks
             //filter for segmentId
@@ -390,12 +391,12 @@ namespace WaterLog_Backend.Controllers
             {
                 foreach (SensorHistoryEntry entry in faultySensors)
                 {
-                    if (type == 0)
+                    if (sensorType == 0)
                     {
                         var latestReading = await _db.TankReadings
                             .Where(a => a.TankMonitorsId == entry.SensorId)
                             .OrderByDescending(a => a.TimeStamp).FirstOrDefaultAsync();
-                        if (entry.SensorId == SenseId && (int)entry.SensorType == (int)EnumSensorType.WATER_LEVEL_SENSOR)
+                        if (entry.SensorId == sensorId && (int)entry.SensorType == (int)EnumSensorType.WATER_LEVEL_SENSOR)
                         {
                             ListOfAlerts.Add
                             (
@@ -427,7 +428,7 @@ namespace WaterLog_Backend.Controllers
                         var latestReading = await _db.Readings
                             .Where(a => a.MonitorsId == entry.SensorId)
                             .OrderByDescending(a => a.TimesStamp).FirstOrDefaultAsync();
-                        if (entry.SensorId == SenseId && (int)entry.SensorType == (int)EnumSensorType.WATER_FLOW_SENSOR)
+                        if (entry.SensorId == sensorId && (int)entry.SensorType == (int)EnumSensorType.WATER_FLOW_SENSOR)
                         {
                             ListOfAlerts.Add(
                                 new GetAlerts
