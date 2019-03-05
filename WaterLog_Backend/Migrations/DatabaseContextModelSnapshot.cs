@@ -242,6 +242,10 @@ namespace WaterLog_Backend.Migrations
 
                     b.Property<string>("Status");
 
+                    b.Property<int>("connectedMonitorID");
+
+                    b.Property<int>("connectedMonitorType");
+
                     b.HasKey("Id");
 
                     b.ToTable("TankMonitors");
