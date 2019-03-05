@@ -67,8 +67,12 @@ namespace WaterLog_Backend.Controllers
             {
                 DateTime tempTime = DateTime.Now;
                 DateTime returnV = new DateTime(tempTime.Year, tempTime.Month, tempTime.Day, i, 0, 0);
-                for (int j =0; j< ret.Count(); j++)
+                for (int j =0; j< ret.Length; j++)
                 {
+                    if(ret.ElementAt(j).dataPoints.Count < 1)
+                    {
+                        continue;
+                    }
                     var dateValue = ret.ElementAt(j).getvalueT();
                     var reading = ret.ElementAt(j).getValueY();
                     if (dateValue.ElementAt(0).Hour == returnV.Hour)
@@ -585,8 +589,12 @@ namespace WaterLog_Backend.Controllers
             {
                 DateTime tempTime = DateTime.Now;
                 DateTime returnV = new DateTime(tempTime.Year, tempTime.Month, tempTime.Day, i, 0, 0);
-                for (int j = 0; j < ret.Count(); j++)
+                for (int j = 0; j < ret.Length; j++)
                 {
+                    if (ret.ElementAt(j).dataPoints.Count < 1)
+                    {
+                        continue;
+                    }
                     var dateValue = ret.ElementAt(j).getvalueT();
                     var reading = ret.ElementAt(j).getValueY();
                     if (dateValue.ElementAt(0).Hour == returnV.Hour)
@@ -628,6 +636,10 @@ namespace WaterLog_Backend.Controllers
                 DateTime returnV = new DateTime(tempTime.Year, tempTime.Month, tempTime.Day, i, 0, 0);
                 for (int j = 0; j < ret.Count(); j++)
                 {
+                    if (ret.ElementAt(j).dataPoints.Count < 1)
+                    {
+                        continue;
+                    }
                     var dateValue = ret.ElementAt(j).getvalueT();
                     var reading = ret.ElementAt(j).getValueY();
                     if (dateValue.ElementAt(0).Hour == returnV.Hour)
