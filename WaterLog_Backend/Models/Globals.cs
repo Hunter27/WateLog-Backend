@@ -18,5 +18,11 @@ namespace WaterLog_Backend.Models
         public static string Faulty = "faulty";
         public static string Segment = "Segment";
         public static string Leak = "leak";
+        public enum COMPONENT_TYPES
+        {
+            SEGMENT = 1,
+            SENSOR = 2,
+            TANK = 3
+        }
     }
 }
