@@ -28,5 +28,6 @@ namespace WaterLog_Backend.Models
         public DbSet<MailingListEntry> MailingList { get; set; }
         public DbSet<HistoryLogEntry> HistoryLogs { get; set; }
         public DbSet<SensorHistoryEntry> SensorHistory { get; set; }
+
     }
 }

@@ -69,7 +69,7 @@ namespace WaterLog_Backend.Controllers
                 throw new Exception(error.Message);
             }
         }
-
+        
         [Route("sensor/{id}/{date}")]
         public async Task<List<GetAlerts>> GetSensorByDate(int id, DateTime date)
         {

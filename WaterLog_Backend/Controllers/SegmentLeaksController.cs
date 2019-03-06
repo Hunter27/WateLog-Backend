@@ -87,49 +87,20 @@ namespace WaterLog_Backend.Controllers
             }
             return alerts;
         }
-        //Resolve Leakage
-        [HttpPost("resolveleaks")]
-        public async Task<ActionResult<SegmentLeaksEntry>> Resolve([FromForm] int id)
+
+        // GET api/Sensormonitor
+        [HttpPut("segment/{id}/{date}")]
+        public async Task<ActionResult> Put(int id, DateTime date, [FromBody] SegmentLeaksEntry value)
         {
-            var leaks = await _db.SegmentLeaks
-                .Where(a => a.SegmentsId == id)
-                .OrderByDescending(b => b.LatestTimeStamp)
-                .FirstOrDefaultAsync();
-
-            if (leaks == null)
-            {
-                return NotFound();
-            }
-            else if(leaks.ResolvedStatus == EnumResolveStatus.UNRESOLVED)
-            {
-                var latestEntry = await _db.HistoryLogs
-                    .Where(a => a.EventsId == leaks.SegmentsId && a.Type == EnumTypeOfEvent.LEAK)
-                    .OrderByDescending(b => b.CreationDate).FirstOrDefaultAsync();
-
-                if (latestEntry == null)
-                {
-                    var hist = new HistoryLogEntry();
-                    hist.CreationDate = DateTime.Now;
-                    hist.EventsId = leaks.SegmentsId;
-                    hist.Type = EnumTypeOfEvent.LEAK;
-                    await _db.HistoryLogs.AddAsync(hist);
-                }
-                else
-                {
-                    if (latestEntry.ManualDate == DateTime.Parse("0001-01-01 00:00:00.0000000"))
-                    {
-                        latestEntry.ManualDate = DateTime.Now;
-                        _db.HistoryLogs.Update(latestEntry);
-                    }
-                }
-
-                await _db.SaveChangesAsync();
-                return leaks;
-
-            }
-                return Ok("Already Resolved");
-        }
-
+            var old = await _db.SegmentLeaks
+                 .Where(a => a.SegmentsId == id)
+                 .OrderByDescending(b => b.LatestTimeStamp)
+                 .Where(a => a.OriginalTimeStamp == date)
+                 .FirstOrDefaultAsync();
+            _db.Entry(old).CurrentValues.SetValues(value);
+            await _db.SaveChangesAsync();
+            return Ok(value); 
+        } 
         // GET api/segmentById/
         [HttpGet("{id}")]
         public async Task<ActionResult<SegmentLeaksEntry>> GetBySegmentId(int id)
