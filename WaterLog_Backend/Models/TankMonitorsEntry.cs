@@ -12,6 +12,8 @@ namespace WaterLog_Backend.Models
         public double Lat { get; set; }
         public string Status { get; set; } 
         public int FaultCount { get; set; }
+        public int connectedMonitorID { get; set; }
+        public int connectedMonitorType { get; set; }
     }
 }
 
