@@ -42,7 +42,9 @@ namespace WaterLog_Backend.Controllers
             var oldhistories = await _db.SensorHistory.Where(history => history.SensorId == id).ToListAsync();
             var oldhistory = oldhistories.Where(history => history.FaultDate == date).FirstOrDefault();
             SensorHistoryEntry newHistory = oldhistory; 
-            newHistory.SensorResolved = oldhistory.SensorResolved == EnumResolveStatus.UNRESOLVED ? EnumResolveStatus.RESOLVED : EnumResolveStatus.UNRESOLVED;
+            newHistory.SensorResolved = oldhistory.SensorResolved == EnumResolveStatus.UNRESOLVED 
+                ? EnumResolveStatus.RESOLVED 
+                : EnumResolveStatus.UNRESOLVED;
             _db.Entry(oldhistory).CurrentValues.SetValues(newHistory);
             await _db.SaveChangesAsync();
             return Ok(Monitor_value);
