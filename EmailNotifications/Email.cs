@@ -60,7 +60,7 @@ namespace EmailNotifications
                         var client = new SmtpClient("smtp.gmail.com", 587)
                         {
                             //TODO: Move email address to config file
-                            Credentials = new NetworkCredential("glanga@retrorabbit.co.za", _conf.GetSection("Password").Value),
+                            Credentials = new NetworkCredential("nmotsumi@retrorabbit.co.za", _conf.GetSection("Password").Value),
                             EnableSsl = true
                         };
 
