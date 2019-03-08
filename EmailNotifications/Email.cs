@@ -171,7 +171,7 @@ namespace EmailNotifications
                     }
                     using (var tr = table.AddRow(classAttributes: "someattributes2"))
                     {
-                        tr.AddImage("https://res.cloudinary.com/retro-rabbit/image/upload/v1549634899/logo.png", align: "center", style: "padding-left: 130px", sizeX: "100", sizeY: "100");
+                        tr.AddImage("https://res.cloudinary.com/retro-rabbit/image/upload/v1549634899/logo.png", align: "center", style: "padding-left: 70px", sizeX: "100", sizeY: "100");
 
                     }
                     table.EndBody();
