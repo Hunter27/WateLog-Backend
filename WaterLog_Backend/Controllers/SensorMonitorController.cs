@@ -49,16 +49,20 @@ namespace WaterLog_Backend.Controllers
             _db.Entry(oldMonitor).CurrentValues.SetValues(updateMonitor);
             await _db.SaveChangesAsync();
             var oldhistories = await _db.SensorHistory.Where(history => history.SensorId == id).ToListAsync();
-            var latesthistory = oldhistories.Where(history => history.SensorResolved == EnumResolveStatus.UNRESOLVED)
-                .OrderByDescending(history => history.FaultDate).FirstOrDefault();
-            if (oldhistories != null && latesthistory != null)
+            if (oldhistories != null)
             {
-                SensorHistoryEntry newHistory = latesthistory;
-                newHistory.SensorResolved = latesthistory.SensorResolved == EnumResolveStatus.UNRESOLVED
-                    ? EnumResolveStatus.RESOLVED
-                    : EnumResolveStatus.UNRESOLVED;
-                _db.Entry(latesthistory).CurrentValues.SetValues(newHistory);
-                await _db.SaveChangesAsync();
+                var latesthistory = oldhistories.Where(history => history.SensorResolved == EnumResolveStatus.UNRESOLVED)
+                    .OrderByDescending(history => history.FaultDate).FirstOrDefault();
+                if(latesthistory != null)
+                {
+                    SensorHistoryEntry newHistory = latesthistory;
+                    newHistory.SensorResolved = latesthistory.SensorResolved == EnumResolveStatus.UNRESOLVED
+                        ? EnumResolveStatus.RESOLVED
+                        : EnumResolveStatus.UNRESOLVED;
+                    newHistory.AttendedDate = DateTime.Now;
+                    _db.Entry(latesthistory).CurrentValues.SetValues(newHistory);
+                    await _db.SaveChangesAsync();
+                }
             }
 
             return Ok(updateMonitor);

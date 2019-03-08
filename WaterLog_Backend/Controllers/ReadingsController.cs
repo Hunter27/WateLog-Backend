@@ -72,7 +72,7 @@ namespace WaterLog_Backend.Controllers
                 if (sensorHistory == null)
                 {
                     SensorHistoryEntry history = new SensorHistoryEntry();
-                    history.SensorId = values.IdOut;
+                    history.SensorId = values.IdIn;
                     history.SensorType = EnumSensorType.WATER_FLOW_SENSOR;
                     history.SensorResolved = EnumResolveStatus.UNRESOLVED;
                     history.FaultDate = DateTime.Now;
