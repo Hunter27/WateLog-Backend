@@ -45,7 +45,7 @@ namespace WaterLog_Backend.Controllers
             }
             Procedures procedures = new Procedures(_db, _config);
             return (JsonConvert.SerializeObject(
-                (procedures.CalculateTotalCostAsync(leaks), 
+                (procedures.CalculateTotalCostAsync(leaks),
                 procedures.CalculatePerHourWastageCost(leaks)))
                 );
         }
@@ -71,7 +71,7 @@ namespace WaterLog_Backend.Controllers
                 .FirstOrDefaultAsync();
 
             List<GetAlerts> alerts = new List<GetAlerts>();
-            if(alert != null)
+            if (alert != null)
             {
                 Procedures proc = new Procedures(_db, _config);
                 double totalSystemLitres = await proc.CalculateTotalUsageLitres(alert),
@@ -82,7 +82,7 @@ namespace WaterLog_Backend.Controllers
                 alerts.Add(new GetAlerts(alert.OriginalTimeStamp,
                     (alert.LatestTimeStamp.Subtract(alert.OriginalTimeStamp) < TimeSpan.Zero ? TimeSpan.Zero :
                         alert.LatestTimeStamp.Subtract(alert.OriginalTimeStamp)),
-                    "Segment", alert.SegmentsId, "leak", cost, perhourwastagelitre, 
+                    "Segment", alert.SegmentsId, "leak", cost, perhourwastagelitre,
                     alert.Severity, litresUsed, totalSystemLitres, alert.ResolvedStatus));
             }
             return alerts;
@@ -93,14 +93,13 @@ namespace WaterLog_Backend.Controllers
         public async Task<ActionResult> Put(int id, DateTime date, [FromBody] SegmentLeaksEntry value)
         {
             var old = await _db.SegmentLeaks
-                 .Where(a => a.SegmentsId == id)
                  .OrderByDescending(b => b.LatestTimeStamp)
                  .Where(a => a.OriginalTimeStamp == date)
                  .FirstOrDefaultAsync();
             _db.Entry(old).CurrentValues.SetValues(value);
             await _db.SaveChangesAsync();
-            return Ok(value); 
-        } 
+            return Ok(value);
+        }
         // GET api/segmentById/
         [HttpGet("{id}")]
         public async Task<ActionResult<SegmentLeaksEntry>> GetBySegmentId(int id)
@@ -121,7 +120,7 @@ namespace WaterLog_Backend.Controllers
         [HttpGet("segment/{Id}")]
         public async Task<ActionResult<IEnumerable<SegmentLeaksEntry>>> GetSegmentHistory(int Id)
         {
-            return await _db.SegmentLeaks.Where( row => row.SegmentsId == Id ).ToListAsync();
+            return await _db.SegmentLeaks.Where(row => row.SegmentsId == Id).ToListAsync();
         }
 
         // POST api/segment
@@ -134,12 +133,15 @@ namespace WaterLog_Backend.Controllers
 
         // PUT api/segmentLeak
         [HttpPut("{id}")]
-        public async Task Put(int id, [FromBody] SegmentLeaksEntry value)
+        public async Task Put(int id)
         {
             try
             {
-                var old = await _db.SegmentLeaks.FindAsync(id);
-                _db.Entry(old).CurrentValues.SetValues(value);
+                var old = await _db.SegmentLeaks.Where(leak => leak.SegmentsId == id)
+                    .OrderByDescending(leak => leak.OriginalTimeStamp).FirstOrDefaultAsync();
+                var updated = old;
+                updated.ResolvedStatus = EnumResolveStatus.RESOLVED;
+                _db.Entry(old).CurrentValues.SetValues(updated);
                 await _db.SaveChangesAsync();
             }
             catch (Exception e)
