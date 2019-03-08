@@ -33,14 +33,14 @@ namespace WaterLog_Backend.Controllers
             return Ok("date: " + date + "id: " + id);
         }
 
-       // GET api/Sensormonitor
-       [HttpPut("{id}/{date}")]
-        public async Task<ActionResult> Put(int id, DateTime date)
+        // GET api/Sensormonitor
+        [HttpPut("resolveSensor/{id}")]
+        public async Task<ActionResult> Put(int id)
         {
             var oldMonitor = await _db.Monitors
                 .Where(monitor => monitor.Id == id)
                 .FirstOrDefaultAsync();
-            if(oldMonitor == null)
+            if (oldMonitor == null)
             {
                 return NotFound();
             }
@@ -49,18 +49,19 @@ namespace WaterLog_Backend.Controllers
             _db.Entry(oldMonitor).CurrentValues.SetValues(updateMonitor);
             await _db.SaveChangesAsync();
             var oldhistories = await _db.SensorHistory.Where(history => history.SensorId == id).ToListAsync();
-            var oldhistory = oldhistories.Where(history => history.FaultDate == date).FirstOrDefault();
-            if (oldhistories != null && oldhistory != null)
+            var latesthistory = oldhistories.Where(history => history.SensorResolved == EnumResolveStatus.UNRESOLVED)
+                .OrderByDescending(history => history.FaultDate).FirstOrDefault();
+            if (oldhistories != null && latesthistory != null)
             {
-                SensorHistoryEntry newHistory = oldhistory;
-                newHistory.SensorResolved = oldhistory.SensorResolved == EnumResolveStatus.UNRESOLVED
+                SensorHistoryEntry newHistory = latesthistory;
+                newHistory.SensorResolved = latesthistory.SensorResolved == EnumResolveStatus.UNRESOLVED
                     ? EnumResolveStatus.RESOLVED
                     : EnumResolveStatus.UNRESOLVED;
-                _db.Entry(oldhistory).CurrentValues.SetValues(newHistory);
+                _db.Entry(latesthistory).CurrentValues.SetValues(newHistory);
                 await _db.SaveChangesAsync();
             }
 
             return Ok(updateMonitor);
-        }  
+        }
     }
 }
