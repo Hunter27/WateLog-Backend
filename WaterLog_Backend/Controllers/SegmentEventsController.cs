@@ -68,23 +68,16 @@ namespace WaterLog_Backend.Controllers
             {
                 DateTime tempTime = DateTime.Now;
                 DateTime returnV = new DateTime(tempTime.Year, tempTime.Month, tempTime.Day, i, 0, 0);
-                for (int j =0; j< ret.Length; j++)
+                var perHourData = ret.FirstOrDefault().dataPoints
+                    .Where(dataPoint => dataPoint.x.Hour == returnV.Hour);
+                double average = 0;
+                int length = perHourData.Count();
+                for (int j = 0; j < length; j++)
                 {
-                    if(ret.ElementAt(j).dataPoints.Count < 1)
-                    {
-                        continue;
-                    }
-                    var dateValue = ret.ElementAt(j).getvalueT();
-                    var reading = ret.ElementAt(j).getValueY();
-                    if (dateValue.ElementAt(0).Hour == returnV.Hour)
-                    {
-                        outV.AddPoint(dateValue.ElementAt(0), reading.ElementAt(0));
-                    }
-                    else
-                    {
-                        outV.AddPoint(dateValue.ElementAt(0), 0);
-                    }
-                }              
+                    average += perHourData.ElementAt(j).y;
+                }
+                average = average / length;
+                outV.AddPoint(returnV, average);
             }
 
             return outV;
@@ -198,11 +191,11 @@ namespace WaterLog_Backend.Controllers
         }
 
         [HttpGet("GetAlertsFilter")]
-        public async Task<List<GetAlerts>> GetAlertsByPage (
-            [FromQuery(Name = "segment")] int segment, 
-            [FromQuery(Name = "sensorType")] int sensorType, 
-            [FromQuery(Name = "sensorId")] int sensorId, 
-            [FromQuery(Name = "severity")] int severity )
+        public async Task<List<GetAlerts>> GetAlertsByPage(
+            [FromQuery(Name = "segment")] int segment,
+            [FromQuery(Name = "sensorType")] int sensorType,
+            [FromQuery(Name = "sensorId")] int sensorId,
+            [FromQuery(Name = "severity")] int severity)
         {
 
             //Get Entries from SegmentLeaks
@@ -220,7 +213,7 @@ namespace WaterLog_Backend.Controllers
             {
                 tableSeverity = "High";
             }
-           
+
             List<GetAlerts> ListOfAlerts = new List<GetAlerts>();
             //Get Entries from SegmentLeaks
             //filter for segmentId
@@ -514,7 +507,7 @@ namespace WaterLog_Backend.Controllers
                         (
                             new GetAlerts
                             (
-                                entry.OriginalTimeStamp, 
+                                entry.OriginalTimeStamp,
                                 (entry
                                  .LatestTimeStamp
                                  .Subtract(entry
