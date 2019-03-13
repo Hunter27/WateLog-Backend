@@ -10,7 +10,6 @@ namespace WaterLog_Backend.Models
         public int Segment { get; set; }
         public int SensorType { get; set; }
         public int SensorId { get; set; }
-        public Range Severity { get; set; }
-        public  enum Range : int { off= 0, low = 1, medium = 2, high = 3 };
+        public string Severity { get; set; }
     }
 }
