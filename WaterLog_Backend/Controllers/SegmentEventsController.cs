@@ -265,12 +265,7 @@ namespace WaterLog_Backend.Controllers
                      .Where(alert => alert.Severity.ToLower() == filter.Severity.ToLower())
                      .ToList();
             }
-            else if (filteredAlerts.Count != 0)
-            {
-                return filteredAlerts
-                     .Where(alert => alert.Severity.ToLower() == filter.Severity.ToLower())
-                     .ToList();
-            }
+
             return filteredAlerts;
         }
         //Routing to get all currently opened events
