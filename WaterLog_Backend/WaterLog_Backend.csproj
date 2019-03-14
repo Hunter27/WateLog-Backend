@@ -8,12 +8,18 @@
 
   <ItemGroup>
     <Content Remove="appsettings.json" />
+    <Content Remove="wwwroot\EmailTemplates\EmailFile.htm" />
+    <Content Remove="wwwroot\logo.png" />
   </ItemGroup>
 
   <ItemGroup>
     <None Include="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="wwwroot\EmailTemplates\EmailFile.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\EmailTemplates\logo.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -39,6 +45,9 @@
   <ItemGroup>
     <Content Update="web.config">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\EmailTemplates\EmailFile.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
 

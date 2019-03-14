@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
+using System.IO;
 using WaterLog_Backend;
 using WaterLog_Backend.Models;
 namespace WebApplication1
@@ -37,7 +39,6 @@ namespace WebApplication1
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            app.UseCors("CorsPolicy");
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -46,8 +47,26 @@ namespace WebApplication1
             {
                 app.UseHsts();
             }
+            app.UseCors("CorsPolicy");
             app.UseHttpsRedirection();
+
+            app.UseStaticFiles();
+
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(
+                Path.Combine(Directory.GetCurrentDirectory(), "wwwroot")),
+                RequestPath = "/files"
+            });
+
+            app.UseDirectoryBrowser(new DirectoryBrowserOptions
+            {
+                FileProvider = new PhysicalFileProvider(
+                Path.Combine(Directory.GetCurrentDirectory(), "wwwroot")),
+                RequestPath = "/files"
+            });
             app.UseMvc();
+
         }
 
         private static void UpdateDatabase(IApplicationBuilder app)

@@ -42,7 +42,7 @@ namespace EmailNotifications
 
         public void SendMail(Recipient[] recipient)
         {
-            var filePath = Path.Combine(Directory.GetCurrentDirectory().ToString(), @"Controllers\EmailFile.html");
+            var filePath = Path.Combine(Directory.GetCurrentDirectory(), @"wwwroot\EmailTemplates\EmailFile.html");
 
             if (recipient != null)
             {
