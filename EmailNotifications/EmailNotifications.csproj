@@ -18,4 +18,10 @@
     </Reference>
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="wwwroot\emailTemplates\EmailFile.htm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
