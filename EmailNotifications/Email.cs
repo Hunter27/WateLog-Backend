@@ -42,9 +42,11 @@ namespace EmailNotifications
 
         public void SendMail(Recipient[] recipient)
         {
+            var filePath = Path.Combine(Directory.GetCurrentDirectory().ToString(), @"Controllers\EmailFile.html");
+
             if (recipient != null)
             {
-                string email = ConstructEmail();
+                string email = System.IO.File.ReadAllText(filePath);
                 if (email == "ERROR")
                 {
                     throw new Exception("Error : No Values Given");
@@ -60,7 +62,7 @@ namespace EmailNotifications
                         var client = new SmtpClient("smtp.gmail.com", 587)
                         {
                             //TODO: Move email address to config file
-                            Credentials = new NetworkCredential("nmotsumi@retrorabbit.co.za", _conf.GetSection("Password").Value),
+                            Credentials = new NetworkCredential("6210793Mathenjwa@gmail.com", _conf.GetSection("Password").Value),
                             EnableSsl = true
                         };
 
@@ -171,7 +173,7 @@ namespace EmailNotifications
                     }
                     using (var tr = table.AddRow(classAttributes: "someattributes2"))
                     {
-                        tr.AddImage("https://res.cloudinary.com/retro-rabbit/image/upload/v1549634899/logo.png", align: "center", style: "padding-left: 70px", sizeX: "100", sizeY: "100");
+                        tr.AddImage("https://res.cloudinary.com/retro-rabbit/image/upload/v1549634899/logo.png", align: "center", style: "padding-left: 110px", sizeX: "100", sizeY: "100");
 
                     }
                     table.EndBody();
@@ -204,7 +206,7 @@ namespace EmailNotifications
                 case "resolved":
                     return "";
                 default:
-                    return "call third party help: <u>&zwj;011111929292</u>";
+                    return "call third party help: <p>&zwj;011111929292</p>";
             }
         }
 
@@ -295,6 +297,7 @@ namespace EmailNotifications
                     {
                         case "resolved":
                             return "was being lost";
+
                         default:
                             return "is currently being lost";
                     }
@@ -320,11 +323,11 @@ namespace EmailNotifications
             string[] split = entity.Split(" ");
             if(split[0].ToLower() == "segment" && entityType.ToLower() == "leak")
             {
-                return Math.Round(Double.Parse(entityLitres),1) + "L or R " + Math.Round(Double.Parse(entityRand),1);
+                return " R " + Math.Round(Double.Parse(entityRand),2);
             }
             else if(entityType.ToLower() == "resolved")
             {
-                return "R " + Math.Round(Double.Parse(entityRand), 1);
+                return "R " + Math.Round(Double.Parse(entityRand), 2);
             }
             else
             {
