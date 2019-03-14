@@ -14,6 +14,7 @@ namespace WaterLog_Backend.Models
         //Number of continuous readings needed to be a leak to constitue a leak event.
         public static string BASE_URL = "https://iot.retrotest.co.za/alert";
         public static int LeakThreshold = 1;
+        public static string Empty = "Empty";
         public static string Sensor = "Sensor";
         public static string Faulty = "faulty";
         public static string Segment = "Segment";

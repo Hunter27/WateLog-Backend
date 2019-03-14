@@ -147,43 +147,75 @@ namespace WaterLog_Backend.Controllers
                           )
                      );
                 }
+                //find empty tanks
+                var emptyTank = await _db.TankReadings.OrderByDescending(a => a.TimeStamp)
+                                      .OrderByDescending(b => b.PercentageLevel == 0).Skip((id - 1) * Globals.NumberItems)
+                                      .Take(Globals.NumberItems).ToListAsync();
 
-                //Find All Sensors that are faulty
-                var faultySensors = await _db.SensorHistory.OrderByDescending(a => a.FaultDate)
-                    .OrderByDescending(b => b.SensorResolved)
-                    .Skip((id - 1) * Globals.NumberItems).Take(Globals.NumberItems).ToListAsync();
-
-                if (faultySensors.Count != 0)
+                if (emptyTank.Count != 0)
                 {
-                    foreach (SensorHistoryEntry entry in faultySensors)
+                    foreach (TankReadingsEntry entry in emptyTank)
                     {
 
-                        var sensorInfo = await _db.Monitors.Where(a => a.Id == entry.SensorId).FirstOrDefaultAsync();
-                        var latestReading = await _db.Readings.Where(a => a.MonitorsId == entry.SensorId)
+                        var tankInfo = await _db.Monitors.Where(a => a.Id == entry.TankMonitorsId).FirstOrDefaultAsync();
+                        var latestReading = await _db.Readings.Where(a => a.MonitorsId == entry.TankMonitorsId)
                             .OrderByDescending(a => a.TimesStamp).FirstOrDefaultAsync();
 
                         ListOfAlerts.Add
                         (
                             new GetAlerts
                             (
-                                entry.FaultDate,
-                                (entry
-                                .AttendedDate
-                                .Subtract(entry.AttendedDate) < TimeSpan.Zero ? TimeSpan.Zero : entry
-                                .FaultDate.
-                                Subtract(entry
-                                .AttendedDate)),
-                                COMPONENT_TYPES.SENSOR,
-                                entry.SensorId,
-                                Globals.Faulty,
+                                entry.TimeStamp,
+                                TimeSpan.Zero,
+                                COMPONENT_TYPES.TANK,
+                                entry.TankMonitorsId,
+                                Globals.Empty,
                                 0.0,
                                 0.0,
                                 "High",
                                 latestReading.Value,
-                                sensorInfo.Max_flow,
-                                entry.SensorResolved
+                                tankInfo.Max_flow,
+                                entry.PercentageLevel == 0 ? EnumResolveStatus.UNRESOLVED : EnumResolveStatus.RESOLVED
                              )
                          );
+                    }
+                    //Find All Sensors that are faulty
+                    var faultySensors = await _db.SensorHistory.OrderByDescending(a => a.FaultDate)
+                    .OrderByDescending(b => b.SensorResolved)
+                    .Skip((id - 1) * Globals.NumberItems).Take(Globals.NumberItems).ToListAsync();
+
+                    if (faultySensors.Count != 0)
+                    {
+                        foreach (SensorHistoryEntry entry in faultySensors)
+                        {
+
+                            var sensorInfo = await _db.Monitors.Where(a => a.Id == entry.SensorId).FirstOrDefaultAsync();
+                            var latestReading = await _db.Readings.Where(a => a.MonitorsId == entry.SensorId)
+                                .OrderByDescending(a => a.TimesStamp).FirstOrDefaultAsync();
+
+                            ListOfAlerts.Add
+                            (
+                                new GetAlerts
+                                (
+                                    entry.FaultDate,
+                                    (entry
+                                    .AttendedDate
+                                    .Subtract(entry.AttendedDate) < TimeSpan.Zero ? TimeSpan.Zero : entry
+                                    .FaultDate.
+                                    Subtract(entry
+                                    .AttendedDate)),
+                                    COMPONENT_TYPES.SENSOR,
+                                    entry.SensorId,
+                                    Globals.Faulty,
+                                    0.0,
+                                    0.0,
+                                    "High",
+                                    latestReading.Value,
+                                    sensorInfo.Max_flow,
+                                    entry.SensorResolved
+                                 )
+                             );
+                        }
                     }
                 }
             }
