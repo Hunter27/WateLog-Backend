@@ -179,45 +179,46 @@ namespace WaterLog_Backend.Controllers
                              )
                          );
                     }
-                    //Find All Sensors that are faulty
-                    var faultySensors = await _db.SensorHistory.OrderByDescending(a => a.FaultDate)
-                    .OrderByDescending(b => b.SensorResolved)
-                    .Skip((id - 1) * Globals.NumberItems).Take(Globals.NumberItems).ToListAsync();
+                }
+                //Find All Sensors that are faulty
+                var faultySensors = await _db.SensorHistory.OrderByDescending(a => a.FaultDate)
+                .OrderByDescending(b => b.SensorResolved)
+                .Skip((id - 1) * Globals.NumberItems).Take(Globals.NumberItems).ToListAsync();
 
-                    if (faultySensors.Count != 0)
+                if (faultySensors.Count != 0)
+                {
+                    foreach (SensorHistoryEntry entry in faultySensors)
                     {
-                        foreach (SensorHistoryEntry entry in faultySensors)
-                        {
 
-                            var sensorInfo = await _db.Monitors.Where(a => a.Id == entry.SensorId).FirstOrDefaultAsync();
-                            var latestReading = await _db.Readings.Where(a => a.MonitorsId == entry.SensorId)
-                                .OrderByDescending(a => a.TimesStamp).FirstOrDefaultAsync();
+                        var sensorInfo = await _db.Monitors.Where(a => a.Id == entry.SensorId).FirstOrDefaultAsync();
+                        var latestReading = await _db.Readings.Where(a => a.MonitorsId == entry.SensorId)
+                            .OrderByDescending(a => a.TimesStamp).FirstOrDefaultAsync();
 
-                            ListOfAlerts.Add
+                        ListOfAlerts.Add
+                        (
+                            new GetAlerts
                             (
-                                new GetAlerts
-                                (
-                                    entry.FaultDate,
-                                    (entry
-                                    .AttendedDate
-                                    .Subtract(entry.AttendedDate) < TimeSpan.Zero ? TimeSpan.Zero : entry
-                                    .FaultDate.
-                                    Subtract(entry
-                                    .AttendedDate)),
-                                    COMPONENT_TYPES.SENSOR,
-                                    entry.SensorId,
-                                    Globals.Faulty,
-                                    0.0,
-                                    0.0,
-                                    "High",
-                                    latestReading.Value,
-                                    sensorInfo.Max_flow,
-                                    entry.SensorResolved
-                                 )
-                             );
-                        }
+                                entry.FaultDate,
+                                (entry
+                                .AttendedDate
+                                .Subtract(entry.AttendedDate) < TimeSpan.Zero ? TimeSpan.Zero : entry
+                                .FaultDate.
+                                Subtract(entry
+                                .AttendedDate)),
+                                COMPONENT_TYPES.SENSOR,
+                                entry.SensorId,
+                                Globals.Faulty,
+                                0.0,
+                                0.0,
+                                "High",
+                                latestReading.Value,
+                                sensorInfo.Max_flow,
+                                entry.SensorResolved
+                             )
+                         );
                     }
                 }
+
             }
             return ListOfAlerts.OrderByDescending(a => a.Date).OrderByDescending(a => a.Status).ToList();
         }
@@ -246,14 +247,14 @@ namespace WaterLog_Backend.Controllers
                 {
                     onlySeverity = false;
                     sensorData = alerts
-                        .Where(alert => alert.EntityName == COMPONENT_TYPES.SENSOR && alert.EntityId == filter.SensorId)
+                        .Where(alert => alert.EntityName == COMPONENT_TYPES.TANK && alert.EntityId == filter.SensorId)
                         .ToList();
                 }
                 else if (filter.SensorType == 2)
                 {
                     onlySeverity = false;
                     sensorData = alerts
-                        .Where(alert => alert.EntityName == COMPONENT_TYPES.TANK && alert.EntityId == filter.SensorId)
+                        .Where(alert => alert.EntityName == COMPONENT_TYPES.SENSOR && alert.EntityId == filter.SensorId)
                         .ToList();
                 }
                 filteredAlerts.AddRange(sensorData);
@@ -351,6 +352,39 @@ namespace WaterLog_Backend.Controllers
                                     latestReading.Value,
                                     sensorInfo.Max_flow,
                                     entry.SensorResolved
+                                 )
+                             );
+                        }
+                    }
+                    //find empty tanks
+                    var emptyTank = await _db.TankReadings.OrderByDescending(a => a.TimeStamp)
+                                          .OrderByDescending(b => b.PercentageLevel == 0)
+                                          .Take(Globals.NumberItems).ToListAsync();
+
+                    if (emptyTank.Count != 0)
+                    {
+                        foreach (TankReadingsEntry entry in emptyTank)
+                        {
+
+                            var tankInfo = await _db.Monitors.Where(a => a.Id == entry.TankMonitorsId).FirstOrDefaultAsync();
+                            var latestReading = await _db.Readings.Where(a => a.MonitorsId == entry.TankMonitorsId)
+                                .OrderByDescending(a => a.TimesStamp).FirstOrDefaultAsync();
+
+                            alerts.Add
+                            (
+                                new GetAlerts
+                                (
+                                    entry.TimeStamp,
+                                    TimeSpan.Zero,
+                                    COMPONENT_TYPES.TANK,
+                                    entry.TankMonitorsId,
+                                    Globals.Empty,
+                                    0.0,
+                                    0.0,
+                                    "High",
+                                    latestReading.Value,
+                                    tankInfo.Max_flow,
+                                    entry.PercentageLevel == 0 ? EnumResolveStatus.UNRESOLVED : EnumResolveStatus.RESOLVED
                                  )
                              );
                         }
