@@ -61,33 +61,26 @@ namespace WaterLog_Backend.Controllers
         public async Task<DataPoints<DateTime, double>> GetDailyWastageGraphData()
         {
             var proc = new Procedures(_db, _config);
-            var ret = await proc.CalculatePeriodWastageAsync(Procedures.Period.Daily);
-            var outV = new DataPoints<DateTime, double>();
+            var dailyWastage = await proc.CalculatePeriodWastageAsync(Procedures.Period.Daily);
+            var graphData = new DataPoints<DateTime, double>();
             var dummyHours = new List<DateTime>();
             for (int i = 0; i < 24; i++)
             {
                 DateTime tempTime = DateTime.Now;
-                DateTime returnV = new DateTime(tempTime.Year, tempTime.Month, tempTime.Day, i, 0, 0);
-                for (int j = 0; j < ret.Length; j++)
+                DateTime dateWithSpecificHour = new DateTime(tempTime.Year, tempTime.Month, tempTime.Day, i, 0, 0);
+                var perHourData = dailyWastage.FirstOrDefault().dataPoints
+                    .Where(dataPoint => dataPoint.x.Hour == dateWithSpecificHour.Hour);
+                double average = 0;
+                int length = perHourData.Count();
+                for (int j = 0; j < length; j++)
                 {
-                    if (ret.ElementAt(j).dataPoints.Count < 1)
-                    {
-                        continue;
-                    }
-                    var dateValue = ret.ElementAt(j).getvalueT();
-                    var reading = ret.ElementAt(j).getValueY();
-                    if (dateValue.ElementAt(0).Hour == returnV.Hour)
-                    {
-                        outV.AddPoint(dateValue.ElementAt(0), reading.ElementAt(0));
-                    }
-                    else
-                    {
-                        outV.AddPoint(dateValue.ElementAt(0), 0);
-                    }
+                    average += perHourData.ElementAt(j).y;
                 }
+                average = average / length;
+                graphData.AddPoint(dateWithSpecificHour, average);
             }
 
-            return outV;
+            return graphData;
         }
 
         [Route("monthlywastage")]
@@ -234,12 +227,13 @@ namespace WaterLog_Backend.Controllers
                 filteredAlerts.AddRange(sensorData);
             }
 
-            if(onlySeverity)
+            if (onlySeverity)
             {
                 return alerts
                      .Where(alert => alert.Severity.ToLower() == filter.Severity.ToLower())
                      .ToList();
-            } else if (filteredAlerts.Count != 0)
+            }
+            else if (filteredAlerts.Count != 0)
             {
                 return filteredAlerts
                      .Where(alert => alert.Severity.ToLower() == filter.Severity.ToLower())
