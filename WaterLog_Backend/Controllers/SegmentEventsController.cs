@@ -135,7 +135,7 @@ namespace WaterLog_Backend.Controllers
                              .LatestTimeStamp.
                              Subtract(entry
                              .OriginalTimeStamp)),
-                             Globals.Segment,
+                             COMPONENT_TYPES.SEGMENT,
                              entry.SegmentsId,
                              Globals.Leak,
                              cost,
@@ -173,7 +173,7 @@ namespace WaterLog_Backend.Controllers
                                 .FaultDate.
                                 Subtract(entry
                                 .AttendedDate)),
-                                Globals.Sensor,
+                                COMPONENT_TYPES.SENSOR,
                                 entry.SensorId,
                                 Globals.Faulty,
                                 0.0,
@@ -202,7 +202,7 @@ namespace WaterLog_Backend.Controllers
             {
                 onlySeverity = false;
                 var segmentData = alerts
-                    .Where(alert => alert.EntityName.ToLower() == "segment" && alert.EntityId == filter.Segment)
+                    .Where(alert => alert.EntityName == COMPONENT_TYPES.SEGMENT && alert.EntityId == filter.Segment)
                     .ToList();
                 filteredAlerts.AddRange(segmentData);
             }
@@ -214,14 +214,14 @@ namespace WaterLog_Backend.Controllers
                 {
                     onlySeverity = false;
                     sensorData = alerts
-                        .Where(alert => alert.EntityName.ToLower() == "tank" && alert.EntityId == filter.SensorId)
+                        .Where(alert => alert.EntityName == COMPONENT_TYPES.SENSOR && alert.EntityId == filter.SensorId)
                         .ToList();
                 }
                 else if (filter.SensorType == 2)
                 {
                     onlySeverity = false;
                     sensorData = alerts
-                        .Where(alert => alert.EntityName.ToLower() == "sensor" && alert.EntityId == filter.SensorId)
+                        .Where(alert => alert.EntityName == COMPONENT_TYPES.TANK && alert.EntityId == filter.SensorId)
                         .ToList();
                 }
                 filteredAlerts.AddRange(sensorData);
@@ -281,7 +281,7 @@ namespace WaterLog_Backend.Controllers
                                  .LatestTimeStamp.
                                  Subtract(entry
                                  .OriginalTimeStamp)),
-                                 Globals.Segment,
+                                 COMPONENT_TYPES.SEGMENT,
                                  entry.SegmentsId,
                                  Globals.Leak,
                                  cost,
@@ -315,7 +315,7 @@ namespace WaterLog_Backend.Controllers
                                     .FaultDate.
                                     Subtract(entry
                                     .AttendedDate)),
-                                    Globals.Sensor,
+                                    COMPONENT_TYPES.SENSOR,
                                     entry.SensorId,
                                     Globals.Faulty,
                                     0.0,

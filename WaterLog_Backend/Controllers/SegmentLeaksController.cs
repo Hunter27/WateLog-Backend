@@ -82,7 +82,7 @@ namespace WaterLog_Backend.Controllers
                 alerts.Add(new GetAlerts(alert.OriginalTimeStamp,
                     (alert.LatestTimeStamp.Subtract(alert.OriginalTimeStamp) < TimeSpan.Zero ? TimeSpan.Zero :
                         alert.LatestTimeStamp.Subtract(alert.OriginalTimeStamp)),
-                    "Segment", alert.SegmentsId, "leak", cost, perhourwastagelitre,
+                    COMPONENT_TYPES.SEGMENT, alert.SegmentsId, "leak", cost, perhourwastagelitre,
                     alert.Severity, litresUsed, totalSystemLitres, alert.ResolvedStatus));
             }
             return alerts;

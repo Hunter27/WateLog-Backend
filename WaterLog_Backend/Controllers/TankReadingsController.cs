@@ -56,7 +56,7 @@ namespace WaterLog_Backend.Controllers
                     (
                         alert.TimeStamp,
                         TimeSpan.Zero,
-                        "Tank",
+                        COMPONENT_TYPES.TANK,
                         alert.TankMonitorsId,
                         "faulty",
                         0.0,
