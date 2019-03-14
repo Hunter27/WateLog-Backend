@@ -11,7 +11,7 @@ namespace WaterLog_Backend.Models
         public DateTime Date;
         //How long the event lasted
         public TimeSpan Duration;
-        public string EntityName;
+        public COMPONENT_TYPES EntityName;
         public int EntityId;
         public string EntityType;
         public double Cost;
@@ -28,7 +28,7 @@ namespace WaterLog_Backend.Models
         public GetAlerts(
             DateTime date,
             TimeSpan duration,
-            string entityname, 
+            COMPONENT_TYPES entityname, 
             int entityid, 
             string entitytype, 
             double cost, 
