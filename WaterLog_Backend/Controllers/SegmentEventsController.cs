@@ -69,7 +69,7 @@ namespace WaterLog_Backend.Controllers
                 DateTime tempTime = DateTime.Now;
                 DateTime dateWithSpecificHour = new DateTime(tempTime.Year, tempTime.Month, tempTime.Day, i, 0, 0);
                 var perHourData = dailyWastage.FirstOrDefault().dataPoints
-                    .Where(dataPoint => dataPoint.x.Hour == dateWithSpecificHour.Hour);
+                    .Where(dataPoint => dataPoint.x.Hour == dateWithSpecificHour.Hour).ToList();
                 double average = 0;
                 int length = perHourData.Count();
                 for (int j = 0; j < length; j++)
@@ -107,118 +107,124 @@ namespace WaterLog_Backend.Controllers
             var leaksQuery = await _db.SegmentLeaks.OrderByDescending(a => a.OriginalTimeStamp)
                                       .OrderByDescending(b => b.ResolvedStatus).Skip((id - 1) * Globals.NumberItems)
                                       .Take(Globals.NumberItems).ToListAsync();
-
-            if (leaksQuery.Count != 0)
+            try
             {
-                leaksQuery = leaksQuery.OrderByDescending(a => a.OriginalTimeStamp)
-                    .OrderByDescending(a => a.ResolvedStatus).ToList();
-
-                var proc = new Procedures(_db, _config);
-
-                foreach (SegmentLeaksEntry entry in leaksQuery)
+                if (leaksQuery.Count != 0)
                 {
-                    double totalSystemLitres = await proc.CalculateTotalUsageLitres(entry),
-                            litresUsed = await proc.CalculateTotalWastageLitres(entry),
-                            perhourwastagelitre = await proc.CalculatePerHourWastageLitre(entry),
-                            cost = await proc.CalculatePerHourWastageCost(entry);
+                    leaksQuery = leaksQuery.OrderByDescending(a => a.OriginalTimeStamp)
+                        .OrderByDescending(a => a.ResolvedStatus).ToList();
 
-                    //Find Litre Usage
-                    ListOfAlerts.Add
-                     (
-                         new GetAlerts
+                    var proc = new Procedures(_db, _config);
+
+                    foreach (SegmentLeaksEntry entry in leaksQuery)
+                    {
+                        double totalSystemLitres = await proc.CalculateTotalUsageLitres(entry),
+                                litresUsed = await proc.CalculateTotalWastageLitres(entry),
+                                perhourwastagelitre = await proc.CalculatePerHourWastageLitre(entry),
+                                cost = await proc.CalculatePerHourWastageCost(entry);
+
+                        //Find Litre Usage
+                        ListOfAlerts.Add
                          (
-                             entry.OriginalTimeStamp,
-                             (entry
-                             .LatestTimeStamp
-                             .Subtract(entry
-                             .OriginalTimeStamp) < TimeSpan.Zero ? TimeSpan.Zero : entry
-                             .LatestTimeStamp.
-                             Subtract(entry
-                             .OriginalTimeStamp)),
-                             COMPONENT_TYPES.SEGMENT,
-                             entry.SegmentsId,
-                             Globals.Leak,
-                             cost,
-                             perhourwastagelitre,
-                             entry.Severity,
-                             litresUsed,
-                             totalSystemLitres,
-                             entry.ResolvedStatus
-                          )
-                     );
-                }
-                //find empty tanks
-                var emptyTank = await _db.TankReadings.OrderByDescending(a => a.TimeStamp)
-                                      .OrderByDescending(b => b.PercentageLevel == 0).Skip((id - 1) * Globals.NumberItems)
-                                      .Take(Globals.NumberItems).ToListAsync();
-
-                if (emptyTank.Count != 0)
-                {
-                    foreach (TankReadingsEntry entry in emptyTank)
-                    {
-
-                        var tankInfo = await _db.Monitors.Where(a => a.Id == entry.TankMonitorsId).FirstOrDefaultAsync();
-                        var latestReading = await _db.Readings.Where(a => a.MonitorsId == entry.TankMonitorsId)
-                            .OrderByDescending(a => a.TimesStamp).FirstOrDefaultAsync();
-
-                        ListOfAlerts.Add
-                        (
-                            new GetAlerts
-                            (
-                                entry.TimeStamp,
-                                TimeSpan.Zero,
-                                COMPONENT_TYPES.TANK,
-                                entry.TankMonitorsId,
-                                Globals.Empty,
-                                0.0,
-                                0.0,
-                                "High",
-                                latestReading.Value,
-                                tankInfo.Max_flow,
-                                entry.PercentageLevel == 0 ? EnumResolveStatus.UNRESOLVED : EnumResolveStatus.RESOLVED
-                             )
+                             new GetAlerts
+                             (
+                                 entry.OriginalTimeStamp,
+                                 (entry
+                                 .LatestTimeStamp
+                                 .Subtract(entry
+                                 .OriginalTimeStamp) < TimeSpan.Zero ? TimeSpan.Zero : entry
+                                 .LatestTimeStamp.
+                                 Subtract(entry
+                                 .OriginalTimeStamp)),
+                                 COMPONENT_TYPES.SEGMENT,
+                                 entry.SegmentsId,
+                                 Globals.Leak,
+                                 cost,
+                                 perhourwastagelitre,
+                                 entry.Severity,
+                                 litresUsed,
+                                 totalSystemLitres,
+                                 entry.ResolvedStatus
+                              )
                          );
                     }
-                }
-                //Find All Sensors that are faulty
-                var faultySensors = await _db.SensorHistory.OrderByDescending(a => a.FaultDate)
-                .OrderByDescending(b => b.SensorResolved)
-                .Skip((id - 1) * Globals.NumberItems).Take(Globals.NumberItems).ToListAsync();
+                    //find empty tanks
+                    var emptyTank = await _db.TankReadings.OrderByDescending(a => a.TimeStamp)
+                                          .OrderByDescending(b => b.PercentageLevel == 0).Skip((id - 1) * Globals.NumberItems)
+                                          .Take(Globals.NumberItems).ToListAsync();
 
-                if (faultySensors.Count != 0)
-                {
-                    foreach (SensorHistoryEntry entry in faultySensors)
+                    if (emptyTank.Count != 0)
                     {
+                        foreach (TankReadingsEntry entry in emptyTank)
+                        {
 
-                        var sensorInfo = await _db.Monitors.Where(a => a.Id == entry.SensorId).FirstOrDefaultAsync();
-                        var latestReading = await _db.Readings.Where(a => a.MonitorsId == entry.SensorId)
-                            .OrderByDescending(a => a.TimesStamp).FirstOrDefaultAsync();
+                            var tankInfo = await _db.Monitors.Where(a => a.Id == entry.TankMonitorsId).FirstOrDefaultAsync();
+                            var latestReading = await _db.Readings.Where(a => a.MonitorsId == entry.TankMonitorsId)
+                                .OrderByDescending(a => a.TimesStamp).FirstOrDefaultAsync();
 
-                        ListOfAlerts.Add
-                        (
-                            new GetAlerts
+                            ListOfAlerts.Add
                             (
-                                entry.FaultDate,
-                                (entry
-                                .AttendedDate
-                                .Subtract(entry.AttendedDate) < TimeSpan.Zero ? TimeSpan.Zero : entry
-                                .FaultDate.
-                                Subtract(entry
-                                .AttendedDate)),
-                                COMPONENT_TYPES.SENSOR,
-                                entry.SensorId,
-                                Globals.Faulty,
-                                0.0,
-                                0.0,
-                                "High",
-                                latestReading.Value,
-                                sensorInfo.Max_flow,
-                                entry.SensorResolved
-                             )
-                         );
+                                new GetAlerts
+                                (
+                                    entry.TimeStamp,
+                                    TimeSpan.Zero,
+                                    COMPONENT_TYPES.TANK,
+                                    entry.TankMonitorsId,
+                                    Globals.Empty,
+                                    0.0,
+                                    0.0,
+                                    "High",
+                                    latestReading.Value,
+                                    tankInfo.Max_flow,
+                                    entry.PercentageLevel == 0 ? EnumResolveStatus.UNRESOLVED : EnumResolveStatus.RESOLVED
+                                 )
+                             );
+                        }
                     }
-                }
+                    //Find All Sensors that are faulty
+                    var faultySensors = await _db.SensorHistory.OrderByDescending(a => a.FaultDate)
+                    .OrderByDescending(b => b.SensorResolved)
+                    .Skip((id - 1) * Globals.NumberItems).Take(Globals.NumberItems).ToListAsync();
 
+                    if (faultySensors.Count != 0)
+                    {
+                        foreach (SensorHistoryEntry entry in faultySensors)
+                        {
+
+                            var sensorInfo = await _db.Monitors.Where(a => a.Id == entry.SensorId).FirstOrDefaultAsync();
+                            var latestReading = await _db.Readings.Where(a => a.MonitorsId == entry.SensorId)
+                                .OrderByDescending(a => a.TimesStamp).FirstOrDefaultAsync();
+
+                            ListOfAlerts.Add
+                            (
+                                new GetAlerts
+                                (
+                                    entry.FaultDate,
+                                    (entry
+                                    .AttendedDate
+                                    .Subtract(entry.AttendedDate) < TimeSpan.Zero ? TimeSpan.Zero : entry
+                                    .FaultDate.
+                                    Subtract(entry
+                                    .AttendedDate)),
+                                    COMPONENT_TYPES.SENSOR,
+                                    entry.SensorId,
+                                    Globals.Faulty,
+                                    0.0,
+                                    0.0,
+                                    "High",
+                                    latestReading.Value,
+                                    sensorInfo.Max_flow,
+                                    entry.SensorResolved
+                                 )
+                             );
+                        }
+                    }
+
+                }
+            }
+            catch (Exception e)
+            {
+                return ListOfAlerts;
             }
             return ListOfAlerts.OrderByDescending(a => a.Date).OrderByDescending(a => a.Status).ToList();
         }
